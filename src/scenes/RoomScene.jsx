@@ -19,6 +19,7 @@ export default function RoomScene({ onGoToLevel2 }) {
 
   // 2-MINUTE COUNTDOWN TIMER (120 seconds)
   const [timeLeft, setTimeLeft] = useState(120)
+  const [isTimerRunning, setIsTimerRunning] = useState(true)
   const isLevelCompletedRef = useRef(false)
 
   // Modal states
@@ -61,12 +62,15 @@ export default function RoomScene({ onGoToLevel2 }) {
     }
   }, [currentRoomIndex, activeKeypadDoor, activeInspectRoom, levelData])
 
-  // 2-Minute Countdown Timer Loop
+  // 2-Minute Countdown Timer Loop (stops immediately when final code is entered)
   useEffect(() => {
-    if (isLevelCompletedRef.current) return
+    if (!isTimerRunning || isLevelCompletedRef.current) return
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
+        if (!isTimerRunning || isLevelCompletedRef.current) {
+          return prev
+        }
         if (prev <= 1) {
           // Timer expired! Trigger reset back to Room 1
           handleTimeExpired()
@@ -77,7 +81,7 @@ export default function RoomScene({ onGoToLevel2 }) {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [isTimerRunning])
 
   // Full reset helper when lives are lost or time runs out
   const resetBackToRoom1 = (message) => {
@@ -91,6 +95,8 @@ export default function RoomScene({ onGoToLevel2 }) {
     setCurrentRoomIndex(0)
     setFoundGoldenDigits([])
     setTimeLeft(120)
+    setIsTimerRunning(true)
+    isLevelCompletedRef.current = false
     setDiamonds((d) => Math.max(0, d - 100))
     setRespawnTrigger((t) => t + 1)
 
@@ -159,14 +165,27 @@ export default function RoomScene({ onGoToLevel2 }) {
       sound.playDoorUnlock()
     } else {
       // Final Room 5 cleared! LEVEL 1 MASTERED!
+      // 1. FREEZE TIMER IMMEDIATELY
+      setIsTimerRunning(false)
       isLevelCompletedRef.current = true
+
       setDiamonds((d) => d + 250)
       setBadgeInfo({
         title: '★ LEVEL 1 MASTERED! ★',
-        subtitle: 'You unlocked the Master Vault and closer to free the Developer! Ready for Level 2?',
+        subtitle: 'You unlocked the Master Vault and freed the sector! Transitioning to Level 2...',
       })
       setBadgeAwarded(true)
       sound.playVictory()
+
+      // Release pointer lock so user can interact immediately
+      if (document.pointerLockElement) {
+        document.exitPointerLock()
+      }
+
+      // Automatically redirect to Level 2 after victory fanfare (2.2s)
+      setTimeout(() => {
+        onGoToLevel2 && onGoToLevel2()
+      }, 2200)
     }
   }
 
@@ -185,10 +204,11 @@ export default function RoomScene({ onGoToLevel2 }) {
     })
   }
 
-  // Skip current level button
+  // Skip current level button (Only allowed for Rooms 1 to 4; STRICTLY DISABLED for final Room 5!)
   const handleSkipLevel = () => {
+    if (currentRoomIndex >= 4) return // Cannot skip final vault!
     const nextDoorToOpen = doorsOpen.findIndex((isOpen) => !isOpen)
-    if (nextDoorToOpen !== -1) {
+    if (nextDoorToOpen !== -1 && nextDoorToOpen < 4) {
       handleCodeSuccess(nextDoorToOpen)
     }
   }
@@ -224,6 +244,7 @@ export default function RoomScene({ onGoToLevel2 }) {
             doorsOpen={doorsOpen}
             jumpTrigger={jumpTrigger}
             respawnTrigger={respawnTrigger}
+            onGoToLevel2={onGoToLevel2}
           />
         </Suspense>
       </Canvas>

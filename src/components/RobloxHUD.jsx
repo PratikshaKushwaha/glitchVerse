@@ -140,13 +140,15 @@ export default function RobloxHUD({
           </button>
         </div>
 
-        {/* Skip Level Button */}
-        <button
-          onClick={onSkipLevel}
-          className="px-4 py-1.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] border-[2.5px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.25)] text-white font-extrabold text-sm tracking-wide cursor-pointer transition active:scale-95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-        >
-          Skip Level
-        </button>
+        {/* Skip Level Button - REMOVED AT FINAL STAGE (ROOM 5)! */}
+        {currentRoomIndex < 4 && !badgeAwarded && (
+          <button
+            onClick={onSkipLevel}
+            className="px-4 py-1.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] border-[2.5px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.25)] text-white font-extrabold text-sm tracking-wide cursor-pointer transition active:scale-95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+          >
+            Skip Level
+          </button>
+        )}
 
         {/* Golden Digits Tracker Pill */}
         <div className="mt-1 px-3.5 py-1.5 rounded-xl bg-black/75 border border-yellow-500/40 text-[11px] text-yellow-300 font-mono shadow-md backdrop-blur">
@@ -172,31 +174,33 @@ export default function RobloxHUD({
 
       {/* ================= 4. BADGE AWARDED & LEVEL 2 ADVANCE MODAL ================= */}
       {badgeAwarded && (
-        <div className="absolute bottom-6 right-24 pointer-events-auto animate-bounce z-50">
-          <div className="flex flex-col gap-2 p-4 rounded-2xl bg-[#1e2024]/98 border-2 border-yellow-400/80 shadow-[0_0_40px_rgba(250,204,21,0.35)] text-white max-w-sm backdrop-blur">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 p-0.5 flex items-center justify-center shadow-lg shrink-0">
-                <div className="h-full w-full rounded-full bg-[#1e2024] flex items-center justify-center text-xl text-yellow-400">
-                  🏅
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md pointer-events-auto select-none p-4">
+          <div className="flex flex-col items-center gap-4 p-8 rounded-3xl bg-[#090d16] border-2 border-yellow-400 shadow-[0_0_60px_rgba(250,204,21,0.5)] text-white max-w-md w-full text-center">
+            <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-200 p-1 flex items-center justify-center shadow-2xl animate-bounce">
+              <span className="text-4xl">🏆</span>
+            </div>
+
+            <div>
+              <div className="text-2xl font-black text-yellow-400 uppercase tracking-wider">
+                {badgeTitle}
               </div>
-              <div>
-                <div className="text-xs font-black text-yellow-400 uppercase tracking-wider">
-                  {badgeTitle}
-                </div>
-                <p className="text-xs text-gray-200 leading-tight mt-0.5">
-                  {badgeSubtitle}
-                </p>
-              </div>
+              <p className="text-sm text-gray-200 leading-relaxed mt-2">
+                {badgeSubtitle}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-950/80 border border-emerald-400/60 text-emerald-300 text-xs font-mono font-bold">
+              <span className="animate-ping h-2.5 w-2.5 rounded-full bg-emerald-400" />
+              <span>Redirecting to Level 2 in 2 seconds...</span>
             </div>
 
             {onGoToLevel2 && (
               <button
                 onClick={onGoToLevel2}
-                className="mt-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-extrabold text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2"
+                className="mt-2 w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-400 text-black font-black text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.6)] hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2"
               >
                 <span>Enter Level 2: Word Search & Bot Match</span>
-                <span>➔</span>
+                <span className="text-xl">➔</span>
               </button>
             )}
           </div>

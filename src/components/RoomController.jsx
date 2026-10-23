@@ -11,6 +11,7 @@ export default function RoomController({
   doorsOpen,
   jumpTrigger,
   respawnTrigger,
+  onGoToLevel2,
 }) {
   const { camera, gl } = useThree()
 
@@ -361,6 +362,11 @@ export default function RoomController({
         sound.playFootstep()
         lastFootstep.current = now
       }
+    }
+
+    // If final Room 5 vault exit door is opened and player steps through it, enter Level 2!
+    if (doorsOpen[4] && playerPos.current.z < -31.6) {
+      onGoToLevel2 && onGoToLevel2()
     }
 
     const headBob = isMoving && !isJumping.current ? Math.sin(walkTime.current) * 0.025 : 0
