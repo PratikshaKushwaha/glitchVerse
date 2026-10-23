@@ -35,6 +35,7 @@ export default function FirstPersonController({
   // Footstep sound & head-bob tracker
   const walkTime = useRef(0)
   const lastFootstep = useRef(0)
+  const prevZ = useRef(3.2)
 
   // Listen to keyboard
   useEffect(() => {
@@ -252,29 +253,41 @@ export default function FirstPersonController({
       }
     }
 
-    // Boundary constraints within world environment
-    playerPos.current.x = Math.max(-3.5, Math.min(3.5, playerPos.current.x))
-    playerPos.current.z = Math.max(-1.8, Math.min(4.0, playerPos.current.z))
+    // Boundary constraints within world environment:
+    playerPos.current.x = Math.max(-3.2, Math.min(3.2, playerPos.current.x))
+    playerPos.current.z = Math.min(3.8, playerPos.current.z)
 
-    // Door collision logic:
-    // Door is at X: [-1.4, -0.2], Z: ~ -0.275
-    // If door is NOT open, block walking through Z < -0.1
-    const isInDoorXRange =
-      playerPos.current.x > -1.5 && playerPos.current.x < -0.1
-    if (isInDoorXRange) {
+    // Doorway opening spans X from -1.35 to -0.25 (Door base is at X = -0.814, Z = -0.275)
+    const isInDoorwayX =
+      playerPos.current.x >= -1.35 && playerPos.current.x <= -0.25
+
+    if (!isInDoorwayX) {
+      // Solid wall everywhere outside the doorway!
+      // Player CANNOT walk around the back of the door: clamped at Z = -0.15
+      if (playerPos.current.z < -0.15) {
+        playerPos.current.z = -0.15
+      }
+    } else {
+      // In the doorway passage:
       if (!isDoorOpen) {
-        // Closed door blocks player from going beyond Z = -0.05
-        if (playerPos.current.z < -0.05) {
-          playerPos.current.z = -0.05
+        // Locked/closed door is a solid obstacle: player cannot walk beyond Z = -0.15
+        if (playerPos.current.z < -0.15) {
+          playerPos.current.z = -0.15
         }
       } else {
         // Door is OPEN!
-        // If user walks beyond Z = -0.3, they enter the portal to the next screen!
-        if (playerPos.current.z < -0.3) {
+        // Player can ONLY enter the portal when moving forward from the FRONT (prevZ >= -0.20)
+        if (prevZ.current >= -0.20 && playerPos.current.z < -0.32) {
           onEnterDoor && onEnterDoor()
+        }
+        // Hard boundary preventing walking through into void behind
+        if (playerPos.current.z < -0.45) {
+          playerPos.current.z = -0.45
         }
       }
     }
+
+    prevZ.current = playerPos.current.z
 
     // Calculate eye height with walking bob
     const headBob = isMoving ? Math.sin(walkTime.current) * 0.035 : 0

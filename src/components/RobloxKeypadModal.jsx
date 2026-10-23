@@ -1,64 +1,118 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { sound } from '../utils/AudioEngine'
 
 export default function RobloxKeypadModal({
   isOpen,
+  currentDoorIndex, // 0 to 4
+  expectedCode,     // 4 digits for rooms 1-4, 3 digits for room 5
+  lives = 3,
   onClose,
   onCodeSuccess,
+  onWrongGuess,
 }) {
   const [code, setCode] = useState('')
   const [status, setStatus] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
+  const isFinalRoom = currentDoorIndex === 4
+  const codeLength = isFinalRoom ? 3 : 4
 
-  if (!isOpen) return null
+  // Release pointer lock immediately when keypad opens so mouse clicks work instantly!
+  useEffect(() => {
+    if (isOpen) {
+      if (document.pointerLockElement) {
+        document.exitPointerLock()
+      }
+      setCode('')
+      setStatus('')
+      setIsSuccess(false)
+    }
+  }, [isOpen])
 
   const handlePress = (val) => {
     sound.playTypewriter()
     setStatus('')
 
     if (val === '✖') {
-      // Clear
       setCode('')
       return
     }
 
     if (val === '✔') {
-      // Submit
-      if (code === '6845') {
+      if (code === expectedCode) {
         sound.playDoorUnlock()
         setIsSuccess(true)
-        setStatus('CORRECT!')
+        setStatus('ACCESS GRANTED!')
         setTimeout(() => {
-          onCodeSuccess()
+          onCodeSuccess(currentDoorIndex)
           onClose()
-        }, 800)
+        }, 700)
       } else {
         sound.playDoorLocked()
-        setStatus('WRONG CODE!')
         setCode('')
+
+        if (isFinalRoom) {
+          // Final room wrong permutation penalty
+          const remainingLivesAfter = lives - 1
+          if (remainingLivesAfter <= 0) {
+            setStatus('OUT OF LIVES! RESETTING...')
+            onWrongGuess && onWrongGuess()
+            setTimeout(() => {
+              onClose()
+            }, 650)
+          } else {
+            setStatus(`WRONG! ${remainingLivesAfter} LIVES LEFT`)
+            onWrongGuess && onWrongGuess()
+          }
+        } else {
+          setStatus('WRONG CODE!')
+        }
       }
       return
     }
 
-    if (code.length < 4) {
+    if (code.length < codeLength) {
       setCode((prev) => prev + val)
     }
   }
+
+  // Keyboard number keys support
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e) => {
+      if (e.key >= '0' && e.key <= '9') {
+        handlePress(e.key)
+      } else if (e.key === 'Enter') {
+        handlePress('✔')
+      } else if (e.key === 'Backspace') {
+        handlePress('✖')
+      } else if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, code, expectedCode, lives])
+
+  if (!isOpen) return null
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px] p-4 select-none font-sans"
       onClick={onClose}
     >
-      {/* Keypad Container (styled like the white Roblox wall keypad) */}
       <div
-        className="w-full max-w-[280px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-gray-200 flex flex-col items-center"
+        className="w-full max-w-[290px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-gray-200 flex flex-col items-center cursor-default pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
         <div className="w-full flex items-center justify-between pb-2 mb-2 border-b border-gray-100">
-          <span className="text-xs font-black text-gray-500 uppercase tracking-wider">
-            WALL KEYPAD
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-black text-gray-700 uppercase tracking-wider">
+              {isFinalRoom ? 'MASTER VAULT KEYPAD' : `ROOM ${currentDoorIndex + 1} KEYPAD`}
+            </span>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-black font-bold text-sm cursor-pointer"
@@ -67,27 +121,35 @@ export default function RobloxKeypadModal({
           </button>
         </div>
 
+        {/* Lives Indicator for Final Room */}
+        {isFinalRoom && (
+          <div className="w-full mb-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-red-50 border border-red-200 text-xs">
+            <span className="font-bold text-red-600">Lives Remaining:</span>
+            <span className="text-base tracking-widest">
+              {'❤️'.repeat(Math.max(0, lives))}
+              {'🖤'.repeat(Math.max(0, 3 - lives))}
+            </span>
+          </div>
+        )}
+
         {/* Digital Screen at Top */}
         <div className="w-full h-14 rounded-xl bg-[#0f172a] border-2 border-gray-300 flex items-center justify-center shadow-inner mb-3 px-3">
           {isSuccess ? (
             <span className="text-emerald-400 font-extrabold text-base tracking-wider">
-              ✔ UNLOCKED
+              ✔ {isFinalRoom ? 'VAULT OPEN' : 'UNLOCKED'}
             </span>
           ) : status ? (
-            <span className="text-red-400 font-bold text-sm">{status}</span>
+            <span className="text-red-400 font-bold text-sm text-center animate-pulse">
+              {status}
+            </span>
           ) : (
             <span className="text-white font-mono font-extrabold text-2xl tracking-[0.35em]">
-              {code.padEnd(4, '·')}
+              {code.padEnd(codeLength, '·')}
             </span>
           )}
         </div>
 
-        {/* 3x4 Button Grid matching screenshot:
-            1 2 3
-            4 5 6
-            7 8 9
-            ✔ 0 ✖
-        */}
+        {/* 3x4 Button Grid (Roblox escape room layout) */}
         <div className="grid grid-cols-3 gap-2 w-full">
           {[
             ['1', '2', '3'],
@@ -117,8 +179,10 @@ export default function RobloxKeypadModal({
           )}
         </div>
 
-        <p className="text-[11px] text-gray-400 font-medium mt-3">
-          Tip: Check the round wooden table!
+        <p className="text-[11px] text-gray-500 font-medium mt-3 text-center">
+          {isFinalRoom
+            ? 'Enter the 3 golden digits in the correct order! (6 permutations)'
+            : 'Click or type numbers on your keyboard'}
         </p>
       </div>
     </div>

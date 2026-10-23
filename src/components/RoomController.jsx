@@ -8,20 +8,21 @@ export default function RoomController({
   isInspectingNote,
   onInteract,
   setNearObject,
-  doorOpen,
+  doorsOpen,
   jumpTrigger,
+  respawnTrigger,
 }) {
   const { camera, gl } = useThree()
 
-  // Player state: spawn in center of the red carpet looking toward the doorway
-  const playerPos = useRef(new THREE.Vector3(0, 0.2, 1.2))
+  // Player state: spawn in center of Room 1 looking toward Door 1
+  const playerPos = useRef(new THREE.Vector3(0, 0.2, 1.5))
   const yaw = useRef(0)
   const pitch = useRef(0)
   const isPointerLocked = useRef(false)
   const isDragging = useRef(false)
   const previousMouse = useRef({ x: 0, y: 0 })
 
-  // Jumping state
+  // Jumping
   const isJumping = useRef(false)
   const jumpVelocity = useRef(0)
 
@@ -36,19 +37,38 @@ export default function RoomController({
   const walkTime = useRef(0)
   const lastFootstep = useRef(0)
 
-  // Interactive objects in the Roblox room
+  // Handle respawn back to Room 1
+  useEffect(() => {
+    if (respawnTrigger) {
+      playerPos.current.set(0, 0.2, 1.5)
+      yaw.current = 0
+      pitch.current = 0
+    }
+  }, [respawnTrigger])
+
+  // Interactive items across all 5 rooms
   const interactiveObjects = [
-    { id: 'table', name: 'Paper Note on Table', pos: [-2.3, 0.2, -2.4], radius: 1.8 },
-    { id: 'keypad', name: 'Wall Keypad', pos: [1.15, 0.2, -3.6], radius: 1.8 },
-    { id: 'poster', name: 'Yellow Company Billboard', pos: [3.2, 0.2, 0.5], radius: 1.8 },
+    // Room 1
+    { id: 'note-0', name: 'Note on Round Table', pos: [-2.2, 0.2, -1.2], radius: 1.8 },
+    { id: 'keypad-0', name: 'Room 1 Keypad', pos: [1.05, 0.2, -3.5], radius: 1.8 },
+    // Room 2
+    { id: 'note-1', name: 'Note on Study Desk', pos: [2.4, 0.2, -6.2], radius: 1.8 },
+    { id: 'keypad-1', name: 'Room 2 Keypad', pos: [1.05, 0.2, -10.5], radius: 1.8 },
+    // Room 3
+    { id: 'note-2', name: 'Memo on Filing Cabinet', pos: [-2.6, 0.2, -15.0], radius: 1.8 },
+    { id: 'keypad-2', name: 'Room 3 Keypad', pos: [1.05, 0.2, -17.5], radius: 1.8 },
+    // Room 4
+    { id: 'note-3', name: 'Log on Terminal Desk', pos: [-2.4, 0.2, -20.5], radius: 1.8 },
+    { id: 'keypad-3', name: 'Room 4 Keypad', pos: [1.05, 0.2, -24.5], radius: 1.8 },
+    // Room 5
+    { id: 'note-4', name: 'Master Cipher Console', pos: [-2.4, 0.2, -28.0], radius: 2.2 },
+    { id: 'keypad-4', name: 'Final Vault Keypad', pos: [1.05, 0.2, -31.5], radius: 1.8 },
   ]
 
-  // Furniture Obstacles: Round table
-  const obstacles = [
-    { minX: -3.1, maxX: -1.5, minZ: -3.2, maxZ: -1.6 },
-  ]
+  // Door Z thresholds
+  const doorZPositions = [-3.5, -10.5, -17.5, -24.5, -31.5]
 
-  // Trigger jump from external button (Roblox HUD jump button)
+  // External jump button
   useEffect(() => {
     if (jumpTrigger && !isJumping.current) {
       isJumping.current = true
@@ -56,6 +76,7 @@ export default function RoomController({
     }
   }, [jumpTrigger])
 
+  // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (isKeypadOpen || isInspectingNote) {
@@ -145,7 +166,7 @@ export default function RoomController({
     }
   }, [isKeypadOpen, isInspectingNote, onInteract])
 
-  // Mouse look
+  // Mouse look with pointer lock
   useEffect(() => {
     const dom = gl.domElement
 
@@ -202,43 +223,55 @@ export default function RoomController({
     }
   }, [gl, isKeypadOpen, isInspectingNote])
 
-  // Collision helper
+  // Robust solid collision across 5 connected rooms
   const checkCollision = (testPos) => {
     const r = 0.38
 
-    // Perimeter walls: X in [-3.5, 3.5], Z in [-4.0, 4.0]
+    // 1. Perimeter Side Walls: X in [-3.5, 3.5]
     if (testPos.x < -3.5 + r || testPos.x > 3.5 - r) return true
-    if (testPos.z > 4.0 - r) return true
 
-    // Front Wall / Doorway:
-    if (!doorOpen) {
-      if (testPos.z < -4.0 + r) return true
-    } else {
-      // Door is open: can enter the corridor in X in [-1.1, 1.1] down to Z = -7.0
-      if (Math.abs(testPos.x) <= 1.1) {
-        if (testPos.z < -7.0 + r) return true
-      } else {
-        if (testPos.z < -4.0 + r) return true
+    // 2. Back Wall of Room 1: Z = +3.5
+    if (testPos.z > 3.5 - r) return true
+
+    // 3. Doors & Partition Walls check
+    for (let d = 0; d < 5; d++) {
+      const doorZ = doorZPositions[d]
+      const isDoorOpen = doorsOpen[d]
+
+      // If within 0.4m of the wall boundary
+      if (Math.abs(testPos.z - doorZ) < 0.25 + r) {
+        // Is player in the doorway passage? (Door opening is X in [-0.55, 0.55])
+        const isInDoorway = Math.abs(testPos.x) <= 0.52
+
+        if (isInDoorway) {
+          // If door is closed, player cannot walk through
+          if (!isDoorOpen) {
+            return true
+          }
+        } else {
+          // Player is hitting the solid wall to left or right of doorway
+          return true
+        }
       }
     }
 
-    // Furniture Obstacles
-    for (const obs of obstacles) {
-      if (
-        testPos.x > obs.minX - r &&
-        testPos.x < obs.maxX + r &&
-        testPos.z > obs.minZ - r &&
-        testPos.z < obs.maxZ + r
-      ) {
-        return true
-      }
-    }
+    // 4. Furniture collisions (rigged obstacles)
+    // Room 1 Table
+    if (testPos.x > -2.9 && testPos.x < -1.5 && testPos.z > -1.9 && testPos.z < -0.5) return true
+    // Room 2 Desk
+    if (testPos.x > 1.6 && testPos.x < 3.2 && testPos.z > -7.0 && testPos.z < -5.4) return true
+    // Room 3 Filing Cabinet
+    if (testPos.x > -3.2 && testPos.x < -2.0 && testPos.z > -15.8 && testPos.z < -14.2) return true
+    // Room 4 Terminal Desk
+    if (testPos.x > -3.2 && testPos.x < -1.6 && testPos.z > -21.3 && testPos.z < -19.7) return true
+    // Room 5 Rigged Side Console Table
+    if (testPos.x > -3.3 && testPos.x < -1.5 && testPos.z > -28.9 && testPos.z < -27.1) return true
 
     return false
   }
 
   // Frame update
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     // Proximity check
     let closestObj = null
     let minDistance = Infinity
@@ -268,7 +301,7 @@ export default function RoomController({
       }
     }
 
-    // Walking movement
+    // Movement
     const moveSpeed = (keys.current.sprint ? 3.8 : 2.4) * delta
     const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(
       new THREE.Vector3(0, 1, 0),

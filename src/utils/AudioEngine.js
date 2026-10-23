@@ -5,8 +5,6 @@ class AudioEngine {
   constructor() {
     this.ctx = null
     this.isMuted = false
-    this.ambientGain = null
-    this.ambientOsc = null
   }
 
   init() {
@@ -21,7 +19,7 @@ class AudioEngine {
     }
   }
 
-  // Typewriter key click sound with subtle pitch randomness
+  // Typewriter key click sound
   playTypewriter() {
     if (this.isMuted) return
     this.init()
@@ -32,7 +30,6 @@ class AudioEngine {
     const gain = this.ctx.createGain()
     const filter = this.ctx.createBiquadFilter()
 
-    // Random pitch between 800Hz and 1400Hz
     osc.type = 'triangle'
     osc.frequency.setValueAtTime(900 + Math.random() * 400, now)
 
@@ -40,7 +37,6 @@ class AudioEngine {
     filter.frequency.setValueAtTime(1200, now)
     filter.Q.setValueAtTime(3, now)
 
-    // Sharp mechanical click envelope
     gain.gain.setValueAtTime(0.12, now)
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04)
 
@@ -52,7 +48,7 @@ class AudioEngine {
     osc.stop(now + 0.045)
   }
 
-  // Walkie-talkie / radio static burst
+  // Glitch radio static
   playGlitchRadio() {
     if (this.isMuted) return
     this.init()
@@ -85,7 +81,7 @@ class AudioEngine {
     noise.start(now)
   }
 
-  // Manuscript interaction sound
+  // Manuscript chime
   playManuscriptOpen() {
     if (this.isMuted) return
     this.init()
@@ -132,29 +128,16 @@ class AudioEngine {
     const osc2 = this.ctx.createOscillator()
     const gain2 = this.ctx.createGain()
     osc2.type = 'sine'
-    osc2.frequency.setValueAtTime(783.99, now + 0.15) // G5
-    gain2.gain.setValueAtTime(0.18, now + 0.15)
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6)
+    osc2.frequency.setValueAtTime(783.99, now + 0.12) // G5
+    gain2.gain.setValueAtTime(0.18, now + 0.12)
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5)
     osc2.connect(gain2)
     gain2.connect(this.ctx.destination)
-    osc2.start(now + 0.15)
-    osc2.stop(now + 0.6)
-
-    // Heavy thud
-    const osc3 = this.ctx.createOscillator()
-    const gain3 = this.ctx.createGain()
-    osc3.type = 'triangle'
-    osc3.frequency.setValueAtTime(140, now + 0.2)
-    osc3.frequency.exponentialRampToValueAtTime(50, now + 0.5)
-    gain3.gain.setValueAtTime(0.2, now + 0.2)
-    gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.55)
-    osc3.connect(gain3)
-    gain3.connect(this.ctx.destination)
-    osc3.start(now + 0.2)
-    osc3.stop(now + 0.55)
+    osc2.start(now + 0.12)
+    osc2.stop(now + 0.5)
   }
 
-  // Door creak / opening sound
+  // Door open creak
   playDoorOpen() {
     if (this.isMuted) return
     this.init()
@@ -167,23 +150,23 @@ class AudioEngine {
 
     osc.type = 'sawtooth'
     osc.frequency.setValueAtTime(80, now)
-    osc.frequency.linearRampToValueAtTime(130, now + 0.8)
+    osc.frequency.linearRampToValueAtTime(130, now + 0.6)
 
     filter.type = 'lowpass'
     filter.frequency.setValueAtTime(320, now)
 
     gain.gain.setValueAtTime(0.12, now)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8)
 
     osc.connect(filter)
     filter.connect(gain)
     gain.connect(this.ctx.destination)
 
     osc.start(now)
-    osc.stop(now + 1.1)
+    osc.stop(now + 0.8)
   }
 
-  // Door locked reject click
+  // Door locked buzzer
   playDoorLocked() {
     if (this.isMuted) return
     this.init()
@@ -193,21 +176,21 @@ class AudioEngine {
     const osc = this.ctx.createOscillator()
     const gain = this.ctx.createGain()
 
-    osc.type = 'square'
-    osc.frequency.setValueAtTime(160, now)
-    osc.frequency.setValueAtTime(120, now + 0.08)
+    osc.type = 'sawtooth'
+    osc.frequency.setValueAtTime(140, now)
+    osc.frequency.setValueAtTime(90, now + 0.1)
 
-    gain.gain.setValueAtTime(0.1, now)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16)
+    gain.gain.setValueAtTime(0.16, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25)
 
     osc.connect(gain)
     gain.connect(this.ctx.destination)
 
     osc.start(now)
-    osc.stop(now + 0.16)
+    osc.stop(now + 0.25)
   }
 
-  // Portal transition effect
+  // Portal enter
   playPortalEnter() {
     if (this.isMuted) return
     this.init()
@@ -231,7 +214,7 @@ class AudioEngine {
     osc.stop(now + 0.9)
   }
 
-  // Footstep sound
+  // Footstep
   playFootstep() {
     if (this.isMuted) return
     this.init()
@@ -257,6 +240,102 @@ class AudioEngine {
 
     osc.start(now)
     osc.stop(now + 0.09)
+  }
+
+  // Card Flip Sound (Level 2)
+  playCardFlip() {
+    if (this.isMuted) return
+    this.init()
+    if (!this.ctx) return
+
+    const now = this.ctx.currentTime
+    const osc = this.ctx.createOscillator()
+    const gain = this.ctx.createGain()
+
+    osc.type = 'triangle'
+    osc.frequency.setValueAtTime(350, now)
+    osc.frequency.exponentialRampToValueAtTime(700, now + 0.06)
+
+    gain.gain.setValueAtTime(0.09, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07)
+
+    osc.connect(gain)
+    gain.connect(this.ctx.destination)
+
+    osc.start(now)
+    osc.stop(now + 0.08)
+  }
+
+  // Card Match Sound (Level 2)
+  playCardMatch() {
+    if (this.isMuted) return
+    this.init()
+    if (!this.ctx) return
+
+    const now = this.ctx.currentTime
+    const notes = [523.25, 659.25, 783.99, 1046.5] // C E G C
+    notes.forEach((freq, i) => {
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, now + i * 0.08)
+      gain.gain.setValueAtTime(0.12, now + i * 0.08)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3)
+      osc.connect(gain)
+      gain.connect(this.ctx.destination)
+      osc.start(now + i * 0.08)
+      osc.stop(now + i * 0.08 + 0.32)
+    })
+  }
+
+  // Word Found Chime (Level 2)
+  playWordFound() {
+    if (this.isMuted) return
+    this.init()
+    if (!this.ctx) return
+
+    const now = this.ctx.currentTime
+    const notes = [440, 554.37, 659.25, 880] // A C# E A
+    notes.forEach((freq, i) => {
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(freq, now + i * 0.06)
+      gain.gain.setValueAtTime(0.13, now + i * 0.06)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.25)
+      osc.connect(gain)
+      gain.connect(this.ctx.destination)
+      osc.start(now + i * 0.06)
+      osc.stop(now + i * 0.06 + 0.28)
+    })
+  }
+
+  // Full Victory Fanfare
+  playVictory() {
+    if (this.isMuted) return
+    this.init()
+    if (!this.ctx) return
+
+    const now = this.ctx.currentTime
+    const fanfare = [
+      { f: 523.25, t: 0.0, d: 0.15 },
+      { f: 523.25, t: 0.15, d: 0.15 },
+      { f: 523.25, t: 0.3, d: 0.15 },
+      { f: 659.25, t: 0.45, d: 0.4 },
+      { f: 783.99, t: 0.85, d: 0.6 },
+    ]
+    fanfare.forEach((n) => {
+      const osc = this.ctx.createOscillator()
+      const gain = this.ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(n.f, now + n.t)
+      gain.gain.setValueAtTime(0.18, now + n.t)
+      gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d)
+      osc.connect(gain)
+      gain.connect(this.ctx.destination)
+      osc.start(now + n.t)
+      osc.stop(now + n.t + n.d + 0.05)
+    })
   }
 }
 

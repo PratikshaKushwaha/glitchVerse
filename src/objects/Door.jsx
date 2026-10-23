@@ -75,6 +75,12 @@ export default function Door({
 
       {/* Dimensional Portal Void behind the door (revealed when door opens) */}
       <group position={[0, 0, -0.08]}>
+        {/* Solid Backboard Frame preventing seeing or walking through from behind */}
+        <mesh position={[0, 0, -0.03]}>
+          <boxGeometry args={[1.05, 1.9, 0.05]} />
+          <meshStandardMaterial color="#020617" roughness={0.9} />
+        </mesh>
+
         {/* Swirling Portal Plane */}
         <mesh position={[0, 0, 0]}>
           <planeGeometry args={[0.96, 1.82]} />

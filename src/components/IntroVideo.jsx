@@ -44,12 +44,12 @@ export default function IntroVideo({ onFinish }) {
   }, [])
 
   return (
-    <div className="relative w-screen h-screen bg-black flex items-center justify-center overflow-hidden select-none">
-      {/* Video element */}
+    <div className="fixed inset-0 w-screen h-screen bg-black flex items-center justify-center overflow-hidden select-none z-50">
+      {/* Video element covering 100% of the screen (object-cover fills entire display, no bars) */}
       <video
         ref={videoRef}
         src={openingVideo}
-        className="w-full h-full object-contain"
+        className="w-full h-full object-cover pointer-events-none"
         autoPlay
         playsInline
         muted={isMuted}
@@ -57,8 +57,19 @@ export default function IntroVideo({ onFinish }) {
         onEnded={onFinish}
       />
 
-      {/* Prominent, clean Skip Option Bar at Top Right */}
-      <div className="absolute top-6 right-6 z-40 flex items-center gap-3">
+      {/* Top Left Transmission indicator */}
+      <div className="absolute top-6 left-6 z-30 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/75 border border-white/20 backdrop-blur">
+        <span className="flex h-2.5 w-2.5 relative">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500" />
+        </span>
+        <span className="text-[11px] font-mono uppercase tracking-widest text-cyan-200">
+          PROLOGUE
+        </span>
+      </div>
+
+      {/* Solid Watermark Blocker & Skip Button container firmly anchored at bottom-right corner */}
+      <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-3">
         {isMuted && (
           <button
             onClick={() => {
@@ -67,22 +78,23 @@ export default function IntroVideo({ onFinish }) {
                 setIsMuted(false)
               }
             }}
-            className="px-3.5 py-2 rounded-lg bg-black/70 hover:bg-black/90 border border-white/20 text-xs font-mono text-white cursor-pointer backdrop-blur transition"
+            className="px-4 py-3 rounded-xl bg-black/95 hover:bg-black border border-white/30 text-xs font-mono text-white cursor-pointer backdrop-blur shadow-2xl transition"
           >
-            🔊 Unmute Audio
+            🔊 Unmute
           </button>
         )}
 
+        {/* Large, solid Skip Button covering and obscuring the bottom-right watermark */}
         <button
           onClick={onFinish}
-          className="flex items-center gap-2.5 px-5 py-2.5 rounded-lg bg-black/80 hover:bg-black border border-cyan-400/60 text-xs font-mono font-bold tracking-wider uppercase text-cyan-200 hover:text-white cursor-pointer backdrop-blur transition shadow-[0_0_20px_rgba(6,182,212,0.35)] active:scale-95"
+          className="relative min-w-[210px] flex items-center justify-between gap-3 px-6 py-3.5 rounded-xl bg-[#090d16] hover:bg-black border-2 border-cyan-400 text-xs sm:text-sm font-mono font-black tracking-wider uppercase text-cyan-200 hover:text-white cursor-pointer shadow-[0_0_35px_rgba(6,182,212,0.65)] active:scale-95 transition"
           title="Skip to Door Scene (Press Space)"
         >
-          <span>Skip Video</span>
-          <span className="text-[10px] bg-cyan-950 border border-cyan-400/50 px-1.5 py-0.5 rounded text-cyan-300">
+          <span>SKIP VIDEO</span>
+          <span className="text-[11px] bg-cyan-950 border border-cyan-400/60 px-2 py-0.5 rounded text-cyan-300">
             SPACE ↵
           </span>
-          <span className="text-sm">→</span>
+          <span className="text-base">→</span>
         </button>
       </div>
 

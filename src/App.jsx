@@ -3,10 +3,11 @@ import ambientVideo from './assets/enchanted_cottage_ambient.mp4'
 import IntroVideo from './components/IntroVideo'
 import HubScene from './scenes/HubScene'
 import RoomScene from './scenes/RoomScene'
+import LevelTwoScene from './scenes/LevelTwoScene'
 
 const App = () => {
   // Pure narrative game progression:
-  // 'menu' (Whimsical Landing) -> 'video' (opening.mp4) -> 'hub' (Door Scene) -> 'room' (3D Room with Objects & Clue)
+  // 'menu' (Whimsical Landing) -> 'video' (opening.mp4) -> 'hub' (Door Scene) -> 'room' (Level 1: 5 Rooms) -> 'level2' (Level 2: Word Search & Memory vs Bot)
   const [currentScene, setCurrentScene] = useState('menu')
   const [hasSavedProgress, setHasSavedProgress] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
@@ -40,12 +41,26 @@ const App = () => {
     return <HubScene onEnterLevelOne={() => setCurrentScene('room')} />
   }
 
-  // 3. 3D Room Scene (Enclosed room with physical boundaries, objects, and hidden clue)
+  // 3. Level 1: 5 Rooms Scene (with 2-min timer, 3 lives, golden digits permutation)
   if (currentScene === 'room') {
-    return <RoomScene />
+    return (
+      <RoomScene
+        onGoToLevel2={() => setCurrentScene('level2')}
+      />
+    )
   }
 
-  // 4. Default Whimsical Landing Page
+  // 4. Level 2: Word Search & Memory Card Game vs Computer
+  if (currentScene === 'level2') {
+    return (
+      <LevelTwoScene
+        onBackToMenu={() => setCurrentScene('menu')}
+        onBackToLevelOne={() => setCurrentScene('room')}
+      />
+    )
+  }
+
+  // 5. Default Whimsical Landing Page
   return (
     <main
       className={`relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#18241d] text-[#f4f1e8] transition duration-700 ease-out ${
