@@ -81,8 +81,14 @@ export default function Door({
           <meshStandardMaterial color="#020617" roughness={0.9} />
         </mesh>
 
-        {/* Swirling Portal Plane */}
-        <mesh position={[0, 0, 0]}>
+        {/* Swirling Portal Plane (Clickable when open to enter portal) */}
+        <mesh
+          position={[0, 0, 0]}
+          onClick={(e) => {
+            e.stopPropagation()
+            onInteract && onInteract()
+          }}
+        >
           <planeGeometry args={[0.96, 1.82]} />
           <meshBasicMaterial
             color={isOpen ? '#0ea5e9' : '#050b14'}
@@ -93,7 +99,13 @@ export default function Door({
 
         {/* Portal Inner Vortex Rim */}
         {isOpen && (
-          <mesh position={[0, 0, 0.01]}>
+          <mesh
+            position={[0, 0, 0.01]}
+            onClick={(e) => {
+              e.stopPropagation()
+              onInteract && onInteract()
+            }}
+          >
             <planeGeometry args={[0.88, 1.74]} />
             <meshBasicMaterial
               color="#38bdf8"

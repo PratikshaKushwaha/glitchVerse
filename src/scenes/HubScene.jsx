@@ -53,6 +53,7 @@ export default function HubScene({ onEnterLevelOne }) {
       sound.playDoorLocked()
     } else {
       setIsDoorOpen(true)
+      handleEnterDoor()
     }
   }
 
@@ -140,10 +141,17 @@ export default function HubScene({ onEnterLevelOne }) {
 
           {isNearDoor && (
             <div
-              className={`flex items-center gap-2 px-4 py-2 rounded-full bg-blue-200/80 border text-sm font-mono backdrop-blur ${
+              onClick={() => {
+                if (isManuscriptRead) {
+                  handleDoorInteract()
+                }
+              }}
+              className={`flex items-center gap-2.5 px-6 py-3 rounded-full border-2 shadow-2xl backdrop-blur text-sm font-mono font-bold transition-all duration-300 pointer-events-auto ${
                 !isManuscriptRead
-                  ? 'border-red-500/60 text-red-300 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
-                  : 'border-emerald-400/60 text-emerald-300 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
+                  ? 'border-red-500/60 bg-red-950/80 text-red-300 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                  : isDoorOpen
+                  ? 'border-cyan-400 bg-cyan-950/90 text-cyan-200 shadow-[0_0_25px_rgba(6,182,212,0.5)] cursor-pointer hover:bg-cyan-900 active:scale-95'
+                  : 'border-emerald-400/60 bg-emerald-950/80 text-emerald-300 shadow-[0_0_20px_rgba(34,197,94,0.4)] cursor-pointer'
               }`}
             >
               {!isManuscriptRead ? (
@@ -153,8 +161,11 @@ export default function HubScene({ onEnterLevelOne }) {
                 </>
               ) : isDoorOpen ? (
                 <>
-                  <span className="text-base">⚡</span>
-                  <span>PORTAL ACTIVE — Walk through the doorway</span>
+                  <span className="text-base animate-pulse">⚡</span>
+                  <span>PORTAL ACTIVE — Walk through or click to enter</span>
+                  <span className="ml-1 px-2.5 py-0.5 rounded bg-cyan-400 text-black font-extrabold text-xs">
+                    ENTER ↵
+                  </span>
                 </>
               ) : (
                 <>

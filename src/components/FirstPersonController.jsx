@@ -69,7 +69,7 @@ export default function FirstPersonController({
           keys.current.sprint = true
           break
         case 'KeyE': {
-          // Check proximity
+          // Check proximity to manuscript and door
           const distManuscript = Math.hypot(
             playerPos.current.x - 0.814,
             playerPos.current.z - 0.275
@@ -79,10 +79,19 @@ export default function FirstPersonController({
             playerPos.current.z - (-0.275)
           )
 
-          if (distManuscript < 2.5) {
-            onInteractManuscript()
-          } else if (distDoor < 2.2) {
-            onInteractDoor()
+          // Prioritize whichever target is closest
+          if (distDoor < distManuscript) {
+            if (distDoor < 2.8) {
+              onInteractDoor()
+            } else if (distManuscript < 2.5) {
+              onInteractManuscript()
+            }
+          } else {
+            if (distManuscript < 2.5) {
+              onInteractManuscript()
+            } else if (distDoor < 2.8) {
+              onInteractDoor()
+            }
           }
           break
         }
@@ -254,16 +263,17 @@ export default function FirstPersonController({
     }
 
     // Boundary constraints within world environment:
-    playerPos.current.x = Math.max(-3.2, Math.min(3.2, playerPos.current.x))
-    playerPos.current.z = Math.min(3.8, playerPos.current.z)
+    playerPos.current.x = Math.max(-3.5, Math.min(3.5, playerPos.current.x))
+    playerPos.current.z = Math.min(4.0, playerPos.current.z)
 
-    // Doorway opening spans X from -1.35 to -0.25 (Door base is at X = -0.814, Z = -0.275)
+    // Door center is at X = -0.814, Z = -0.275
+    // Doorway opening spans X from -1.65 to 0.0
     const isInDoorwayX =
-      playerPos.current.x >= -1.35 && playerPos.current.x <= -0.25
+      playerPos.current.x >= -1.65 && playerPos.current.x <= 0.0
 
     if (!isInDoorwayX) {
-      // Solid wall everywhere outside the doorway!
-      // Player CANNOT walk around the back of the door: clamped at Z = -0.15
+      // Solid wall everywhere outside the doorway:
+      // Player CANNOT walk around the back of the door (blocked at Z = -0.15)
       if (playerPos.current.z < -0.15) {
         playerPos.current.z = -0.15
       }
@@ -276,18 +286,16 @@ export default function FirstPersonController({
         }
       } else {
         // Door is OPEN!
-        // Player can ONLY enter the portal when moving forward from the FRONT (prevZ >= -0.20)
-        if (prevZ.current >= -0.20 && playerPos.current.z < -0.32) {
+        // When approaching/stepping through the open doorway (Z <= 0.15 or close to door), activate portal!
+        if (playerPos.current.z <= 0.15 || distDoor < 1.45) {
           onEnterDoor && onEnterDoor()
         }
-        // Hard boundary preventing walking through into void behind
-        if (playerPos.current.z < -0.45) {
-          playerPos.current.z = -0.45
+        // Clamped at -0.40 to prevent walking through into void behind
+        if (playerPos.current.z < -0.40) {
+          playerPos.current.z = -0.40
         }
       }
     }
-
-    prevZ.current = playerPos.current.z
 
     // Calculate eye height with walking bob
     const headBob = isMoving ? Math.sin(walkTime.current) * 0.035 : 0
