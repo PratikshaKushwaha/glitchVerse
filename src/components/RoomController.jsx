@@ -4,22 +4,26 @@ import * as THREE from 'three'
 import { sound } from '../utils/AudioEngine'
 
 export default function RoomController({
-  isInspecting,
   isKeypadOpen,
+  isInspectingNote,
   onInteract,
-  glitchVisionActive,
   setNearObject,
-  exitUnlocked,
+  doorOpen,
+  jumpTrigger,
 }) {
   const { camera, gl } = useThree()
 
-  // Player state: spawn at back entrance of room looking forward
-  const playerPos = useRef(new THREE.Vector3(0, 0.4, 2.8))
+  // Player state: spawn in center of the red carpet looking toward the doorway
+  const playerPos = useRef(new THREE.Vector3(0, 0.2, 1.2))
   const yaw = useRef(0)
   const pitch = useRef(0)
   const isPointerLocked = useRef(false)
   const isDragging = useRef(false)
   const previousMouse = useRef({ x: 0, y: 0 })
+
+  // Jumping state
+  const isJumping = useRef(false)
+  const jumpVelocity = useRef(0)
 
   const keys = useRef({
     forward: false,
@@ -32,27 +36,29 @@ export default function RoomController({
   const walkTime = useRef(0)
   const lastFootstep = useRef(0)
 
-  // Interactive objects with trigger radius
+  // Interactive objects in the Roblox room
   const interactiveObjects = [
-    { id: 'terminal', name: 'Glitched Computer Terminal', pos: [-2.2, 0.4, 0.6], radius: 1.7 },
-    { id: 'cabinet', name: 'Rusted Filing Cabinet', pos: [-2.3, 0.4, -2.2], radius: 1.5 },
-    { id: 'crates', name: 'Stacked Cargo Crates', pos: [2.2, 0.4, 1.8], radius: 1.6 },
-    { id: 'bookshelf', name: 'Archival Bookshelf', pos: [2.4, 0.4, -1.2], radius: 1.6 },
-    { id: 'blueprint', name: 'Tilted Facility Blueprint', pos: [1.2, 0.4, -3.2], radius: 1.5 },
-    { id: 'keypad', name: 'Blast Door Keypad', pos: [-0.8, 0.4, -3.2], radius: 1.6 },
+    { id: 'table', name: 'Paper Note on Table', pos: [-2.3, 0.2, -2.4], radius: 1.8 },
+    { id: 'keypad', name: 'Wall Keypad', pos: [1.15, 0.2, -3.6], radius: 1.8 },
+    { id: 'poster', name: 'Yellow Company Billboard', pos: [3.2, 0.2, 0.5], radius: 1.8 },
   ]
 
-  // Physical Obstacle AABBs inside the room (minX, maxX, minZ, maxZ)
+  // Furniture Obstacles: Round table
   const obstacles = [
-    { name: 'desk', minX: -2.9, maxX: -1.5, minZ: -0.1, maxZ: 1.3 },
-    { name: 'cabinet', minX: -2.9, maxX: -1.7, minZ: -2.8, maxZ: -1.6 },
-    { name: 'crates', minX: 1.5, maxX: 2.9, minZ: 1.1, maxZ: 2.5 },
-    { name: 'bookshelf', minX: 1.8, maxX: 2.9, minZ: -1.9, maxZ: -0.5 },
+    { minX: -3.1, maxX: -1.5, minZ: -3.2, maxZ: -1.6 },
   ]
+
+  // Trigger jump from external button (Roblox HUD jump button)
+  useEffect(() => {
+    if (jumpTrigger && !isJumping.current) {
+      isJumping.current = true
+      jumpVelocity.current = 4.5
+    }
+  }, [jumpTrigger])
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (isInspecting || isKeypadOpen) {
+      if (isKeypadOpen || isInspectingNote) {
         if (e.key === 'e' || e.key === 'E' || e.key === 'Escape') {
           onInteract('close')
         }
@@ -79,6 +85,12 @@ export default function RoomController({
         case 'ShiftLeft':
         case 'ShiftRight':
           keys.current.sprint = true
+          break
+        case 'Space':
+          if (!isJumping.current) {
+            isJumping.current = true
+            jumpVelocity.current = 4.5
+          }
           break
         case 'KeyE': {
           for (const obj of interactiveObjects) {
@@ -131,9 +143,9 @@ export default function RoomController({
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isInspecting, isKeypadOpen, onInteract])
+  }, [isKeypadOpen, isInspectingNote, onInteract])
 
-  // Pointer lock & drag controls
+  // Mouse look
   useEffect(() => {
     const dom = gl.domElement
 
@@ -142,7 +154,7 @@ export default function RoomController({
     }
 
     const onMouseMove = (e) => {
-      if (isInspecting || isKeypadOpen) return
+      if (isKeypadOpen || isInspectingNote) return
 
       let movementX = 0
       let movementY = 0
@@ -164,7 +176,7 @@ export default function RoomController({
     }
 
     const onMouseDown = (e) => {
-      if (e.button === 0 && !isInspecting && !isKeypadOpen) {
+      if (e.button === 0 && !isKeypadOpen && !isInspectingNote) {
         isDragging.current = true
         previousMouse.current = { x: e.clientX, y: e.clientY }
         if (!isPointerLocked.current && dom.requestPointerLock) {
@@ -188,36 +200,35 @@ export default function RoomController({
       window.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('mouseup', onMouseUp)
     }
-  }, [gl, isInspecting, isKeypadOpen])
+  }, [gl, isKeypadOpen, isInspectingNote])
 
-  // Solid Collision Helper
+  // Collision helper
   const checkCollision = (testPos) => {
-    const playerRadius = 0.38
+    const r = 0.38
 
-    // 1. Solid Perimeter Walls (Room is X in [-3, 3], Z in [-3.8, 3.8])
-    if (
-      testPos.x < -3.0 + playerRadius ||
-      testPos.x > 3.0 - playerRadius ||
-      testPos.z < -3.8 + playerRadius ||
-      testPos.z > 3.8 - playerRadius
-    ) {
-      return true
-    }
+    // Perimeter walls: X in [-3.5, 3.5], Z in [-4.0, 4.0]
+    if (testPos.x < -3.5 + r || testPos.x > 3.5 - r) return true
+    if (testPos.z > 4.0 - r) return true
 
-    // 2. Blast Door when locked (Z < -3.3 in front of door)
-    if (!exitUnlocked) {
-      if (testPos.z < -3.3 && testPos.x > -1.6 && testPos.x < 0.2) {
-        return true
+    // Front Wall / Doorway:
+    if (!doorOpen) {
+      if (testPos.z < -4.0 + r) return true
+    } else {
+      // Door is open: can enter the corridor in X in [-1.1, 1.1] down to Z = -7.0
+      if (Math.abs(testPos.x) <= 1.1) {
+        if (testPos.z < -7.0 + r) return true
+      } else {
+        if (testPos.z < -4.0 + r) return true
       }
     }
 
-    // 3. Interior furniture obstacles
+    // Furniture Obstacles
     for (const obs of obstacles) {
       if (
-        testPos.x > obs.minX - playerRadius &&
-        testPos.x < obs.maxX + playerRadius &&
-        testPos.z > obs.minZ - playerRadius &&
-        testPos.z < obs.maxZ + playerRadius
+        testPos.x > obs.minX - r &&
+        testPos.x < obs.maxX + r &&
+        testPos.z > obs.minZ - r &&
+        testPos.z < obs.maxZ + r
       ) {
         return true
       }
@@ -226,7 +237,7 @@ export default function RoomController({
     return false
   }
 
-  // Frame update with sliding collision resolution
+  // Frame update
   useFrame((state, delta) => {
     // Proximity check
     let closestObj = null
@@ -244,10 +255,21 @@ export default function RoomController({
     }
     setNearObject(closestObj)
 
-    if (isInspecting || isKeypadOpen) return
+    if (isKeypadOpen || isInspectingNote) return
 
-    // Movement calculation
-    const moveSpeed = (keys.current.sprint ? 3.4 : 2.0) * delta
+    // Jump physics
+    if (isJumping.current) {
+      playerPos.current.y += jumpVelocity.current * delta
+      jumpVelocity.current -= 14 * delta
+      if (playerPos.current.y <= 0.2) {
+        playerPos.current.y = 0.2
+        isJumping.current = false
+        jumpVelocity.current = 0
+      }
+    }
+
+    // Walking movement
+    const moveSpeed = (keys.current.sprint ? 3.8 : 2.4) * delta
     const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(
       new THREE.Vector3(0, 1, 0),
       yaw.current
@@ -280,7 +302,7 @@ export default function RoomController({
     if (isMoving) {
       moveDelta.normalize().multiplyScalar(moveSpeed)
 
-      // Slide resolution on X axis
+      // X slide
       const targetPosX = new THREE.Vector3(
         playerPos.current.x + moveDelta.x,
         playerPos.current.y,
@@ -290,7 +312,7 @@ export default function RoomController({
         playerPos.current.x = targetPosX.x
       }
 
-      // Slide resolution on Z axis
+      // Z slide
       const targetPosZ = new THREE.Vector3(
         playerPos.current.x,
         playerPos.current.y,
@@ -300,16 +322,15 @@ export default function RoomController({
         playerPos.current.z = targetPosZ.z
       }
 
-      // Head-bob & footsteps
       walkTime.current += delta * (keys.current.sprint ? 14 : 9)
       const now = performance.now()
-      if (now - lastFootstep.current > (keys.current.sprint ? 320 : 500)) {
+      if (now - lastFootstep.current > (keys.current.sprint ? 300 : 450)) {
         sound.playFootstep()
         lastFootstep.current = now
       }
     }
 
-    const headBob = isMoving ? Math.sin(walkTime.current) * 0.025 : 0
+    const headBob = isMoving && !isJumping.current ? Math.sin(walkTime.current) * 0.025 : 0
     camera.position.set(
       playerPos.current.x,
       playerPos.current.y + headBob,
