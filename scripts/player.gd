@@ -23,7 +23,14 @@ func _ready() -> void:
 	prompt_label.text = ""
 
 
+func _vn_playing() -> bool:
+	var vn := VN.box(self)
+	return vn != null and vn.is_playing()
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if _vn_playing():
+		return
 	if look_locked:
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -39,7 +46,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if look_locked:
+	if _vn_playing() or look_locked:
 		velocity = Vector3.ZERO
 		move_and_slide()
 		_update_prompt()
@@ -94,6 +101,9 @@ func _get_interactable() -> Node:
 
 
 func _update_prompt() -> void:
+	if _vn_playing():
+		prompt_label.text = ""
+		return
 	var target := _get_interactable()
 	if target != null and target.has_method("get_prompt"):
 		prompt_label.text = target.get_prompt()
@@ -104,6 +114,8 @@ func _update_prompt() -> void:
 
 
 func _try_interact() -> void:
+	if _vn_playing():
+		return
 	var target := _get_interactable()
 	if target != null:
 		target.interact(self)

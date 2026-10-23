@@ -30,6 +30,9 @@ func _ready() -> void:
 	_build_level()
 	_update_hud()
 	_teleport_player(1)
+	var vn := VN.box(self)
+	if vn != null:
+		vn.play_story("level1_enter")
 
 
 func _build_level() -> void:
@@ -54,8 +57,8 @@ func _build_level() -> void:
 		_spawn_points.append(origin + Vector3(0, 1.0, -3.5))
 		_build_room(i, origin, floor_mat, wall_mat, accent_mat)
 		if i <= 6:
-			_place_furniture(i, origin)
-			_place_hidden_code(i, origin)
+			var paper_pos := _place_furniture(i, origin)
+			_place_hidden_code(i, paper_pos)
 			_place_door(i, origin + Vector3(0, 0, ROOM_SIZE.z * 0.5), false)
 		else:
 			_place_final_terminal(origin)
@@ -109,37 +112,109 @@ func _build_room(index: int, origin: Vector3, floor_mat: Material, wall_mat: Mat
 	room.add_child(lamp)
 
 
-func _place_furniture(room_index: int, origin: Vector3) -> void:
+func _place_furniture(room_index: int, origin: Vector3) -> Vector3:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(room_index * 9176 + 42)
-	var clutter_mat := _make_mat(Color(0.4, 0.35, 0.3))
-	var dark_mat := _make_mat(Color(0.15, 0.14, 0.13))
-	# Desk
-	_prop_box(origin + Vector3(rng.randf_range(-3.5, -1.5), 0.4, rng.randf_range(-2.0, 2.0)), Vector3(1.6, 0.8, 0.7), clutter_mat)
-	# Chair tipped
-	var chair := _prop_box(origin + Vector3(rng.randf_range(1.0, 3.2), 0.35, rng.randf_range(-3.0, 1.0)), Vector3(0.5, 0.7, 0.5), dark_mat)
-	chair.rotation_degrees = Vector3(0, rng.randf_range(-40, 40), rng.randf_range(10, 55))
-	# Cabinet
-	_prop_box(origin + Vector3(rng.randf_range(2.5, 3.8), 0.75, rng.randf_range(1.0, 3.5)), Vector3(0.9, 1.5, 0.5), clutter_mat)
-	# Crates
-	for _k in range(3):
+	var wood := _make_mat(Color(0.42, 0.32, 0.22))
+	var dark := _make_mat(Color(0.16, 0.14, 0.13))
+	var fabric := _make_mat(_fabric_color(room_index))
+	var metal := _make_mat(Color(0.45, 0.47, 0.5))
+
+	var couch_origin := origin + Vector3(rng.randf_range(-2.8, 2.2), 0.0, rng.randf_range(-2.4, 1.6))
+	var couch_yaw := rng.randf_range(-25.0, 35.0)
+	_place_couch(couch_origin, couch_yaw, fabric, dark)
+	# Paper tucked under the front lip of the seat.
+	var under := Basis.from_euler(Vector3(0, deg_to_rad(couch_yaw), 0)) * Vector3(0.15, 0.06, 0.42)
+	var paper_pos := couch_origin + under
+
+	# Unique scatter per room so the wing does not feel copied.
+	match room_index:
+		1:
+			_prop_box(origin + Vector3(2.6, 0.35, -2.2), Vector3(1.2, 0.7, 1.2), wood).rotation_degrees.y = 18
+			_prop_box(origin + Vector3(2.6, 0.95, -2.2), Vector3(0.7, 0.08, 0.9), dark)
+			var lamp := _prop_box(origin + Vector3(-3.4, 0.7, 2.4), Vector3(0.25, 1.4, 0.25), metal)
+			lamp.rotation_degrees.z = 18
+		2:
+			_prop_box(origin + Vector3(-3.1, 0.4, -2.4), Vector3(1.8, 0.8, 0.75), wood)
+			var chair := _prop_box(origin + Vector3(-3.0, 0.35, -1.4), Vector3(0.5, 0.7, 0.5), dark)
+			chair.rotation_degrees = Vector3(12, 40, 28)
+			_prop_box(origin + Vector3(3.2, 0.75, 2.6), Vector3(0.9, 1.5, 0.45), wood)
+		3:
+			_prop_box(origin + Vector3(2.4, 0.28, 2.2), Vector3(2.0, 0.35, 1.4), fabric)
+			_prop_box(origin + Vector3(2.4, 0.55, 1.55), Vector3(2.0, 0.55, 0.25), fabric)
+			var night := _prop_box(origin + Vector3(3.5, 0.3, 1.4), Vector3(0.45, 0.55, 0.45), wood)
+			night.rotation_degrees.y = -12
+		4:
+			_prop_box(origin + Vector3(2.8, 0.45, 2.4), Vector3(1.6, 0.9, 0.55), metal)
+			_prop_box(origin + Vector3(-2.6, 0.4, -2.0), Vector3(1.4, 0.75, 1.4), wood)
+			var stool := _prop_box(origin + Vector3(-2.2, 0.28, -0.9), Vector3(0.4, 0.55, 0.4), dark)
+			stool.rotation_degrees = Vector3(0, 20, 50)
+		5:
+			_prop_box(origin + Vector3(3.1, 1.1, -2.6), Vector3(0.35, 2.2, 2.4), wood)
+			_prop_box(origin + Vector3(-3.2, 0.2, 2.8), Vector3(1.1, 0.15, 0.7), dark).rotation_degrees.z = 12
+			_prop_box(origin + Vector3(-3.0, 0.55, 2.6), Vector3(0.35, 0.5, 0.25), metal)
+		_:
+			_prop_box(origin + Vector3(3.0, 0.55, -2.8), Vector3(1.1, 1.1, 0.7), wood)
+			_prop_box(origin + Vector3(-3.3, 0.9, 2.2), Vector3(0.4, 1.8, 1.6), wood)
+
+	for _k in range(4):
 		var c := _prop_box(
-			origin + Vector3(rng.randf_range(-3.8, 3.8), 0.25, rng.randf_range(-3.8, 3.8)),
-			Vector3(rng.randf_range(0.4, 0.8), rng.randf_range(0.3, 0.6), rng.randf_range(0.4, 0.7)),
-			dark_mat
+			origin + Vector3(rng.randf_range(-3.7, 3.7), rng.randf_range(0.15, 0.35), rng.randf_range(-3.6, 3.6)),
+			Vector3(rng.randf_range(0.35, 0.7), rng.randf_range(0.25, 0.55), rng.randf_range(0.3, 0.65)),
+			dark if _k % 2 == 0 else wood
 		)
-		c.rotation_degrees.y = rng.randf_range(0, 360)
+		c.rotation_degrees = Vector3(rng.randf_range(-15, 15), rng.randf_range(0, 360), rng.randf_range(-25, 35))
+
+	if GameState.is_highlight_room(room_index):
+		var data := GameState.get_highlight_for_room(room_index)
+		var wall_mark := Label3D.new()
+		wall_mark.text = str(data.get("digit", "?"))
+		wall_mark.font_size = 72
+		wall_mark.modulate = Color(0.2, 1.0, 0.8)
+		wall_mark.position = origin + Vector3(rng.randf_range(-2.0, 2.0), 1.7, -4.6)
+		props_root.add_child(wall_mark)
+
+	return paper_pos
 
 
-func _place_hidden_code(room_index: int, origin: Vector3) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = hash(room_index * 1337 + 99)
+func _place_couch(origin: Vector3, yaw_deg: float, fabric: Material, dark: Material) -> void:
+	var yaw := deg_to_rad(yaw_deg)
+	var seat := _prop_box(origin + Vector3(0, 0.28, 0), Vector3(2.05, 0.38, 0.9), fabric)
+	seat.rotation_degrees.y = yaw_deg
+	var back := _prop_box(origin + Basis.from_euler(Vector3(0, yaw, 0)) * Vector3(0, 0.62, -0.38), Vector3(2.05, 0.7, 0.22), fabric)
+	back.rotation_degrees.y = yaw_deg
+	var arm_l := _prop_box(origin + Basis.from_euler(Vector3(0, yaw, 0)) * Vector3(-0.95, 0.42, 0.05), Vector3(0.18, 0.45, 0.9), dark)
+	arm_l.rotation_degrees.y = yaw_deg
+	var arm_r := _prop_box(origin + Basis.from_euler(Vector3(0, yaw, 0)) * Vector3(0.95, 0.42, 0.05), Vector3(0.18, 0.45, 0.9), dark)
+	arm_r.rotation_degrees.y = yaw_deg
+	var tag := Label3D.new()
+	tag.text = "couch"
+	tag.font_size = 20
+	tag.modulate = Color(0.8, 0.75, 0.7, 0.5)
+	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	tag.position = origin + Vector3(0, 1.05, 0)
+	props_root.add_child(tag)
+
+
+func _fabric_color(room_index: int) -> Color:
+	var pal: Array[Color] = [
+		Color(0.35, 0.28, 0.24),
+		Color(0.28, 0.32, 0.3),
+		Color(0.38, 0.22, 0.2),
+		Color(0.24, 0.26, 0.32),
+		Color(0.32, 0.3, 0.22),
+		Color(0.22, 0.24, 0.26),
+	]
+	return pal[(room_index - 1) % pal.size()]
+
+
+func _place_hidden_code(room_index: int, paper_pos: Vector3) -> void:
 	var scrap := StaticBody3D.new()
-	scrap.name = "CodeScrap%d" % room_index
+	scrap.name = "HiddenPaper%d" % room_index
 	scrap.set_script(load("res://scripts/hidden_code.gd"))
-	scrap.position = origin + Vector3(rng.randf_range(-3.2, 3.2), 0.0, rng.randf_range(-3.2, 3.2))
+	scrap.position = paper_pos
 	props_root.add_child(scrap)
-	scrap.call("setup", room_index)
+	scrap.call("setup", room_index, "under the couch")
 
 
 func _place_door(room_index: int, pos: Vector3, is_final: bool) -> void:
@@ -275,6 +350,14 @@ func _rebuild_after_fail() -> void:
 
 
 func _on_level_cleared() -> void:
+	var vn := VN.box(self)
+	if vn != null:
+		vn.play_lines(vn.get_story("level1_clear"), Callable(self, "_show_win"), false)
+	else:
+		_show_win()
+
+
+func _show_win() -> void:
 	win_panel.visible = true
 	if player.has_method("set_look_locked"):
 		player.set_look_locked(true)
