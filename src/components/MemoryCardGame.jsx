@@ -98,7 +98,7 @@ function createShuffledDeck() {
   }))
 }
 
-export default function MemoryCardGame({ playerName = 'You', onComplete, onExit }) {
+export default function MemoryCardGame({ playerName = 'You', onComplete, onExit, environment = 'wood' }) {
   const [cards] = useState(() => createShuffledDeck())
   const [flippedIndices, setFlippedIndices] = useState([])
   const [matchedIds, setMatchedIds] = useState([])
@@ -253,7 +253,7 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
   }
 
   return (
-    <div className="relative w-screen h-screen bg-[#372f33] text-white flex flex-col items-center justify-between p-4 select-none font-sans overflow-hidden">
+    <div className="relative w-screen h-screen bg-black/45 backdrop-blur-sm text-white flex flex-col items-center justify-between p-4 select-none font-sans overflow-hidden">
       
       {/* Top Bar matching Image 2 */}
       <div className="w-full max-w-lg flex items-center justify-between pt-2">

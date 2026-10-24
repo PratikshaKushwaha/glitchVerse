@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { sound } from '../utils/AudioEngine'
 import { WORD_THEMES, GRID_SIZE, generateThemedWordSearch } from '../data/wordSearchThemes'
 
-export default function WordSearchGame({ onComplete, onExit }) {
+export default function WordSearchGame({ onComplete, onExit, environment = 'wood' }) {
   const [puzzleData, setPuzzleData] = useState(() => generateThemedWordSearch())
   const [foundWords, setFoundWords] = useState([])
   const [foundLines, setFoundLines] = useState([]) // array of { cells, word }
@@ -194,7 +194,7 @@ export default function WordSearchGame({ onComplete, onExit }) {
 
   return (
     <div
-      className="relative w-screen h-screen bg-[#0284c7] flex flex-col items-center justify-between overflow-hidden select-none font-sans"
+      className="relative w-screen h-screen bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-between overflow-hidden select-none font-sans"
       onMouseUp={handleMouseUp}
       onTouchEnd={handleMouseUp}
     >

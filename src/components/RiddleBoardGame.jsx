@@ -3,7 +3,7 @@ import woodBoardImg from '../assets/level2/wood_board.jpg'
 import { sound } from '../utils/AudioEngine'
 import { RIDDLES_DATASET, fetchRiddlesDataset } from '../data/riddlesDataset'
 
-export default function RiddleBoardGame({ onComplete, onExit }) {
+export default function RiddleBoardGame({ onComplete, onExit, environment = 'wood' }) {
   // 3 Dynamic Riddles selected from dataset
   const [activeRiddles, setActiveRiddles] = useState(() => {
     const shuffled = [...RIDDLES_DATASET].sort(() => Math.random() - 0.5)
@@ -150,16 +150,9 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
   const radius = 105 // radius in pixels
 
   return (
-    <div
-      className="relative w-screen h-screen flex flex-col justify-between overflow-hidden select-none font-sans"
-      style={{
-        backgroundImage: `url(${woodBoardImg})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-    >
-      {/* Dark overlay for rich wooden contrast */}
-      <div className="absolute inset-0 bg-black/45 pointer-events-none" />
+    <div className="relative w-screen h-screen flex flex-col justify-between overflow-hidden select-none font-sans bg-transparent">
+      {/* Dark overlay for rich contrast */}
+      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
 
       {/* 1. TOP HEADER BAR */}
       <div className="relative z-20 w-full flex items-center justify-between px-4 sm:px-6 py-2.5 bg-black/80 backdrop-blur border-b border-white/20 text-white text-xs">
