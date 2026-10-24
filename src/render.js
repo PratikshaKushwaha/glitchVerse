@@ -1,18 +1,36 @@
 import { settings } from './settings.js';
+import { setCanvas } from './input.js';
 
 export const W = 320, H = 180;                 // internal pixel resolution
 const lo = document.createElement('canvas'); lo.width = W; lo.height = H;
 export const g = lo.getContext('2d'); g.imageSmoothingEnabled = false;
 
 const cv = document.getElementById('game'), out = cv.getContext('2d');
-const resize = () => { cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio; };
+setCanvas(cv);
+
+let vp = { x: 0, y: 0, w: W, h: H, s: 1, dpr: 1, cw: W, ch: H };
+
+const resize = () => {
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    cv.width = Math.round(innerWidth * dpr);
+    cv.height = Math.round(innerHeight * dpr);
+    const s = Math.max(1, Math.floor(Math.min(cv.width / W, cv.height / H)));
+    const w = W * s, h = H * s;
+    const x = (cv.width - w) >> 1, y = (cv.height - h) >> 1;
+    vp = { x, y, w, h, s, dpr, cw: cv.width, ch: cv.height };
+};
 addEventListener('resize', resize); resize();
 
+export const getViewport = () => vp;
+export { cv, out, lo };
+
+let uiCallback = null;
+export function setUIRenderer(fn) { uiCallback = fn; }
+
 export function present(glitchBoost = 0) {
-    const s = Math.max(1, Math.floor(Math.min(cv.width / W, cv.height / H)));
-    const w = W * s, h = H * s, x = (cv.width - w) >> 1, y = (cv.height - h) >> 1;
+    const { x, y, w, h, s } = vp;
     out.imageSmoothingEnabled = false;
-    out.fillStyle = '#000'; out.fillRect(0, 0, cv.width, cv.height);
+    out.fillStyle = '#05040a'; out.fillRect(0, 0, cv.width, cv.height);
     out.drawImage(lo, x, y, w, h);
 
     // glitch slices (reduced when "reduce flashing" is on)
@@ -37,5 +55,10 @@ export function present(glitchBoost = 0) {
         const gr = out.createRadialGradient(x + w / 2, y + h / 2, h * .35, x + w / 2, y + h / 2, h * .95);
         gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, `rgba(0,0,0,${settings.vignette * .8})`);
         out.fillStyle = gr; out.fillRect(x, y, w, h);
+    }
+
+    // High-res UI rendering pass (crisp typography, hearts & touch controls!)
+    if (uiCallback) {
+        uiCallback(out, vp);
     }
 }

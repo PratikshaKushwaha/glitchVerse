@@ -7,7 +7,10 @@ import { settings } from './settings.js';
 import { text } from './ui.js';
 import { MenuScene } from './scenes/menu.js';
 
-addEventListener('keydown', () => Audio.init(), { once: true });   // browsers need a key press before sound
+const unlockAudio = () => Audio.init();
+addEventListener('keydown', unlockAudio, { once: true });
+addEventListener('touchstart', unlockAudio, { once: true });
+addEventListener('pointerdown', unlockAudio, { once: true });
 Scenes.set(new MenuScene());
 
 let last = performance.now(), acc = 0, fps = 0, frames = 0, fpsT = 0;

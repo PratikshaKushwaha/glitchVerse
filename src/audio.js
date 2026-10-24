@@ -28,7 +28,9 @@ export const Audio = {
         const T = {
             jump: [320, .12, 'square', .25, 300], land: [120, .08, 'triangle', .3, -60], select: [520, .06, 'square', .2, 0],
             move: [380, .04, 'square', .15, 0], back: [260, .08, 'square', .2, -80], flip: [300, .15, 'sawtooth', .2, 500],
-            freeze: [900, .3, 'sine', .25, -600], switch: [200, .2, 'sawtooth', .25, 700], die: [200, .4, 'sawtooth', .3, -150]
+            freeze: [900, .3, 'sine', .25, -600], switch: [200, .2, 'sawtooth', .25, 700], die: [200, .4, 'sawtooth', .3, -150],
+            checkpoint: [520, .28, 'triangle', .3, 400], dash: [520, .12, 'sawtooth', .25, -280],
+            walljump: [340, .1, 'square', .22, 180], gameover: [160, .6, 'sawtooth', .35, -100]
         }[n];
         if (T) this.tone(...T);
     },

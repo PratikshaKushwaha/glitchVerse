@@ -26,9 +26,26 @@ export class MenuScene {
     main() {
         return new Menu('THE WAY OUT', [
             B('Start Game', () => Scenes.set(new GameScene())),
+            B('Level Select', () => this.levelSelectMenu()),
             B('Settings', () => this.settingsMenu()),
-            B('How To Play', () => this.sub('HOW TO PLAY', [B('Reach the exit. Use gravity, time and dimensions.', () => { })])),
+            B('How To Play', () => this.sub('HOW TO PLAY', [
+                B('A/D or Arrows: Move left / right', () => {}),
+                B('SPACE or W: Jump (Variable height)', () => {}),
+                B('SHIFT or K: Air Dash forward', () => {}),
+                B('Wall Slide: Hold toward wall, Jump to Kick', () => {}),
+                B('G: Flip Gravity between floor & ceiling', () => {}),
+                B('Activate 3 CHECKPOINTS per level to save progress', () => {}),
+                B('Survive with 3 LIVES to reach the portal!', () => {})
+            ])),
             B('Credits', () => this.sub('CREDITS', [B('Made by our team for PS01 GlitchVerse', () => { })]))
+        ]);
+    }
+    levelSelectMenu() {
+        this.sub('LEVEL SELECT', [
+            B('1. Warm Up', () => Scenes.set(new GameScene(0))),
+            B('2. Spike Run', () => Scenes.set(new GameScene(1))),
+            B('3. Upside Down', () => Scenes.set(new GameScene(2))),
+            B('4. The Way Out', () => Scenes.set(new GameScene(3)))
         ]);
     }
     settingsMenu() {
@@ -39,7 +56,10 @@ export class MenuScene {
                 C('Palette', 'palette', ['neon', 'gameboy', 'sunset', 'void']),
                 Tg('Show FPS', 'showFps'), Tg('Reduce flashing', 'reduceFlash')])),
             B('Audio', () => this.sub('AUDIO', [S('Master', 'master'), S('Music', 'music'), S('Effects', 'sfx')])),
-            B('Controls', () => this.sub('CONTROLS', Object.keys(settings.keys).map(Bd))),
+            B('Controls', () => this.sub('CONTROLS', [
+                Tg('On-Screen Buttons', 'touchControls'),
+                ...Object.keys(settings.keys).map(Bd)
+            ])),
             B('Gameplay', () => this.sub('GAMEPLAY', [
                 C('Difficulty', 'difficulty', ['easy', 'normal', 'hard', 'glitched']),
                 Tg('Developer radio', 'devRadio'), Tg('Jump assist', 'assist'), Tg('Ghost replay', 'ghost')])),
