@@ -38,11 +38,10 @@ export default function LevelTwoScene({ playerName = 'Seeker', onBackToMenu, onB
   const handleRiddleComplete = () => {
     sound.playVictory()
     setBadgeAwarded(true)
-    setStage('victory')
     if (onGoToLevel3) {
-      setTimeout(() => {
-        onGoToLevel3()
-      }, 2500)
+      onGoToLevel3()
+    } else {
+      setStage('victory')
     }
   }
 

@@ -167,12 +167,14 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
 
   // Check Game Over
   useEffect(() => {
-    if (matchedIds.length === 10 && !gameOver) {
+    const uniqueCount = new Set(matchedIds).size
+    if (uniqueCount >= 10 && !gameOver) {
       setGameOver(true)
       sound.playVictory()
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         onComplete && onComplete()
-      }, 2000)
+      }, 900)
+      return () => clearTimeout(timer)
     }
   }, [matchedIds, gameOver, onComplete])
 
@@ -185,11 +187,15 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
   }
 
   const handleAutoSolve = () => {
-    setMatchedIds(cards.map((c) => c.id))
+    const allIds = Array.from(new Set(cards.map((c) => c.id)))
+    setMatchedIds(allIds)
     setPlayerScore(10)
     setBotScore(0)
     setGameOver(true)
     sound.playVictory()
+    setTimeout(() => {
+      onComplete && onComplete()
+    }, 600)
   }
 
   return (

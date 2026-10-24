@@ -1,4 +1,4 @@
-﻿const KEY = 'wayout.settings.v1';
+const KEY = 'wayout.settings.v1';
 
 export const DEFAULTS = {
     // video
@@ -8,6 +8,7 @@ export const DEFAULTS = {
     master: .8, music: .6, sfx: .9,
     // gameplay (a few unusual ones)
     difficulty: 'normal', devRadio: true, assist: true, ghost: true,
+    touchControls: true,
     // accessibility
     colorblind: 'off',
     keys: {

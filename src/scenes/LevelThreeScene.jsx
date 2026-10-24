@@ -91,7 +91,7 @@ export default function LevelThreeScene({
   const selectStage = (stageIdx) => {
     sound.playKeyClick()
     setCurrentStage(stageIdx)
-    Scenes.set(new GameScene(stageIdx, onGoToLevel4))
+    Scenes.set(new GameScene(stageIdx, 3, onGoToLevel4))
   }
 
   const stageNames = ['1: WARM UP', '2: SPIKE RUN', '3: UPSIDE DOWN', '4: THE WAY OUT']
@@ -177,12 +177,14 @@ export default function LevelThreeScene({
 
       {/* Bottom Controls Bar */}
       <footer className="relative z-20 w-full flex flex-wrap items-center justify-between px-4 py-2 bg-[#0d0922]/90 border-t border-purple-900/60 text-[11px] text-gray-400 backdrop-blur">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="text-cyan-400 font-bold">CONTROLS:</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">A</kbd> / <kbd className="px-1 py-0.5 bg-white/10 rounded text-white">D</kbd> Move</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">SPACE</kbd> Jump</span>
+          <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">SHIFT</kbd> / <kbd className="px-1 py-0.5 bg-white/10 rounded text-white">K</kbd> Dash</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">G</kbd> Flip Gravity</span>
-          <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">R</kbd> Respawn</span>
+          <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">ESC</kbd> Pause</span>
+          <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">R</kbd> Retry</span>
         </div>
         <div className="hidden sm:flex items-center gap-2 text-purple-300">
           <span>Reach the golden vortex portal to unlock Sector 4!</span>

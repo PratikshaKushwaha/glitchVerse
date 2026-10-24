@@ -118,7 +118,7 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
         setIsFinalLevelComplete(true)
         setTimeout(() => {
           onComplete && onComplete()
-        }, 2000)
+        }, 1100)
       }
     }, 1400)
   }
@@ -360,6 +360,13 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
               <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
               <span>Breaching into Level 3: Gravity Core...</span>
             </div>
+
+            <button
+              onClick={() => onComplete && onComplete()}
+              className="mt-2 w-full py-3 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-lg cursor-pointer transition flex items-center justify-center gap-2"
+            >
+              <span>Enter Level 3: Gravity Core ➔</span>
+            </button>
           </div>
         </div>
       )}

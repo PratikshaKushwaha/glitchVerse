@@ -141,9 +141,9 @@ export default function ManuscriptModal({ isOpen, onClose }) {
 
         {/* Bottom Actions */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-cyan-500/25 pt-4">
-          <p className="text-xs text-cyan-400/70">
-            [Press <kbd className="px-1.5 py-0.5 rounded bg-cyan-900/60 border border-cyan-600/50 text-cyan-200 font-mono">E</kbd> or Click anywhere to continue]
-          </p>
+          <div className="flex items-center gap-1.5">
+            <kbd className="px-2.5 py-1 rounded bg-cyan-900/70 border border-cyan-500/60 text-cyan-200 font-mono font-bold text-xs shadow-[0_0_8px_rgba(6,182,212,0.3)]">E</kbd>
+          </div>
 
           <div className="flex gap-2">
             {isTyping && (

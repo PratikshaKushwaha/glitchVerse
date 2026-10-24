@@ -48,7 +48,7 @@ export default function CadgyWordGame({ onComplete, onExit }) {
       setCommentaryColor('text-emerald-300 font-extrabold')
       const timeout = setTimeout(() => {
         onComplete && onComplete()
-      }, 1600)
+      }, 750)
       return () => clearTimeout(timeout)
     }
   }, [isBasicComplete, onComplete])
@@ -304,9 +304,12 @@ export default function CadgyWordGame({ onComplete, onExit }) {
 
         {/* Auto-Advance Notification - NO FINISH BUTTON NEEDED */}
         {isBasicComplete && (
-          <div className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.7)] flex items-center justify-center gap-2 animate-bounce">
-            <span>✓ ALL BASIC WORDS SOLVED! ADVANCING TO RIDDLE BOARD...</span>
-          </div>
+          <button
+            onClick={() => onComplete && onComplete()}
+            className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.7)] flex items-center justify-center gap-2 cursor-pointer transition animate-bounce"
+          >
+            <span>✓ ALL BASIC WORDS SOLVED! ADVANCE TO RIDDLE BOARD ➔</span>
+          </button>
         )}
       </div>
 

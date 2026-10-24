@@ -188,7 +188,7 @@ export default function HubScene({ onEnterLevelOne }) {
             <span className="uppercase text-cyan-400 font-bold">Objective:</span>
             <span className="text-cyan-100">
               {!isManuscriptRead
-                ? 'Approach the floating manuscript on the right and press E to read.'
+                ? 'Approach the floating manuscript on the right [E]'
                 : 'The door is unlocked! Walk through the doorway.'}
             </span>
           </div>

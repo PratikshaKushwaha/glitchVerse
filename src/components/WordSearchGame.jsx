@@ -37,10 +37,10 @@ export default function WordSearchGame({ onComplete, onExit }) {
   useEffect(() => {
     if (isAllFound && autoAdvanceCountdown === null) {
       sound.playVictory()
-      setAutoAdvanceCountdown(2)
+      setAutoAdvanceCountdown(1)
       const timeout = setTimeout(() => {
         onComplete && onComplete()
-      }, 1800)
+      }, 750)
       return () => clearTimeout(timeout)
     }
   }, [isAllFound, onComplete, autoAdvanceCountdown])
@@ -369,9 +369,12 @@ export default function WordSearchGame({ onComplete, onExit }) {
             {/* Bottom Progress & Advance Action */}
             <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
               {isAllFound ? (
-                <div className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 animate-bounce">
-                  <span>✓ ALL WORDS FOUND! ADVANCING TO MEMORY BOT...</span>
-                </div>
+                <button
+                  onClick={() => onComplete && onComplete()}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer transition animate-bounce"
+                >
+                  <span>✓ ALL WORDS FOUND! ADVANCE TO MEMORY BOT ➔</span>
+                </button>
               ) : (
                 <div className="text-center text-xs text-slate-400 font-mono">
                   Drag straight lines in any direction: ↔ ↕ ⤢

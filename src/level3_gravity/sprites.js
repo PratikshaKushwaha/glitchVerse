@@ -1,4 +1,4 @@
-﻿const PAL = {
+const PAL = {
     o: '#120d22', h: '#5b3a9e', s: '#f2c9a0', e: '#1a1030',
     j: '#18b7ff', J: '#9af0ff', p: '#2b3a8c', b: '#e8e8f5'
 };
@@ -40,8 +40,12 @@ export function heroFrame(p, t) {
     if (Math.abs(p.vx) > 8) return F.run[(t * 10 | 0) % 4];
     return F.idle;
 }
-// draws a baked sprite; flipX = facing left, flipY = gravity reversed
-export function drawSprite(g, img, x, y, flipX = false, flipY = false) {
-    g.save(); g.translate(Math.round(x + (flipX ? img.width : 0)), Math.round(y + (flipY ? img.height : 0)));
-    g.scale(flipX ? -1 : 1, flipY ? -1 : 1); g.drawImage(img, 0, 0); g.restore();
+// draws a baked sprite; flipX = facing left, flipY = gravity reversed, sx/sy = squash/stretch
+export function drawSprite(g, img, x, y, flipX = false, flipY = false, sx = 1, sy = 1) {
+    g.save();
+    const cx = x + img.width / 2, cy = y + img.height / 2;
+    g.translate(Math.round(cx), Math.round(cy));
+    g.scale((flipX ? -1 : 1) * sx, (flipY ? -1 : 1) * sy);
+    g.drawImage(img, -img.width / 2, -img.height / 2);
+    g.restore();
 }
