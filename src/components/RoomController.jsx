@@ -47,24 +47,24 @@ export default function RoomController({
     }
   }, [respawnTrigger])
 
-  // Interactive items across all 5 rooms
+  // Interactive items across all 5 rooms (open keypads are filtered out so they are NEVER available once door opens)
   const interactiveObjects = [
     // Room 1
-    { id: 'note-0', name: 'Note on Round Table', pos: [-2.2, 0.2, -1.2], radius: 1.8 },
-    { id: 'keypad-0', name: 'Room 1 Keypad', pos: [1.05, 0.2, -3.5], radius: 1.8 },
+    { id: 'note-0', name: 'Note on Round Table', pos: [-2.2, 0.2, -1.2], radius: 1.8, doorIdx: null },
+    { id: 'keypad-0', name: 'Room 1 Keypad', pos: [1.05, 0.2, -3.5], radius: 1.8, doorIdx: 0 },
     // Room 2
-    { id: 'note-1', name: 'Note on Study Desk', pos: [2.4, 0.2, -6.2], radius: 1.8 },
-    { id: 'keypad-1', name: 'Room 2 Keypad', pos: [1.05, 0.2, -10.5], radius: 1.8 },
+    { id: 'note-1', name: 'Note on Study Desk', pos: [2.4, 0.2, -6.2], radius: 1.8, doorIdx: null },
+    { id: 'keypad-1', name: 'Room 2 Keypad', pos: [1.05, 0.2, -10.5], radius: 1.8, doorIdx: 1 },
     // Room 3
-    { id: 'note-2', name: 'Memo on Filing Cabinet', pos: [-2.6, 0.2, -15.0], radius: 1.8 },
-    { id: 'keypad-2', name: 'Room 3 Keypad', pos: [1.05, 0.2, -17.5], radius: 1.8 },
+    { id: 'note-2', name: 'Memo on Filing Cabinet', pos: [-2.6, 0.2, -15.0], radius: 1.8, doorIdx: null },
+    { id: 'keypad-2', name: 'Room 3 Keypad', pos: [1.05, 0.2, -17.5], radius: 1.8, doorIdx: 2 },
     // Room 4
-    { id: 'note-3', name: 'Log on Terminal Desk', pos: [-2.4, 0.2, -20.5], radius: 1.8 },
-    { id: 'keypad-3', name: 'Room 4 Keypad', pos: [1.05, 0.2, -24.5], radius: 1.8 },
+    { id: 'note-3', name: 'Log on Terminal Desk', pos: [-2.4, 0.2, -20.5], radius: 1.8, doorIdx: null },
+    { id: 'keypad-3', name: 'Room 4 Keypad', pos: [1.05, 0.2, -24.5], radius: 1.8, doorIdx: 3 },
     // Room 5
-    { id: 'note-4', name: 'Master Cipher Console', pos: [-2.4, 0.2, -28.0], radius: 2.2 },
-    { id: 'keypad-4', name: 'Final Vault Keypad', pos: [1.05, 0.2, -31.5], radius: 1.8 },
-  ]
+    { id: 'note-4', name: 'Master Cipher Console', pos: [-2.4, 0.2, -28.0], radius: 2.2, doorIdx: null },
+    { id: 'keypad-4', name: 'Final Vault Keypad', pos: [1.05, 0.2, -31.5], radius: 1.8, doorIdx: 4 },
+  ].filter((obj) => obj.doorIdx === null || !doorsOpen[obj.doorIdx])
 
   // Door Z thresholds
   const doorZPositions = [-3.5, -10.5, -17.5, -24.5, -31.5]

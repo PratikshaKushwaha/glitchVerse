@@ -2,7 +2,7 @@ import { useState } from 'react'
 import LevelFourGame from '../components/LevelFourGame'
 import { sound } from '../utils/AudioEngine'
 
-export default function LevelFourScene({ onBackToMenu, onBackToLevelThree }) {
+export default function LevelFourScene({ playerName = 'Seeker', onBackToMenu, onBackToLevelThree }) {
   const [stage, setStage] = useState('boss') // 'boss' | 'credits'
 
   const handleBossDefeated = () => {
@@ -16,6 +16,7 @@ export default function LevelFourScene({ onBackToMenu, onBackToLevelThree }) {
     <div className="relative w-screen h-screen overflow-hidden select-none bg-black font-sans">
       {stage === 'boss' && (
         <LevelFourGame
+          playerName={playerName}
           onComplete={handleBossDefeated}
           onExit={onBackToMenu}
         />
@@ -41,9 +42,13 @@ export default function LevelFourScene({ onBackToMenu, onBackToLevelThree }) {
           <div className="relative z-10 max-w-xl w-full my-6 p-6 rounded-3xl bg-black/60 border border-cyan-400/40 shadow-2xl backdrop-blur flex flex-col items-center gap-4 text-left">
             <div className="flex items-center gap-3 w-full pb-3 border-b border-white/10">
               <span className="text-3xl">👨‍💻</span>
-              <div>
+              <div className="flex-1">
                 <div className="text-sm font-black text-white">THE DEVELOPER (AUTHOR)</div>
-                <div className="text-xs text-cyan-400 font-mono">Status: Fully Liberated</div>
+                <div className="text-xs text-cyan-400 font-mono">Status: Fully Liberated by {playerName}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] text-gray-400 uppercase font-mono">Hero Callsign</div>
+                <div className="text-sm font-black text-amber-300 font-mono">{playerName}</div>
               </div>
             </div>
 

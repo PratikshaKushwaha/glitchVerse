@@ -9,11 +9,20 @@ import LevelFourScene from './scenes/LevelFourScene'
 
 const App = () => {
   // Pure narrative game progression:
-  // 'menu' (Whimsical Landing) -> 'video' (opening.mp4) -> 'hub' (Door Scene) -> 'room' (Level 1: 5 Rooms) -> 'level2' (Level 2: Word Search & Memory vs Bot)
+  // 'menu' (Whimsical Landing with Player Name) -> 'video' (opening.mp4) -> 'hub' (Door Scene) ->
+  // 'room' (Level 1: 5 Rooms) -> 'level2' (Level 2: Word Search, Memory Bot, Double Cadgy, Riddle Board) ->
+  // 'level3' (Level 3: 2D Gravity Flips from dev2) -> 'level4' (Level 4: Joker Puppeteer Boss Showdown)
   const [currentScene, setCurrentScene] = useState('menu')
   const [hasSavedProgress, setHasSavedProgress] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [playerName, setPlayerName] = useState(() => {
+    try {
+      return window.localStorage.getItem('the_way_out_player_name') || 'Seeker'
+    } catch {
+      return 'Seeker'
+    }
+  })
 
   useEffect(() => {
     setHasSavedProgress(window.localStorage.getItem('the-way-out-progress') !== null)
@@ -33,20 +42,21 @@ const App = () => {
     setMessage('You can close this window to leave the game.')
   }
 
-  // 1. Intro Video Scene (opening.mp4 with skip option)
+  // 1. Intro Video Scene (opening.mp4 with skip button bottom-right covering watermark)
   if (currentScene === 'video') {
     return <IntroVideo onFinish={() => setCurrentScene('hub')} />
   }
 
-  // 2. Door Scene (environment_collider.glb, floating manuscript, locked/unlocked door)
+  // 2. Hub Door Scene (environment_collider.glb, floating manuscript, locked/unlocked door)
   if (currentScene === 'hub') {
     return <HubScene onEnterLevelOne={() => setCurrentScene('room')} />
   }
 
-  // 3. Level 1: 5 Rooms Scene (with 2-min timer, 3 lives, golden digits permutation)
+  // 3. Level 1: 5 Rooms Scene (with 2-min timer, 3 lives, golden digits permutation, deactivated opened keypads)
   if (currentScene === 'room') {
     return (
       <RoomScene
+        playerName={playerName || 'Seeker'}
         onGoToLevel2={() => setCurrentScene('level2')}
       />
     )
@@ -56,6 +66,7 @@ const App = () => {
   if (currentScene === 'level2') {
     return (
       <LevelTwoScene
+        playerName={playerName || 'Seeker'}
         onBackToMenu={() => setCurrentScene('menu')}
         onBackToLevelOne={() => setCurrentScene('room')}
         onGoToLevel3={() => setCurrentScene('level3')}
@@ -63,10 +74,11 @@ const App = () => {
     )
   }
 
-  // 5. Level 3 Scene: The Mainframe Sanctuary (Unlocked after completing all 3 Riddles)
+  // 5. Level 3 Scene: 2D Gravity Platformer (From dev2 branch with bitmask tiles, spikes, parallax, 4 stages)
   if (currentScene === 'level3') {
     return (
       <LevelThreeScene
+        playerName={playerName || 'Seeker'}
         onBackToMenu={() => setCurrentScene('menu')}
         onBackToLevelTwo={() => setCurrentScene('level2')}
         onGoToLevel4={() => setCurrentScene('level4')}
@@ -78,13 +90,14 @@ const App = () => {
   if (currentScene === 'level4') {
     return (
       <LevelFourScene
+        playerName={playerName || 'Seeker'}
         onBackToMenu={() => setCurrentScene('menu')}
         onBackToLevelThree={() => setCurrentScene('level3')}
       />
     )
   }
 
-  // 5. Default Whimsical Landing Page
+  // Main Whimsical Landing Page with Player Name Option
   return (
     <main
       className={`relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#18241d] text-[#f4f1e8] transition duration-700 ease-out ${
@@ -123,6 +136,37 @@ const App = () => {
 
         <div>
           <nav className="flex w-full flex-col items-stretch gap-3" aria-label="Game actions">
+            {/* Player Name Input Field Option */}
+            <div className="w-full flex flex-col gap-1.5 rounded-sm border border-white/20 bg-black/40 p-3 backdrop-blur transition-all focus-within:border-[#dce8d3]">
+              <label
+                htmlFor="player-name"
+                className="text-xs uppercase tracking-[0.16em] text-[#c8d4bd] font-medium flex items-center justify-between"
+              >
+                <span>Player Callsign</span>
+                <span className="text-[10px] text-[#bfcbb8]/70">Enter Name</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm opacity-80" aria-hidden="true">
+                  👤
+                </span>
+                <input
+                  id="player-name"
+                  type="text"
+                  maxLength={16}
+                  value={playerName}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setPlayerName(val)
+                    try {
+                      window.localStorage.setItem('the_way_out_player_name', val)
+                    } catch {}
+                  }}
+                  placeholder="Enter your name..."
+                  className="w-full bg-transparent text-sm tracking-[0.08em] text-[#f7f4eb] placeholder-[#bfcbb8]/50 focus:outline-none"
+                />
+              </div>
+            </div>
+
             <button
               className="flex min-h-14 w-full cursor-pointer items-center justify-between rounded-sm border border-[#dce8d3] bg-[#dce8d3] px-5 py-4 text-left text-sm uppercase tracking-[.14em] text-[#223124] transition duration-200 hover:translate-x-1 hover:border-[#f0f5e9] hover:bg-[#f0f5e9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#dce8d3] sm:min-h-16 sm:px-6 sm:text-base"
               onClick={() => beginJourney()}

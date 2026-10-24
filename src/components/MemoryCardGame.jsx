@@ -32,7 +32,7 @@ function createShuffledDeck() {
   }))
 }
 
-export default function MemoryCardGame({ onComplete, onExit }) {
+export default function MemoryCardGame({ playerName = 'You', onComplete, onExit }) {
   const [cards] = useState(() => createShuffledDeck())
   const [flippedIndices, setFlippedIndices] = useState([])
   const [matchedIds, setMatchedIds] = useState([])
@@ -212,7 +212,7 @@ export default function MemoryCardGame({ onComplete, onExit }) {
       <div className="w-full max-w-lg flex items-center justify-between px-2 my-2">
         {/* Left Pill: Score Indicator (2 • 3 style from Image 2) */}
         <div className="h-10 px-4 rounded-full bg-black/60 border border-white/20 backdrop-blur flex items-center gap-2 shadow-lg text-sm font-extrabold font-mono">
-          <span className="text-cyan-400">YOU: {playerScore}</span>
+          <span className="text-cyan-400">{playerName.toUpperCase()}: {playerScore}</span>
           <span className="text-gray-400">•</span>
           <span className="text-rose-400">BOT: {botScore}</span>
         </div>
@@ -225,7 +225,7 @@ export default function MemoryCardGame({ onComplete, onExit }) {
               : 'bg-emerald-500 text-black'
           }`}
         >
-          {isBotTurn ? "🤖 Bot's Turn..." : '👤 Your Turn!'}
+          {isBotTurn ? "🤖 Bot's Turn..." : `👤 ${playerName}'s Turn!`}
         </div>
 
         {/* Right Pill: EXIT button from Image 2 */}

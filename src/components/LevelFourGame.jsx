@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { sound } from '../utils/AudioEngine'
 
-export default function LevelFourGame({ onComplete, onExit }) {
+export default function LevelFourGame({ playerName = 'Seeker', onComplete, onExit }) {
   const canvasRef = useRef(null)
 
   // Game state
@@ -19,7 +19,7 @@ export default function LevelFourGame({ onComplete, onExit }) {
     speaker: 'JOKER',
     avatar: '🤡',
     color: 'text-purple-400 border-purple-500',
-    text: "AHAHAHA! Look who crawled out of the trash heap! The Developer thought he was in control... but I'M pulling the strings now!",
+    text: `AHAHAHA! Look who crawled out of the trash heap! ${playerName}, you think you can save your precious Developer?! I'M pulling the strings now!`,
   })
   const [dialogueVisible, setDialogueVisible] = useState(true)
 
@@ -126,12 +126,12 @@ export default function LevelFourGame({ onComplete, onExit }) {
         'DEVELOPER',
         '👨‍💻',
         'text-cyan-300 border-cyan-400',
-        "Player! Watch out! He's using holographic tether strings! Aim your blaster at the 3 glowing nodes on his platform!",
+        `${playerName}! Watch out! He's using holographic tether strings! Aim your blaster at the 3 glowing nodes on his platform!`,
         4500
       )
     }, 4500)
     return () => clearTimeout(t1)
-  }, [])
+  }, [playerName])
 
   // Input listeners
   useEffect(() => {
@@ -544,7 +544,7 @@ export default function LevelFourGame({ onComplete, onExit }) {
                   'DEVELOPER',
                   '👨‍💻',
                   'text-emerald-400 border-emerald-400',
-                  'YOU DID IT! The Jester is defeated and the matrix is unlocked! Freedom at last!',
+                  `YOU DID IT, ${playerName}! The Jester is defeated and the matrix is unlocked! Freedom at last!`,
                   6000
                 )
                 setTimeout(() => onComplete && onComplete(), 4500)
@@ -963,15 +963,20 @@ export default function LevelFourGame({ onComplete, onExit }) {
           </div>
         </div>
 
-        {/* Level Timer Bar */}
-        <div className="mt-2 flex items-center gap-4">
-          <div className="px-4 py-1 rounded-full bg-black/75 border border-cyan-400/50 shadow text-cyan-300 text-xs font-mono font-extrabold flex items-center gap-1.5">
+        {/* Level Timer Bar & Player Info */}
+        <div className="mt-2 flex items-center gap-3">
+          <div className="px-3 py-1 rounded-full bg-purple-950/75 border border-purple-500/50 shadow text-purple-200 text-xs font-mono font-extrabold flex items-center gap-1.5">
+            <span>CALLSIGN:</span>
+            <span className="text-cyan-300">{playerName}</span>
+          </div>
+
+          <div className="px-3.5 py-1 rounded-full bg-black/75 border border-cyan-400/50 shadow text-cyan-300 text-xs font-mono font-extrabold flex items-center gap-1.5">
             <span>⏱️</span>
-            <span>TIME REMAINING: {formatTimer(timeLeft)}</span>
+            <span>TIME: {formatTimer(timeLeft)}</span>
           </div>
 
           {/* Player Hearts */}
-          <div className="px-4 py-1 rounded-full bg-black/75 border border-rose-500/50 shadow text-rose-400 text-xs font-mono font-extrabold flex items-center gap-1.5">
+          <div className="px-3.5 py-1 rounded-full bg-black/75 border border-rose-500/50 shadow text-rose-400 text-xs font-mono font-extrabold flex items-center gap-1.5">
             <span>SHIELDS:</span>
             <span>{'❤️'.repeat(Math.max(0, playerHp))}</span>
           </div>

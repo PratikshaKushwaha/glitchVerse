@@ -8,7 +8,7 @@ import NoteModal from '../components/NoteModal'
 import { generateLevel1Data } from '../utils/LevelManager'
 import { sound } from '../utils/AudioEngine'
 
-export default function RoomScene({ onGoToLevel2 }) {
+export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
   // Generate level codes & golden digits
   const [levelData, setLevelData] = useState(() => generateLevel1Data())
   const [doorsOpen, setDoorsOpen] = useState([false, false, false, false, false])
@@ -33,7 +33,7 @@ export default function RoomScene({ onGoToLevel2 }) {
   const [badgeAwarded, setBadgeAwarded] = useState(false)
   const [badgeInfo, setBadgeInfo] = useState({
     title: 'Badge Awarded',
-    subtitle: 'Player won Kikamug\'s "You have completed level 1!" award!',
+    subtitle: `${playerName} won Kikamug's "You have completed level 1!" award!`,
   })
   const [resetMessage, setResetMessage] = useState('')
 
@@ -258,6 +258,7 @@ export default function RoomScene({ onGoToLevel2 }) {
 
       {/* Roblox-Style HUD with Topbar, Diamonds, 2-Min Timer, Lives, Room Tracker */}
       <RobloxHUD
+        playerName={playerName}
         diamonds={diamonds}
         lives={lives}
         timeLeft={timeLeft}

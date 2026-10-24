@@ -5,7 +5,7 @@ import CadgyWordGame from '../components/CadgyWordGame'
 import RiddleBoardGame from '../components/RiddleBoardGame'
 import { sound } from '../utils/AudioEngine'
 
-export default function LevelTwoScene({ onBackToMenu, onBackToLevelOne, onGoToLevel3 }) {
+export default function LevelTwoScene({ playerName = 'Seeker', onBackToMenu, onBackToLevelOne, onGoToLevel3 }) {
   // 4 Sublevels: 'wordsearch' | 'memory' | 'cadgy' | 'riddle' | 'victory'
   const [stage, setStage] = useState('wordsearch')
   const [badgeAwarded, setBadgeAwarded] = useState(false)
@@ -117,6 +117,7 @@ export default function LevelTwoScene({ onBackToMenu, onBackToLevelOne, onGoToLe
       {/* SUBLEVEL 2: Memory Card Match vs AI Computer */}
       {stage === 'memory' && (
         <MemoryCardGame
+          playerName={playerName}
           onComplete={handleMemoryComplete}
           onExit={onBackToMenu}
         />

@@ -82,7 +82,9 @@ export default function RoomDoor({
         position={[1.05, 0.1, 0.02]}
         onClick={(e) => {
           e.stopPropagation()
-          onInteractKeypad && onInteractKeypad(doorIndex)
+          if (!isOpen) {
+            onInteractKeypad && onInteractKeypad(doorIndex)
+          }
         }}
       >
         {/* Keypad Plate */}

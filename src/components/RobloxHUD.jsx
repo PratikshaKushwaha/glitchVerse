@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 export default function RobloxHUD({
+  playerName = 'Seeker',
   diamonds = 0,
   lives = 3,
   timeLeft = 120, // 2 minutes in seconds
@@ -9,11 +10,12 @@ export default function RobloxHUD({
   onSkipLevel,
   badgeAwarded = false,
   badgeTitle = "Badge Awarded",
-  badgeSubtitle = 'Player won Kikamug\'s "You have completed level 1!" award!',
+  badgeSubtitle = '',
   resetMessage = '',
   onJump,
   onGoToLevel2,
 }) {
+  const displaySubtitle = badgeSubtitle || `${playerName} won Kikamug's "You have completed level 1!" award!`
   const [showShop, setShowShop] = useState(false)
   const [showPet, setShowPet] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
@@ -88,6 +90,12 @@ export default function RobloxHUD({
             {'❤️'.repeat(Math.max(0, lives))}
             {'🖤'.repeat(Math.max(0, 3 - lives))}
           </span>
+        </div>
+
+        {/* Player Callsign Badge */}
+        <div className="h-10 px-3.5 rounded-full bg-black/75 border border-cyan-400/40 flex items-center gap-1.5 shadow-lg text-xs font-mono font-bold text-cyan-300">
+          <span>👤</span>
+          <span>{playerName}</span>
         </div>
       </div>
 
@@ -185,7 +193,7 @@ export default function RobloxHUD({
                 {badgeTitle}
               </div>
               <p className="text-sm text-gray-200 leading-relaxed mt-2">
-                {badgeSubtitle}
+                {displaySubtitle}
               </p>
             </div>
 
