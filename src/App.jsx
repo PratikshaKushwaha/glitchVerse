@@ -4,6 +4,7 @@ import IntroVideo from './components/IntroVideo'
 import HubScene from './scenes/HubScene'
 import RoomScene from './scenes/RoomScene'
 import LevelTwoScene from './scenes/LevelTwoScene'
+import LevelThreeScene from './scenes/LevelThreeScene'
 
 const App = () => {
   // Pure narrative game progression:
@@ -50,12 +51,23 @@ const App = () => {
     )
   }
 
-  // 4. Level 2: Word Search & Memory Card Game vs Computer
+  // 4. Level 2: 4 Sublevels (Word Search -> Memory Bot -> Double Cadgy -> Pinned Riddle Board)
   if (currentScene === 'level2') {
     return (
       <LevelTwoScene
         onBackToMenu={() => setCurrentScene('menu')}
         onBackToLevelOne={() => setCurrentScene('room')}
+        onGoToLevel3={() => setCurrentScene('level3')}
+      />
+    )
+  }
+
+  // 5. Level 3 Scene: The Mainframe Sanctuary (Unlocked after completing all 3 Riddles)
+  if (currentScene === 'level3') {
+    return (
+      <LevelThreeScene
+        onBackToMenu={() => setCurrentScene('menu')}
+        onBackToLevelTwo={() => setCurrentScene('level2')}
       />
     )
   }

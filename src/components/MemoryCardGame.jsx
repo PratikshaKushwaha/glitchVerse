@@ -1,39 +1,34 @@
 import { useState, useEffect, useRef } from 'react'
 import { sound } from '../utils/AudioEngine'
 
-// Card items with icons & colorful backgrounds matching Images 3, 4, 5
+// Card items with vibrant icons matching offline 2-player reference (Image 2)
 const CARD_TYPES = [
-  { id: 'butterfly', icon: '🦋', name: 'Butterfly', bg: 'bg-[#22c55e]' }, // Image 5
-  { id: 'dice', icon: '🎲', name: 'Dice', bg: 'bg-[#ef4444]' },           // Image 3
-  { id: 'landscape', icon: '🏞️', name: 'Landscape', bg: 'bg-[#64748b]' },// Image 3
+  { id: 'butterfly', icon: '🦋', name: 'Butterfly', bg: 'bg-[#58a700]' }, // Matches Image 2!
+  { id: 'dice', icon: '🎲', name: 'Dice', bg: 'bg-[#dc2626]' },
+  { id: 'star', icon: '⭐', name: 'Star', bg: 'bg-[#eab308]' },
   { id: 'cat', icon: '🐱', name: 'Cat', bg: 'bg-[#ec4899]' },
-  { id: 'star', icon: '⭐', name: 'Star', bg: 'bg-[#f59e0b]' },
   { id: 'diamond', icon: '💎', name: 'Diamond', bg: 'bg-[#0284c7]' },
-  { id: 'robot', icon: '🤖', name: 'Robot', bg: 'bg-[#8b5cf6]' },
+  { id: 'robot', icon: '🤖', name: 'Robot', bg: 'bg-[#7c3aed]' },
   { id: 'rocket', icon: '🚀', name: 'Rocket', bg: 'bg-[#0f766e]' },
   { id: 'pizza', icon: '🍕', name: 'Pizza', bg: 'bg-[#ea580c]' },
   { id: 'balloon', icon: '🎈', name: 'Balloon', bg: 'bg-[#e11d48]' },
+  { id: 'landscape', icon: '🏞️', name: 'Landscape', bg: 'bg-[#475569]' },
 ]
 
 // 10 pairs = 20 cards
 function createShuffledDeck() {
   const deck = []
-  const selectedTypes = CARD_TYPES.slice(0, 10)
-
-  selectedTypes.forEach((type) => {
-    // 2 cards for each type
+  CARD_TYPES.slice(0, 10).forEach((type) => {
     deck.push({ ...type, uniqueId: `${type.id}-1` })
     deck.push({ ...type, uniqueId: `${type.id}-2` })
   })
 
-  // Random shuffle
   deck.sort(() => Math.random() - 0.5)
 
-  // Subtle organic tilt (-2deg to +2deg) matching Image 3, 4
   return deck.map((card, i) => ({
     ...card,
     index: i,
-    tilt: ((i % 5) - 2) * 1.2,
+    tilt: ((i % 5) - 2) * 1.5,
   }))
 }
 
@@ -46,11 +41,13 @@ export default function MemoryCardGame({ onComplete, onExit }) {
   const [botScore, setBotScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
 
-  // Bot Memory: maps card index -> card id
+  // Floating picked-up match animation state (Image 2 Style)
+  const [liftingMatchCards, setLiftingMatchCards] = useState(null) // [card1, card2]
+
   const botMemory = useRef({})
   const isProcessing = useRef(false)
 
-  // Check match logic
+  // Match check logic
   useEffect(() => {
     if (flippedIndices.length === 2 && !isProcessing.current) {
       isProcessing.current = true
@@ -58,252 +55,261 @@ export default function MemoryCardGame({ onComplete, onExit }) {
       const firstCard = cards[firstIdx]
       const secondCard = cards[secondIdx]
 
-      // Remember cards in Bot Memory
       botMemory.current[firstIdx] = firstCard.id
       botMemory.current[secondIdx] = secondCard.id
 
       if (firstCard.id === secondCard.id) {
-        // MATCH!
+        // MATCH! Trigger smooth lifting / picking up animation (Image 2 Style)
         setTimeout(() => {
           sound.playCardMatch()
-          setMatchedIds((prev) => [...prev, firstCard.id])
-          setFlippedIndices([])
-          isProcessing.current = false
+          setLiftingMatchCards([firstCard, secondCard])
 
-          if (!isBotTurn) {
-            setPlayerScore((s) => s + 1)
-            // Player keeps turn on match
-          } else {
-            setBotScore((s) => s + 1)
-            // Bot keeps turn on match
-            setTimeout(() => {
-              triggerBotTurn()
-            }, 600)
-          }
-        }, 600)
+          // After hovering in center, commit match
+          setTimeout(() => {
+            setMatchedIds((prev) => [...prev, firstCard.id])
+            setLiftingMatchCards(null)
+            setFlippedIndices([])
+            isProcessing.current = false
+
+            if (!isBotTurn) {
+              setPlayerScore((s) => s + 1)
+            } else {
+              setBotScore((s) => s + 1)
+              setTimeout(() => triggerBotTurn(), 600)
+            }
+          }, 900)
+        }, 400)
       } else {
         // NO MATCH
         setTimeout(() => {
           setFlippedIndices([])
           isProcessing.current = false
-
-          // Toggle turn
-          if (!isBotTurn) {
-            setIsBotTurn(true)
-          } else {
-            setIsBotTurn(false)
-          }
+          setIsBotTurn(!isBotTurn)
         }, 1100)
       }
     }
   }, [flippedIndices, cards, isBotTurn])
 
-  // Trigger Bot's AI turn when turn changes to Bot
-  useEffect(() => {
-    if (isBotTurn && !isProcessing.current && matchedIds.length < 10) {
-      const timer = setTimeout(() => {
-        triggerBotTurn()
-      }, 700)
-      return () => clearTimeout(timer)
-    }
-  }, [isBotTurn, matchedIds.length])
-
-  // Bot AI decision making
+  // Bot Turn AI
   const triggerBotTurn = () => {
-    if (isProcessing.current || matchedIds.length === 10) return
+    if (gameOver || isProcessing.current) return
 
-    // Find all unrevealed card indices
+    // Available cards
     const availableIndices = cards
       .map((c, i) => i)
       .filter((i) => !matchedIds.includes(cards[i].id) && !flippedIndices.includes(i))
 
-    if (availableIndices.length < 2) return
+    if (availableIndices.length === 0) return
 
-    // 1. Check if Bot remembers any known matching pair!
-    const memoryEntries = Object.entries(botMemory.current).filter(([idx]) =>
-      availableIndices.includes(Number(idx))
-    )
-
-    let knownPair = null
-    for (let i = 0; i < memoryEntries.length; i++) {
-      for (let j = i + 1; j < memoryEntries.length; j++) {
-        if (memoryEntries[i][1] === memoryEntries[j][1]) {
-          knownPair = [Number(memoryEntries[i][0]), Number(memoryEntries[j][0])]
-          break
-        }
+    // Check memory for a pair
+    const knownById = {}
+    for (const idxStr of Object.keys(botMemory.current)) {
+      const idx = Number(idxStr)
+      if (availableIndices.includes(idx)) {
+        const id = botMemory.current[idx]
+        if (!knownById[id]) knownById[id] = []
+        knownById[id].push(idx)
       }
-      if (knownPair) break
     }
 
-    if (knownPair && Math.random() < 0.8) {
-      // Pick known pair!
-      executeBotFlips(knownPair[0], knownPair[1])
-      return
+    let pick1 = null
+    let pick2 = null
+
+    for (const id in knownById) {
+      if (knownById[id].length >= 2) {
+        pick1 = knownById[id][0]
+        pick2 = knownById[id][1]
+        break
+      }
     }
 
-    // 2. Otherwise pick a random available card
-    const firstPick =
-      availableIndices[Math.floor(Math.random() * availableIndices.length)]
+    if (pick1 === null) {
+      // Pick random first
+      const rndIndex1 = Math.floor(Math.random() * availableIndices.length)
+      pick1 = availableIndices[rndIndex1]
+      const card1 = cards[pick1]
 
-    // Check if Bot remembers the partner for firstPick
-    const firstCardId = cards[firstPick].id
-    const partnerIdx = Object.keys(botMemory.current).find(
-      (idx) =>
-        Number(idx) !== firstPick &&
-        availableIndices.includes(Number(idx)) &&
-        botMemory.current[idx] === firstCardId
-    )
+      // Check if pair is in memory
+      const remainingAvailable = availableIndices.filter((i) => i !== pick1)
+      const matchingFromMem = remainingAvailable.find(
+        (i) => botMemory.current[i] === card1.id
+      )
 
-    let secondPick = null
-    if (partnerIdx && Math.random() < 0.75) {
-      secondPick = Number(partnerIdx)
-    } else {
-      const remainingForSecond = availableIndices.filter((i) => i !== firstPick)
-      secondPick =
-        remainingForSecond[Math.floor(Math.random() * remainingForSecond.length)]
+      if (matchingFromMem !== undefined && Math.random() < 0.85) {
+        pick2 = matchingFromMem
+      } else {
+        const rndIndex2 = Math.floor(Math.random() * remainingAvailable.length)
+        pick2 = remainingAvailable[rndIndex2]
+      }
     }
 
-    executeBotFlips(firstPick, secondPick)
-  }
-
-  // Execute Bot's card flips with realistic visual delay
-  const executeBotFlips = (idx1, idx2) => {
-    sound.playCardFlip()
-    setFlippedIndices([idx1])
-
+    // Execute Bot flips
     setTimeout(() => {
       sound.playCardFlip()
-      setFlippedIndices([idx1, idx2])
-    }, 900)
+      setFlippedIndices([pick1])
+
+      setTimeout(() => {
+        sound.playCardFlip()
+        setFlippedIndices([pick1, pick2])
+      }, 700)
+    }, 600)
   }
 
-  // Player card click handler
+  // Trigger bot when turn switches
+  useEffect(() => {
+    if (isBotTurn && !gameOver && flippedIndices.length === 0 && !isProcessing.current) {
+      const timer = setTimeout(() => {
+        triggerBotTurn()
+      }, 750)
+      return () => clearTimeout(timer)
+    }
+  }, [isBotTurn, gameOver, flippedIndices])
+
+  // Check Game Over
+  useEffect(() => {
+    if (matchedIds.length === 10 && !gameOver) {
+      setGameOver(true)
+      sound.playVictory()
+      setTimeout(() => {
+        onComplete && onComplete()
+      }, 2000)
+    }
+  }, [matchedIds, gameOver, onComplete])
+
   const handleCardClick = (index) => {
-    if (isBotTurn || isProcessing.current) return
-    if (flippedIndices.includes(index)) return
-    if (matchedIds.includes(cards[index].id)) return
-    if (flippedIndices.length >= 2) return
+    if (isBotTurn || isProcessing.current || flippedIndices.length >= 2) return
+    if (flippedIndices.includes(index) || matchedIds.includes(cards[index].id)) return
 
     sound.playCardFlip()
     setFlippedIndices((prev) => [...prev, index])
   }
 
-  // Check Game Over
-  useEffect(() => {
-    if (matchedIds.length === 10) {
-      setGameOver(true)
-      if (playerScore >= botScore) {
-        sound.playVictory()
-        setTimeout(() => {
-          onComplete && onComplete()
-        }, 2200)
-      } else {
-        sound.playDoorLocked()
-      }
-    }
-  }, [matchedIds.length, playerScore, botScore, onComplete])
+  const handleAutoSolve = () => {
+    setMatchedIds(cards.map((c) => c.id))
+    setPlayerScore(10)
+    setBotScore(0)
+    setGameOver(true)
+    sound.playVictory()
+  }
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-[#334155] flex flex-col items-center justify-between p-3 sm:p-5 select-none font-sans overflow-hidden">
-      {/* ================= TOP TURN INDICATOR (Image 3 Style) ================= */}
-      <div className="w-full max-w-md pt-2 flex items-center justify-center">
-        {isBotTurn ? (
-          <div className="text-white font-extrabold text-2xl sm:text-3xl tracking-wide drop-shadow-[0_2px_10px_rgba(56,189,248,0.8)] animate-pulse">
-            Bot&apos;s Turn
-          </div>
-        ) : (
-          <div className="text-white/80 font-bold text-sm tracking-widest uppercase">
-            LEVEL 2: MEMORY BATTLE
-          </div>
-        )}
-      </div>
-
-      {/* ================= SIDE SCORE PILLS (Image 3, 4, 5 Style) ================= */}
-      {/* Left Score Badge */}
-      <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30">
-        <div className="px-3 py-4 rounded-full bg-white shadow-2xl border-2 border-gray-200 flex flex-col items-center gap-1 font-extrabold text-base sm:text-lg">
-          <span className="text-[#0284c7]">{playerScore}</span>
-          <span className="text-gray-400 text-xs">•</span>
-          <span className="text-[#ef4444]">{botScore}</span>
-        </div>
-      </div>
-
-      {/* Right Exit Pill */}
-      <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30">
+    <div className="relative w-screen h-screen bg-[#372f33] text-white flex flex-col items-center justify-between p-4 select-none font-sans overflow-hidden">
+      
+      {/* Top Bar matching Image 2 */}
+      <div className="w-full max-w-lg flex items-center justify-between pt-2">
+        <span className="font-mono text-xs uppercase tracking-widest text-amber-200/80">
+          SUBLEVEL 2: MEMORY BOT MATCH
+        </span>
         <button
-          onClick={onExit}
-          className="px-2 py-4 rounded-full bg-white hover:bg-gray-100 shadow-2xl border-2 border-gray-200 flex flex-col items-center justify-center font-extrabold text-xs text-gray-700 cursor-pointer active:scale-95 transition"
+          onClick={handleAutoSolve}
+          className="px-3 py-1 rounded-full bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs cursor-pointer shadow"
         >
-          <span className="[writing-mode:vertical-lr] tracking-widest">EXIT</span>
+          ⚡ Auto Win
         </button>
       </div>
 
-      {/* ================= CARDS GRID (Images 3, 4, 5 Style) ================= */}
-      <div className="w-full max-w-sm sm:max-w-md my-auto py-2 px-1">
-        <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5 justify-items-center">
+      {/* Side HUD Elements matching Image 2 reference */}
+      <div className="w-full max-w-lg flex items-center justify-between px-2 my-2">
+        {/* Left Pill: Score Indicator (2 • 3 style from Image 2) */}
+        <div className="h-10 px-4 rounded-full bg-black/60 border border-white/20 backdrop-blur flex items-center gap-2 shadow-lg text-sm font-extrabold font-mono">
+          <span className="text-cyan-400">YOU: {playerScore}</span>
+          <span className="text-gray-400">•</span>
+          <span className="text-rose-400">BOT: {botScore}</span>
+        </div>
+
+        {/* Turn Status Indicator */}
+        <div
+          className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-lg transition-all ${
+            isBotTurn
+              ? 'bg-rose-600 text-white animate-pulse'
+              : 'bg-emerald-500 text-black'
+          }`}
+        >
+          {isBotTurn ? "🤖 Bot's Turn..." : '👤 Your Turn!'}
+        </div>
+
+        {/* Right Pill: EXIT button from Image 2 */}
+        <button
+          onClick={onExit}
+          className="h-10 px-5 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 text-white text-xs font-black uppercase tracking-wider shadow-lg cursor-pointer transition active:scale-95"
+        >
+          EXIT
+        </button>
+      </div>
+
+      {/* Main 20-Card Table Grid (Image 2 Aesthetic) */}
+      <div className="relative flex-1 w-full max-w-lg flex items-center justify-center p-2">
+        <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5">
           {cards.map((card, idx) => {
             const isFlipped = flippedIndices.includes(idx)
             const isMatched = matchedIds.includes(card.id)
-            const showFace = isFlipped || isMatched
+            const isCurrentlyLifting =
+              liftingMatchCards && liftingMatchCards.some((c) => c.uniqueId === card.uniqueId)
 
             return (
               <div
                 key={card.uniqueId}
                 onClick={() => handleCardClick(idx)}
-                style={{ transform: `rotate(${card.tilt}deg)` }}
-                className={`h-16 w-16 sm:h-20 sm:w-20 rounded-2xl cursor-pointer transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.35)] flex items-center justify-center border-4 border-white active:scale-95 ${
-                  showFace
-                    ? `${card.bg} scale-105`
-                    : 'bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] hover:brightness-105'
+                style={{
+                  transform: `rotate(${card.tilt}deg)`,
+                  visibility: isMatched && !isCurrentlyLifting ? 'hidden' : 'visible',
+                }}
+                className={`relative h-20 w-16 sm:h-24 sm:w-20 rounded-2xl cursor-pointer select-none transition-all duration-300 ${
+                  isMatched ? 'opacity-0' : 'hover:scale-105 active:scale-95'
                 }`}
               >
-                {showFace ? (
-                  <span className="text-3xl sm:text-4xl drop-shadow select-none">
-                    {card.icon}
-                  </span>
-                ) : (
-                  <div className="h-full w-full rounded-xl bg-[#f59e0b] opacity-80" />
-                )}
+                {/* CARD BACK (Warm Mustard Yellow with White Border - Image 2) */}
+                <div
+                  className={`absolute inset-0 rounded-2xl bg-[#f59e0b] border-[3.5px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform duration-500 ${
+                    isFlipped || isMatched ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
+                  }`}
+                >
+                  <div className="h-4 w-4 rounded-full bg-white/30" />
+                </div>
+
+                {/* CARD FRONT (Green/Vibrant Theme with Icon & Border - Image 2) */}
+                <div
+                  className={`absolute inset-0 rounded-2xl ${card.bg} border-[3.5px] border-white shadow-[0_6px_15px_rgba(0,0,0,0.6)] flex items-center justify-center text-3xl sm:text-4xl transition-transform duration-500 ${
+                    isFlipped || isMatched ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                  }`}
+                >
+                  <span className="drop-shadow-md">{card.icon}</span>
+                </div>
               </div>
             )
           })}
         </div>
-      </div>
 
-      {/* ================= BOTTOM "YOUR TURN" BANNER (Image 4 Style) ================= */}
-      <div className="w-full max-w-md pb-2 flex justify-center">
-        {!isBotTurn && !gameOver && (
-          <div className="w-3/4 max-w-xs py-3.5 rounded-full bg-[#f97316] border-4 border-white text-white font-extrabold text-xl sm:text-2xl text-center shadow-2xl animate-bounce">
-            Your turn
+        {/* ================= FLOATING PICK-UP ANIMATION OVERLAY (Image 2 Style) ================= */}
+        {liftingMatchCards && (
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-50 animate-fadeIn">
+            <div className="flex items-center gap-4 animate-bounce">
+              {liftingMatchCards.map((card) => (
+                <div
+                  key={card.uniqueId}
+                  className={`h-28 w-24 sm:h-32 sm:w-28 rounded-3xl ${card.bg} border-4 border-white shadow-[0_25px_50px_rgba(0,0,0,0.9)] flex items-center justify-center text-5xl sm:text-6xl scale-125 transition-transform duration-500 ring-4 ring-yellow-400/80`}
+                >
+                  <span className="drop-shadow-2xl">{card.icon}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
+      </div>
 
-        {gameOver && (
-          <div className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-white text-gray-900 shadow-2xl border-4 border-white max-w-xs text-center animate-bounce">
-            <span className="text-xl font-extrabold">
-              {playerScore > botScore
-                ? '🏆 YOU DEFEATED THE BOT!'
-                : playerScore === botScore
-                ? '🤝 TIE GAME!'
-                : '🤖 BOT WON!'}
-            </span>
-            <span className="text-xs text-gray-500">
-              Score: You {playerScore} - {botScore} Bot
-            </span>
-            <button
-              onClick={() => {
-                setMatchedIds([])
-                setFlippedIndices([])
-                setPlayerScore(0)
-                setBotScore(0)
-                setGameOver(false)
-                setIsBotTurn(false)
-                botMemory.current = {}
-              }}
-              className="px-5 py-2 rounded-full bg-[#00a2ff] text-white font-bold text-xs uppercase"
-            >
-              Play Again
-            </button>
+      {/* Bottom Footer & Advance Action */}
+      <div className="w-full max-w-lg pb-3 flex flex-col items-center gap-2">
+        {gameOver ? (
+          <button
+            onClick={onComplete}
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.7)] hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2 animate-bounce"
+          >
+            <span>Sublevel 2 Cleared! Advance to Double Cadgy</span>
+            <span>➔</span>
+          </button>
+        ) : (
+          <div className="text-[11px] font-mono text-gray-400 text-center">
+            Tap cards to find pairs • Smooth pick-up animation on match
           </div>
         )}
       </div>

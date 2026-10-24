@@ -23,31 +23,29 @@ const SAMPLE_WORDS = [
 
 const GRID_SIZE = 12
 
-// Generate a 12x12 word search grid with placed words
+// Generate a 12x12 word search grid with strictly straight placed words
 function generateWordSearchGrid() {
-  // Select 10 words to place
   const wordsToPlace = [...SAMPLE_WORDS].sort(() => Math.random() - 0.5).slice(0, 10)
-
-  // Empty grid
   const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(''))
   const placedWords = []
 
-  // Directions: [dx, dy] (horizontal, vertical, diagonal)
+  // Directions: Horizontal, Vertical, Diagonal ONLY
   const directions = [
-    [1, 0],   // right
-    [0, 1],   // down
-    [1, 1],   // down-right
-    [-1, 1],  // down-left
-    [1, -1],  // up-right
-    [-1, 0],  // left
-    [0, -1],  // up
+    [1, 0],   // Horizontal right
+    [-1, 0],  // Horizontal left
+    [0, 1],   // Vertical down
+    [0, -1],  // Vertical up
+    [1, 1],   // Diagonal down-right
+    [-1, 1],  // Diagonal down-left
+    [1, -1],  // Diagonal up-right
+    [-1, -1], // Diagonal up-left
   ]
 
   for (const word of wordsToPlace) {
     let placed = false
     let attempts = 0
 
-    while (!placed && attempts < 120) {
+    while (!placed && attempts < 150) {
       attempts++
       const dir = directions[Math.floor(Math.random() * directions.length)]
       const [dx, dy] = dir
@@ -92,7 +90,7 @@ function generateWordSearchGrid() {
     }
   }
 
-  // Fill empty cells with random letters
+  // Fill remaining blanks
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   for (let y = 0; y < GRID_SIZE; y++) {
     for (let x = 0; x < GRID_SIZE; x++) {
@@ -108,10 +106,13 @@ function generateWordSearchGrid() {
 export default function WordSearchGame({ onComplete, onExit }) {
   const [puzzleData, setPuzzleData] = useState(() => generateWordSearchGrid())
   const [foundWords, setFoundWords] = useState([])
-  const [foundCells, setFoundCells] = useState(new Set())
+  const [foundLines, setFoundLines] = useState([]) // array of { cells, word }
   const [selection, setSelection] = useState([])
-  const [seconds, setSeconds] = useState(111) // starts at 01:51 like Image 1
-  const [activeWordHover, setActiveWordHover] = useState(null)
+  const [seconds, setSeconds] = useState(111) // 01:51 like Image 1
+  const [activeWordPreview, setActiveWordPreview] = useState('')
+  const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState(null)
+
+  const startCell = useRef(null)
   const isDragging = useRef(false)
 
   // Timer tick
@@ -128,31 +129,70 @@ export default function WordSearchGame({ onComplete, onExit }) {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   }
 
-  // Completion check
+  // Completion check & automatic advance
   const isAllFound =
     puzzleData.placedWords.length > 0 &&
     foundWords.length === puzzleData.placedWords.length
 
   useEffect(() => {
-    if (isAllFound) {
+    if (isAllFound && autoAdvanceCountdown === null) {
       sound.playVictory()
+      setAutoAdvanceCountdown(2)
+      const timeout = setTimeout(() => {
+        onComplete && onComplete()
+      }, 2000)
+      return () => clearTimeout(timeout)
     }
-  }, [isAllFound])
+  }, [isAllFound, onComplete, autoAdvanceCountdown])
 
   const cellKey = (x, y) => `${x}-${y}`
 
+  // Calculate STRICTLY STRAIGHT LINE: Horizontal, Vertical, or Diagonal ONLY
+  const calculateStraightLine = (x0, y0, x1, y1) => {
+    const dx = x1 - x0
+    const dy = y1 - y0
+
+    const isHorizontal = dy === 0
+    const isVertical = dx === 0
+    const isDiagonal = Math.abs(dx) === Math.abs(dy)
+
+    if (!isHorizontal && !isVertical && !isDiagonal) {
+      // Not a valid straight line: restrict to closest valid point or just start cell
+      return [cellKey(x0, y0)]
+    }
+
+    const stepX = Math.sign(dx)
+    const stepY = Math.sign(dy)
+    const steps = Math.max(Math.abs(dx), Math.abs(dy))
+
+    const line = []
+    for (let i = 0; i <= steps; i++) {
+      line.push(cellKey(x0 + i * stepX, y0 + i * stepY))
+    }
+    return line
+  }
+
+  // Mouse selection handlers
   const handleCellMouseDown = (x, y) => {
     isDragging.current = true
+    startCell.current = { x, y }
     setSelection([cellKey(x, y)])
+    setActiveWordPreview(puzzleData.grid[y][x])
     sound.playTypewriter()
   }
 
   const handleCellMouseEnter = (x, y) => {
-    if (!isDragging.current) return
-    const key = cellKey(x, y)
-    if (!selection.includes(key)) {
-      setSelection((prev) => [...prev, key])
-    }
+    if (!isDragging.current || !startCell.current) return
+    const line = calculateStraightLine(startCell.current.x, startCell.current.y, x, y)
+    setSelection(line)
+
+    const letters = line
+      .map((k) => {
+        const [cx, cy] = k.split('-').map(Number)
+        return puzzleData.grid[cy][cx]
+      })
+      .join('')
+    setActiveWordPreview(letters)
   }
 
   const handleMouseUp = () => {
@@ -182,33 +222,36 @@ export default function WordSearchGame({ onComplete, onExit }) {
     if (match) {
       sound.playWordFound()
       setFoundWords((prev) => [...prev, match.word])
-      setFoundCells((prev) => {
-        const next = new Set(prev)
-        match.cells.forEach((c) => next.add(c))
-        return next
-      })
-      setActiveWordHover(match.word)
+      setFoundLines((prev) => [...prev, { cells: [...selection], word: match.word }])
+      setActiveWordPreview(match.word)
     }
 
     setSelection([])
+    startCell.current = null
   }
 
   const handleAutoSolve = () => {
     const all = puzzleData.placedWords.map((p) => p.word)
-    const allCells = new Set()
-    puzzleData.placedWords.forEach((p) => p.cells.forEach((c) => allCells.add(c)))
+    const allLines = puzzleData.placedWords.map((p) => ({
+      cells: p.cells,
+      word: p.word,
+    }))
     setFoundWords(all)
-    setFoundCells(allCells)
+    setFoundLines(allLines)
     sound.playVictory()
   }
 
   const handleNewPuzzle = () => {
     setPuzzleData(generateWordSearchGrid())
     setFoundWords([])
-    setFoundCells(new Set())
+    setFoundLines([])
     setSelection([])
-    setActiveWordHover(null)
+    setActiveWordPreview('')
+    setAutoAdvanceCountdown(null)
   }
+
+  // Set of all found cell keys for fast background highlighting
+  const allFoundCellKeys = new Set(foundLines.flatMap((l) => l.cells))
 
   return (
     <div
@@ -245,6 +288,9 @@ export default function WordSearchGame({ onComplete, onExit }) {
           <span className="font-semibold text-slate-600 text-xs sm:text-sm">
             Medium - English
           </span>
+          <span className="hidden sm:inline-block text-[11px] font-mono bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full border border-sky-300">
+            Straight Lines Only: ↔ ↕ ⤢
+          </span>
         </div>
 
         <div className="flex items-center gap-3 sm:gap-4 text-xs font-medium text-slate-700">
@@ -268,20 +314,23 @@ export default function WordSearchGame({ onComplete, onExit }) {
           <div className="flex-1 flex flex-col items-center justify-center">
             {/* Top Green Word Badges (Image 1 Header Pills) */}
             <div className="flex items-center justify-center gap-4 mb-3 h-8">
-              {activeWordHover || (foundWords.length > 0 ? foundWords[foundWords.length - 1] : 'FIND WORDS')}
-              {activeWordHover && (
-                <div className="flex items-center gap-4">
+              {activeWordPreview ? (
+                <div className="flex items-center gap-4 animate-fadeIn">
                   <span className="px-4 py-1 rounded-full bg-[#22c55e] text-white font-black tracking-wider text-xs uppercase shadow-sm">
-                    {activeWordHover}
+                    {activeWordPreview}
                   </span>
                   <span className="px-4 py-1 rounded-full bg-[#16a34a] text-white font-black tracking-wider text-xs uppercase shadow-sm">
-                    {activeWordHover.split('').reverse().join('')}
+                    {activeWordPreview.split('').reverse().join('')}
                   </span>
                 </div>
+              ) : (
+                <span className="text-xs font-mono font-bold text-slate-400">
+                  Select words horizontally, vertically, or diagonally
+                </span>
               )}
             </div>
 
-            {/* Letter Grid Container */}
+            {/* Letter Grid Container with strict straight-line dragging */}
             <div className="relative p-2 rounded-xl bg-slate-50 border border-slate-200">
               <div
                 className="grid gap-1 sm:gap-2"
@@ -291,7 +340,7 @@ export default function WordSearchGame({ onComplete, onExit }) {
                   row.map((letter, x) => {
                     const key = cellKey(x, y)
                     const isSelected = selection.includes(key)
-                    const isFound = foundCells.has(key)
+                    const isFound = allFoundCellKeys.has(key)
 
                     return (
                       <div
@@ -358,14 +407,14 @@ export default function WordSearchGame({ onComplete, onExit }) {
               {isAllFound ? (
                 <button
                   onClick={onComplete}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2 animate-bounce"
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2 animate-bounce"
                 >
-                  <span>Sublevel 1 Cleared! Advance to Sublevel 2</span>
+                  <span>Sublevel 1 Cleared! Advance to Memory Bot</span>
                   <span>➔</span>
                 </button>
               ) : (
                 <div className="text-center text-xs text-slate-400">
-                  Drag across letters to highlight words
+                  Drag straight lines (↔ ↕ ⤢) to select words
                 </div>
               )}
             </div>

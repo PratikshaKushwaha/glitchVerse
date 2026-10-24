@@ -5,7 +5,7 @@ import CadgyWordGame from '../components/CadgyWordGame'
 import RiddleBoardGame from '../components/RiddleBoardGame'
 import { sound } from '../utils/AudioEngine'
 
-export default function LevelTwoScene({ onBackToMenu, onBackToLevelOne }) {
+export default function LevelTwoScene({ onBackToMenu, onBackToLevelOne, onGoToLevel3 }) {
   // 4 Sublevels: 'wordsearch' | 'memory' | 'cadgy' | 'riddle' | 'victory'
   const [stage, setStage] = useState('wordsearch')
   const [badgeAwarded, setBadgeAwarded] = useState(false)
@@ -34,11 +34,16 @@ export default function LevelTwoScene({ onBackToMenu, onBackToLevelOne }) {
     }, 800)
   }
 
-  // 4. Riddle Board complete -> Grand Victory Celebration
+  // 4. Riddle Board complete -> Transition into Level 3!
   const handleRiddleComplete = () => {
     sound.playVictory()
     setBadgeAwarded(true)
     setStage('victory')
+    if (onGoToLevel3) {
+      setTimeout(() => {
+        onGoToLevel3()
+      }, 2500)
+    }
   }
 
   return (
@@ -150,17 +155,19 @@ export default function LevelTwoScene({ onBackToMenu, onBackToLevelOne }) {
             </p>
 
             <div className="mt-6 flex flex-col sm:flex-row gap-3 w-full">
+              {onGoToLevel3 && (
+                <button
+                  onClick={onGoToLevel3}
+                  className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-black font-black text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:brightness-110 active:scale-95 transition"
+                >
+                  Enter Level 3 ➔
+                </button>
+              )}
               <button
                 onClick={() => setStage('wordsearch')}
-                className="flex-1 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg transition active:scale-95"
+                className="flex-1 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs uppercase tracking-wider cursor-pointer shadow transition active:scale-95"
               >
                 Replay Level 2
-              </button>
-              <button
-                onClick={onBackToLevelOne}
-                className="flex-1 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg transition active:scale-95"
-              >
-                Return to Level 1
               </button>
             </div>
           </div>
