@@ -1,60 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import { sound } from '../utils/AudioEngine'
-
-// Exact Puzzle configuration from https://www.onelook.com/cadgy/2026-10-23 (Image 3)
-const CADGY_BOARD = [
-  // 5 Columns of stacked tiles
-  [
-    { id: 'c0-r0', char: 'G', row: 0, col: 0 },
-    { id: 'c0-r1', char: 'T', row: 1, col: 0 },
-    { id: 'c0-r2', char: 'H', row: 2, col: 0 },
-    { id: 'c0-r3', char: 'S', row: 3, col: 0 },
-    { id: 'c0-r4', char: '💖', row: 4, col: 0, isHeart: true },
-  ],
-  [
-    { id: 'c1-r0', char: 'L', row: 0, col: 1 },
-    { id: 'c1-r1', char: 'R', row: 1, col: 1 },
-    { id: 'c1-r2', char: 'E', row: 2, col: 1 },
-    { id: 'c1-r3', char: 'K', row: 3, col: 1 },
-    { id: 'c1-r4', char: 'CI', row: 4, col: 1 },
-  ],
-  [
-    { id: 'c2-r0', char: 'N', row: 0, col: 2 },
-    { id: 'c2-r1', char: 'I', row: 1, col: 2 },
-    { id: 'c2-r2', char: '💖', row: 2, col: 2, isHeart: true },
-    { id: 'c2-r3', char: 'EN', row: 3, col: 2 },
-    { id: 'c2-r4', char: 'A', row: 4, col: 2 },
-  ],
-  [
-    { id: 'c3-r0', char: 'C', row: 0, col: 3 },
-    { id: 'c3-r1', char: 'R', row: 1, col: 3 },
-    { id: 'c3-r2', char: 'S', row: 2, col: 3 },
-    { id: 'c3-r3', char: 'D', row: 3, col: 3 },
-    { id: 'c3-r4', char: 'B', row: 4, col: 3 },
-  ],
-  [
-    { id: 'c4-r0', char: '💖', row: 0, col: 4, isHeart: true },
-    { id: 'c4-r1', char: 'T', row: 1, col: 4 },
-    { id: 'c4-r2', char: 'S', row: 2, col: 4 },
-    { id: 'c4-r3', char: 'E', row: 3, col: 4 },
-    { id: 'c4-r4', char: '💖', row: 4, col: 4, isHeart: true },
-  ],
-]
-
-// Target Basic Words & Bonus Words from Image 3
-const BASIC_WORDS = [
-  { word: 'HEADS', clue: 'Uppermost parts of human bodies' },
-  { word: 'HEART', clue: 'Muscular organ that pumps blood' },
-  { word: 'TRADE', clue: 'Exchange of goods or services' },
-]
-
-const BONUS_WORDS = [
-  { word: 'GEARS', clue: 'Mechanical toothed wheels transmitting motion' },
-  { word: 'GENRE', clue: 'Category of artistic or literary works' },
-  { word: 'GLACE', clue: 'Glazed fruit or frozen dessert; from French for ice' },
-]
+import { CADGY_PUZZLE_BOARDS } from '../data/cadgyBoards'
 
 export default function CadgyWordGame({ onComplete, onExit }) {
+  // Pick random puzzle board from CADGY_PUZZLE_BOARDS
+  const [boardIndex, setBoardIndex] = useState(() =>
+    Math.floor(Math.random() * CADGY_PUZZLE_BOARDS.length)
+  )
+  const currentBoard = CADGY_PUZZLE_BOARDS[boardIndex]
+
   // Selected tiles: array of tile objects { id, char, col, row }
   const [selectedTiles, setSelectedTiles] = useState([])
   const [foundBasicWords, setFoundBasicWords] = useState([])
@@ -63,9 +17,41 @@ export default function CadgyWordGame({ onComplete, onExit }) {
   const [commentary, setCommentary] = useState('')
   const [commentaryColor, setCommentaryColor] = useState('text-emerald-400')
   const [isVerifying, setIsVerifying] = useState(false)
+  const autoAdvanceTriggered = useRef(false)
   const boardRef = useRef(null)
 
-  const isBasicComplete = foundBasicWords.length === BASIC_WORDS.length
+  const isBasicComplete =
+    currentBoard.basicWords.length > 0 &&
+    foundBasicWords.length === currentBoard.basicWords.length
+
+  // Switch to another board
+  const handleSwitchBoard = (newIndex = null) => {
+    sound.playKeyClick()
+    const nextIdx =
+      newIndex !== null
+        ? newIndex
+        : (boardIndex + 1) % CADGY_PUZZLE_BOARDS.length
+    setBoardIndex(nextIdx)
+    setSelectedTiles([])
+    setFoundBasicWords([])
+    setFoundBonusWords([])
+    setCommentary('')
+    autoAdvanceTriggered.current = false
+  }
+
+  // Automatic advance once all basic words are solved - NO FINISH BUTTON NEEDED!
+  useEffect(() => {
+    if (isBasicComplete && !autoAdvanceTriggered.current) {
+      autoAdvanceTriggered.current = true
+      sound.playVictory()
+      setCommentary('🎉 ALL BASIC WORDS SOLVED! ADVANCING TO RIDDLE BOARD...')
+      setCommentaryColor('text-emerald-300 font-extrabold')
+      const timeout = setTimeout(() => {
+        onComplete && onComplete()
+      }, 1600)
+      return () => clearTimeout(timeout)
+    }
+  }, [isBasicComplete, onComplete])
 
   // Auto-verification whenever selected word reaches 5 characters!
   useEffect(() => {
@@ -74,8 +60,8 @@ export default function CadgyWordGame({ onComplete, onExit }) {
     if (currentWord.length >= 5 && !isVerifying) {
       setIsVerifying(true)
 
-      // Automatic verification
-      const basicMatch = BASIC_WORDS.find((b) => b.word === currentWord)
+      // Automatic verification against Basic Words
+      const basicMatch = currentBoard.basicWords.find((b) => b.word === currentWord)
       if (basicMatch) {
         if (foundBasicWords.includes(currentWord)) {
           setCommentary(`Already solved "${currentWord}"!`)
@@ -90,11 +76,12 @@ export default function CadgyWordGame({ onComplete, onExit }) {
         setTimeout(() => {
           setSelectedTiles([])
           setIsVerifying(false)
-        }, 600)
+        }, 550)
         return
       }
 
-      const bonusMatch = BONUS_WORDS.find((b) => b.word === currentWord)
+      // Automatic verification against Bonus Words
+      const bonusMatch = currentBoard.bonusWords.find((b) => b.word === currentWord)
       if (bonusMatch) {
         if (foundBonusWords.includes(currentWord)) {
           setCommentary(`Already discovered bonus "${currentWord}"!`)
@@ -109,170 +96,129 @@ export default function CadgyWordGame({ onComplete, onExit }) {
         setTimeout(() => {
           setSelectedTiles([])
           setIsVerifying(false)
-        }, 600)
+        }, 550)
         return
       }
 
-      // Word not in today's clue list (Image 3 commentary style)
+      // Word not in today's clue list
       sound.playDoorLocked()
       setCommentary(
         `"${currentWord}" is a good guess, but it's not selected for today's clues.`
       )
-      setCommentaryColor('text-emerald-500/80')
+      setCommentaryColor('text-rose-400')
 
       setTimeout(() => {
         setSelectedTiles([])
         setIsVerifying(false)
-      }, 750)
+      }, 800)
     }
-  }, [selectedTiles, foundBasicWords, foundBonusWords, isVerifying])
+  }, [selectedTiles, isVerifying, currentBoard, foundBasicWords, foundBonusWords])
 
-  // Handle clicking a tile on the board
-  const handleTileClick = (tile) => {
-    if (isVerifying) return
+  // Tile Selection Handler
+  const handleTileClick = (tile, colIndex) => {
+    if (isVerifying || isBasicComplete) return
 
-    if (tile.isHeart) {
-      sound.playTypewriter()
-      setScore((s) => s + 20)
-      setCommentary('💖 Heart Bonus! +20 points!')
-      setCommentaryColor('text-rose-400')
-      setTimeout(() => setCommentary(''), 1200)
-      return
-    }
+    sound.playTypewriter()
 
-    // If tile already selected, deselect from this tile onward
+    // 1. Check if clicking on already selected tile -> deselect it
     const existingIndex = selectedTiles.findIndex((t) => t.id === tile.id)
     if (existingIndex !== -1) {
-      sound.playTypewriter()
-      setSelectedTiles((prev) => prev.slice(0, existingIndex))
+      setSelectedTiles((prev) => prev.filter((_, idx) => idx !== existingIndex))
       return
     }
 
-    if (selectedTiles.length < 5) {
-      sound.playTypewriter()
-      setSelectedTiles((prev) => [...prev, tile])
-    }
+    // 2. If tile from this column is already selected, replace it
+    const filtered = selectedTiles.filter((t) => t.col !== colIndex)
+
+    // 3. Keep column order sorted 0..4
+    const nextSelection = [...filtered, { ...tile, col: colIndex }].sort(
+      (a, b) => a.col - b.col
+    )
+    setSelectedTiles(nextSelection)
   }
 
-  // Clear current word
-  const handleClear = () => {
-    sound.playTypewriter()
-    setSelectedTiles([])
-    setCommentary('')
-  }
-
-  // Auto solve for testing
+  // Quick auto-solve for testing
   const handleAutoSolve = () => {
-    setFoundBasicWords(BASIC_WORDS.map((b) => b.word))
-    setFoundBonusWords(BONUS_WORDS.slice(0, 2).map((b) => b.word))
-    setScore(520)
     sound.playVictory()
-    setCommentary('All basic words auto-verified!')
-    setCommentaryColor('text-emerald-400')
+    const allBasic = currentBoard.basicWords.map((b) => b.word)
+    setFoundBasicWords(allBasic)
+    setScore((s) => s + 300)
   }
 
   const currentSpelled = selectedTiles.map((t) => t.char)
 
   return (
-    <div className="relative w-screen h-screen bg-[#0e0e0e] text-white flex flex-col items-center justify-between p-3 select-none font-sans overflow-y-auto">
+    <div className="relative w-screen h-screen bg-[#140b22] text-white flex flex-col items-center justify-between overflow-y-auto select-none font-sans p-3 sm:p-5">
       
-      {/* 1. TOP HEADER & NAVIGATION (Image 3 Style) */}
-      <div className="w-full max-w-xl flex items-center justify-between pt-1 pb-1 text-xs">
-        <button
-          onClick={onExit}
-          className="px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-gray-200 font-bold cursor-pointer transition"
-        >
-          ← Exit
-        </button>
-        <span className="font-mono text-gray-400">
-          onelook.com/cadgy • Exact Layout
-        </span>
-        <button
-          onClick={handleAutoSolve}
-          className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer transition shadow"
-        >
-          ⚡ Auto Solve
-        </button>
-      </div>
-
-      {/* 2. SIGNATURE DOUBLE CADGY BANNER (Image 3 Style) */}
-      <div className="flex flex-col items-center">
-        {/* DOUBLE in red outline font */}
-        <div className="flex items-center gap-1 mb-1">
-          {['D', 'O', 'U', 'B', 'L', 'E'].map((letter, i) => (
-            <span
-              key={i}
-              className="text-xs sm:text-sm font-black font-mono text-white tracking-widest px-1 py-0.5 rounded bg-red-600/90 shadow-sm border border-red-400"
-            >
-              {letter}
-            </span>
-          ))}
-        </div>
-
-        {/* CADGY connected orange square wooden blocks */}
-        <div className="relative flex items-center">
-          {/* Horizontal connector bar behind blocks */}
-          <div className="absolute inset-x-2 h-2.5 bg-[#78350f] rounded pointer-events-none top-1/2 -translate-y-1/2" />
-          <div className="relative flex items-center gap-2">
-            {['C', 'A', 'D', 'G', 'Y'].map((char, i) => (
-              <div
-                key={i}
-                className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-b from-[#f59e0b] via-[#d97706] to-[#b45309] border-2 border-amber-300 shadow-[0_5px_12px_rgba(0,0,0,0.8)] flex items-center justify-center font-mono font-black text-2xl text-black"
-              >
-                {char}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Date string */}
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 font-mono mt-2">
-          <span>October 23, 2026</span>
-          <span>📅</span>
-        </div>
-
-        {/* Controls Pill Bar (Score: 30, Timer, Shuffle, 3D, Solo, ? - Image 3) */}
-        <div className="flex items-center gap-2.5 mt-2.5 bg-[#1a1a1a] px-4 py-1.5 rounded-2xl border border-white/10 shadow-lg text-xs font-mono">
-          <div className="font-bold text-gray-200">
-            Score: <span className="font-black text-white">{score}</span>
-          </div>
-          <span>•</span>
-          <span title="Timer">⏱️</span>
-          <span>•</span>
+      {/* 1. TOP HEADER & NAVIGATION BAR */}
+      <div className="w-full max-w-4xl flex items-center justify-between border-b border-purple-900/50 pb-2">
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => handleClear()}
-            className="hover:text-yellow-400 cursor-pointer transition font-bold"
+            onClick={onExit}
+            className="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-xs font-bold transition cursor-pointer"
           >
-            Shuffle
+            ← Exit
           </button>
-          <span>•</span>
-          <span className="text-gray-400">3D</span>
-          <span>•</span>
-          <span title="Players">👥</span>
-          <span>•</span>
-          <span className="text-gray-400 font-bold">?</span>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-purple-400 animate-ping" />
+            <span className="font-mono text-purple-300 font-bold text-xs uppercase tracking-wider">
+              {currentBoard.title}
+            </span>
+          </div>
+        </div>
+
+        {/* Puzzle Selector & Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleAutoSolve}
+            className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer transition shadow active:scale-95"
+          >
+            ⚡ Auto Solve
+          </button>
+          <button
+            onClick={() => handleSwitchBoard()}
+            className="px-3 py-1 rounded-full bg-purple-800 hover:bg-purple-700 text-purple-100 font-bold text-xs cursor-pointer transition shadow active:scale-95"
+          >
+            🔄 New Board
+          </button>
+          <div className="px-3 py-1 rounded-full bg-purple-950 border border-purple-500/50 text-xs font-mono font-bold text-amber-300 shadow">
+            SCORE: {score}
+          </div>
         </div>
       </div>
 
-      {/* 3. THE 3D ISOMETRIC STACKED TILES BOARD WITH PURPLE SELECTION (Image 3) */}
-      <div className="relative flex flex-col items-center my-2" ref={boardRef}>
-        <div className="grid grid-cols-5 gap-2.5 sm:gap-3 p-3 sm:p-4 rounded-3xl bg-[#121212]/90 border border-white/5 shadow-2xl">
-          {CADGY_BOARD.map((col, colIdx) => (
-            <div key={colIdx} className="flex flex-col gap-2.5 sm:gap-3">
-              {col.map((tile) => {
+      {/* 2. INSPIRATION BANNER (Onelook Cadgy Reproduction) */}
+      <div className="w-full max-w-xl text-center my-1">
+        <div className="text-[11px] font-mono text-purple-300/80 tracking-widest uppercase">
+          DOUBLE CADGY • COLUMN WORD PUZZLE
+        </div>
+        <p className="text-xs text-gray-300 mt-0.5">
+          Pick 1 tile from each column left-to-right to construct 5-letter words. Auto-verifies immediately!
+        </p>
+      </div>
+
+      {/* 3. 3D STACKED TILES BOARD (Image 3 Cadgy Layout) */}
+      <div
+        ref={boardRef}
+        className="w-full max-w-xl flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl bg-[#1e1333]/90 border-2 border-purple-500/50 shadow-[0_0_50px_rgba(168,85,247,0.35)] backdrop-blur my-auto"
+      >
+        {/* 5 COLUMNS OF TILES */}
+        <div className="grid grid-cols-5 gap-2 sm:gap-4 w-full">
+          {currentBoard.board.map((colTiles, colIdx) => (
+            <div key={colIdx} className="flex flex-col gap-2">
+              {colTiles.map((tile, rowIdx) => {
                 const isSelected = selectedTiles.some((t) => t.id === tile.id)
-                const isHeart = tile.isHeart
 
                 return (
                   <button
                     key={tile.id}
-                    onClick={() => handleTileClick(tile)}
-                    className={`relative h-11 w-11 sm:h-13 sm:w-13 md:h-14 md:w-14 rounded-2xl flex items-center justify-center font-black text-base sm:text-xl font-mono cursor-pointer transition-all duration-200 active:scale-90 select-none ${
+                    onClick={() => handleTileClick(tile, colIdx)}
+                    className={`relative h-11 sm:h-13 w-full rounded-xl flex items-center justify-center font-bold text-base sm:text-lg transition-all duration-200 cursor-pointer ${
                       isSelected
-                        ? 'bg-[#d8b4fe] text-[#3b0764] shadow-[0_6px_0_#9333ea,0_10px_20px_rgba(147,51,234,0.5)] scale-105 z-20 border-2 border-[#a855f7]'
-                        : isHeart
-                        ? 'bg-gradient-to-b from-[#f59e0b] to-[#d97706] text-xl shadow-[0_5px_0_#78350f,0_8px_14px_rgba(0,0,0,0.6)] border border-amber-300 animate-pulse'
-                        : 'bg-gradient-to-b from-[#fef3c7] via-[#fde68a] to-[#f59e0b] text-[#451a03] shadow-[0_5px_0_#78350f,0_8px_14px_rgba(0,0,0,0.6)] border-t border-l border-white/80 hover:brightness-105'
+                        ? 'bg-gradient-to-t from-purple-500 to-fuchsia-400 text-white scale-105 shadow-[0_0_18px_rgba(217,70,239,0.9)] ring-2 ring-white z-10 translate-y-[-2px]'
+                        : tile.isHeart
+                        ? 'bg-[#2a1b46] hover:bg-[#3b2760] text-rose-400 border border-purple-500/30 shadow-md'
+                        : 'bg-[#2a1b46] hover:bg-[#3b2760] text-gray-100 border border-purple-500/30 shadow-md hover:scale-102'
                     }`}
                   >
                     {tile.char}
@@ -283,8 +229,8 @@ export default function CadgyWordGame({ onComplete, onExit }) {
           ))}
         </div>
 
-        {/* Spelled Word Output Bar with blank lines (G L I S _ from Image 3) */}
-        <div className="flex items-center gap-3 sm:gap-4 mt-3 font-mono font-black text-xl sm:text-2xl tracking-[0.25em] text-white">
+        {/* Spelled Word Output Bar with blank lines */}
+        <div className="flex items-center gap-3 sm:gap-4 mt-4 font-mono font-black text-xl sm:text-2xl tracking-[0.25em] text-white">
           {[0, 1, 2, 3, 4].map((idx) => {
             const letter = currentSpelled[idx]
             return (
@@ -300,7 +246,7 @@ export default function CadgyWordGame({ onComplete, onExit }) {
           })}
         </div>
 
-        {/* Auto-verify instruction & Commentary in Green (Image 3 Style) */}
+        {/* Auto-verify instruction & Commentary */}
         <div className="h-10 mt-2 flex items-center justify-center text-center px-4">
           {commentary ? (
             <div className={`text-xs sm:text-sm font-serif italic ${commentaryColor} animate-fadeIn`}>
@@ -321,10 +267,10 @@ export default function CadgyWordGame({ onComplete, onExit }) {
           <div className="p-3 rounded-2xl bg-[#142319] border border-emerald-500/40">
             <div className="flex items-center justify-between font-bold text-emerald-400 mb-1.5">
               <span>BASIC WORDS</span>
-              <span className="font-mono">({foundBasicWords.length}/{BASIC_WORDS.length})</span>
+              <span className="font-mono">({foundBasicWords.length}/{currentBoard.basicWords.length})</span>
             </div>
             <div className="flex flex-col gap-1.5">
-              {BASIC_WORDS.map((b) => (
+              {currentBoard.basicWords.map((b) => (
                 <div key={b.word} className="text-[11px]">
                   {foundBasicWords.includes(b.word) ? (
                     <span className="text-emerald-300 font-bold">✓ {b.word}: {b.clue}</span>
@@ -343,7 +289,7 @@ export default function CadgyWordGame({ onComplete, onExit }) {
               <span className="font-mono">({foundBonusWords.length}/3)</span>
             </div>
             <div className="flex flex-col gap-1.5">
-              {BONUS_WORDS.map((b) => (
+              {currentBoard.bonusWords.map((b) => (
                 <div key={b.word} className="text-[11px]">
                   {foundBonusWords.includes(b.word) ? (
                     <span className="text-sky-300 font-bold">★ {b.word}: {b.clue}</span>
@@ -356,15 +302,11 @@ export default function CadgyWordGame({ onComplete, onExit }) {
           </div>
         </div>
 
-        {/* Completion Advance Button */}
+        {/* Auto-Advance Notification - NO FINISH BUTTON NEEDED */}
         {isBasicComplete && (
-          <button
-            onClick={onComplete}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.7)] hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2 animate-bounce"
-          >
-            <span>Sublevel 3 Cleared! Advance to Riddle Board</span>
-            <span>➔</span>
-          </button>
+          <div className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.7)] flex items-center justify-center gap-2 animate-bounce">
+            <span>✓ ALL BASIC WORDS SOLVED! ADVANCING TO RIDDLE BOARD...</span>
+          </div>
         )}
       </div>
 

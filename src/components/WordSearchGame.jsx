@@ -1,119 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { sound } from '../utils/AudioEngine'
-
-// Word list inspired by Image 1
-const SAMPLE_WORDS = [
-  'DEALERS',
-  'CONSIDERS',
-  'CONTINENTAL',
-  'CABINETS',
-  'EXPANSION',
-  'EXPERIENCED',
-  'INSPIRATION',
-  'UNIVERSITY',
-  'TRIPADVISOR',
-  'TWENTY',
-  'OPERATING',
-  'ORGANIZED',
-  'RECEPTION',
-  'RESPONDENTS',
-  'ITSELF',
-  'LENSES',
-]
-
-const GRID_SIZE = 12
-
-// Generate a 12x12 word search grid with strictly straight placed words
-function generateWordSearchGrid() {
-  const wordsToPlace = [...SAMPLE_WORDS].sort(() => Math.random() - 0.5).slice(0, 10)
-  const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(''))
-  const placedWords = []
-
-  // Directions: Horizontal, Vertical, Diagonal ONLY
-  const directions = [
-    [1, 0],   // Horizontal right
-    [-1, 0],  // Horizontal left
-    [0, 1],   // Vertical down
-    [0, -1],  // Vertical up
-    [1, 1],   // Diagonal down-right
-    [-1, 1],  // Diagonal down-left
-    [1, -1],  // Diagonal up-right
-    [-1, -1], // Diagonal up-left
-  ]
-
-  for (const word of wordsToPlace) {
-    let placed = false
-    let attempts = 0
-
-    while (!placed && attempts < 150) {
-      attempts++
-      const dir = directions[Math.floor(Math.random() * directions.length)]
-      const [dx, dy] = dir
-
-      const startX = Math.floor(Math.random() * GRID_SIZE)
-      const startY = Math.floor(Math.random() * GRID_SIZE)
-
-      const endX = startX + dx * (word.length - 1)
-      const endY = startY + dy * (word.length - 1)
-
-      if (endX >= 0 && endX < GRID_SIZE && endY >= 0 && endY < GRID_SIZE) {
-        let canFit = true
-        for (let i = 0; i < word.length; i++) {
-          const cx = startX + dx * i
-          const cy = startY + dy * i
-          const cell = grid[cy][cx]
-          if (cell !== '' && cell !== word[i]) {
-            canFit = false
-            break
-          }
-        }
-
-        if (canFit) {
-          const cells = []
-          for (let i = 0; i < word.length; i++) {
-            const cx = startX + dx * i
-            const cy = startY + dy * i
-            grid[cy][cx] = word[i]
-            cells.push(`${cx}-${cy}`)
-          }
-          placedWords.push({
-            word,
-            cells,
-            startX,
-            startY,
-            endX,
-            endY,
-          })
-          placed = true
-        }
-      }
-    }
-  }
-
-  // Fill remaining blanks
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  for (let y = 0; y < GRID_SIZE; y++) {
-    for (let x = 0; x < GRID_SIZE; x++) {
-      if (grid[y][x] === '') {
-        grid[y][x] = alphabet[Math.floor(Math.random() * alphabet.length)]
-      }
-    }
-  }
-
-  return { grid, placedWords }
-}
+import { WORD_THEMES, GRID_SIZE, generateThemedWordSearch } from '../data/wordSearchThemes'
 
 export default function WordSearchGame({ onComplete, onExit }) {
-  const [puzzleData, setPuzzleData] = useState(() => generateWordSearchGrid())
+  const [puzzleData, setPuzzleData] = useState(() => generateThemedWordSearch())
   const [foundWords, setFoundWords] = useState([])
   const [foundLines, setFoundLines] = useState([]) // array of { cells, word }
   const [selection, setSelection] = useState([])
-  const [seconds, setSeconds] = useState(111) // 01:51 like Image 1
+  const [seconds, setSeconds] = useState(0)
   const [activeWordPreview, setActiveWordPreview] = useState('')
   const [autoAdvanceCountdown, setAutoAdvanceCountdown] = useState(null)
 
   const startCell = useRef(null)
   const isDragging = useRef(false)
+  const gridContainerRef = useRef(null)
 
   // Timer tick
   useEffect(() => {
@@ -140,36 +40,58 @@ export default function WordSearchGame({ onComplete, onExit }) {
       setAutoAdvanceCountdown(2)
       const timeout = setTimeout(() => {
         onComplete && onComplete()
-      }, 2000)
+      }, 1800)
       return () => clearTimeout(timeout)
     }
   }, [isAllFound, onComplete, autoAdvanceCountdown])
 
   const cellKey = (x, y) => `${x}-${y}`
 
-  // Calculate STRICTLY STRAIGHT LINE: Horizontal, Vertical, or Diagonal ONLY
+  // Calculate STRICT STRAIGHT LINE with snapping for Diagonal, Horizontal, and Vertical
+  // Allows dragging diagonally in all 4 directions (down-right, down-left, up-right, up-left)
+  // as well as horizontal (left, right) and vertical (up, down).
   const calculateStraightLine = (x0, y0, x1, y1) => {
     const dx = x1 - x0
     const dy = y1 - y0
 
-    const isHorizontal = dy === 0
-    const isVertical = dx === 0
-    const isDiagonal = Math.abs(dx) === Math.abs(dy)
+    if (dx === 0 && dy === 0) return [cellKey(x0, y0)]
 
-    if (!isHorizontal && !isVertical && !isDiagonal) {
-      // Not a valid straight line: restrict to closest valid point or just start cell
-      return [cellKey(x0, y0)]
+    const absDx = Math.abs(dx)
+    const absDy = Math.abs(dy)
+
+    let stepX = 0
+    let stepY = 0
+    let steps = 0
+
+    // Ratio dy/dx to cleanly classify angle into Horizontal, Vertical, or 45-degree Diagonal
+    const ratio = absDx === 0 ? 999 : absDy / absDx
+
+    if (ratio < 0.45) {
+      // Horizontal (left or right)
+      stepX = Math.sign(dx)
+      stepY = 0
+      steps = absDx
+    } else if (ratio > 2.2) {
+      // Vertical (up or down)
+      stepX = 0
+      stepY = Math.sign(dy)
+      steps = absDy
+    } else {
+      // 45° Diagonal (down-right, down-left, up-right, up-left)
+      stepX = Math.sign(dx)
+      stepY = Math.sign(dy)
+      steps = Math.min(absDx, absDy)
     }
-
-    const stepX = Math.sign(dx)
-    const stepY = Math.sign(dy)
-    const steps = Math.max(Math.abs(dx), Math.abs(dy))
 
     const line = []
     for (let i = 0; i <= steps; i++) {
-      line.push(cellKey(x0 + i * stepX, y0 + i * stepY))
+      const curX = x0 + i * stepX
+      const curY = y0 + i * stepY
+      if (curX >= 0 && curX < GRID_SIZE && curY >= 0 && curY < GRID_SIZE) {
+        line.push(cellKey(curX, curY))
+      }
     }
-    return line
+    return line.length > 0 ? line : [cellKey(x0, y0)]
   }
 
   // Mouse selection handlers
@@ -230,6 +152,31 @@ export default function WordSearchGame({ onComplete, onExit }) {
     startCell.current = null
   }
 
+  // Touch Support
+  const handleTouchStart = (e, x, y) => {
+    handleCellMouseDown(x, y)
+  }
+
+  const handleTouchMove = (e) => {
+    if (!isDragging.current || !startCell.current || !gridContainerRef.current) return
+    const touch = e.touches[0]
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY)
+    if (targetEl && targetEl.dataset && targetEl.dataset.coords) {
+      const [x, y] = targetEl.dataset.coords.split('-').map(Number)
+      if (!isNaN(x) && !isNaN(y)) {
+        const line = calculateStraightLine(startCell.current.x, startCell.current.y, x, y)
+        setSelection(line)
+        const letters = line
+          .map((k) => {
+            const [cx, cy] = k.split('-').map(Number)
+            return puzzleData.grid[cy][cx]
+          })
+          .join('')
+        setActiveWordPreview(letters)
+      }
+    }
+  }
+
   const handleAutoSolve = () => {
     const all = puzzleData.placedWords.map((p) => p.word)
     const allLines = puzzleData.placedWords.map((p) => ({
@@ -241,13 +188,16 @@ export default function WordSearchGame({ onComplete, onExit }) {
     sound.playVictory()
   }
 
-  const handleNewPuzzle = () => {
-    setPuzzleData(generateWordSearchGrid())
+  const handleNewPuzzle = (specificThemeId = null) => {
+    sound.playKeyClick()
+    const nextPuzzle = generateThemedWordSearch(specificThemeId)
+    setPuzzleData(nextPuzzle)
     setFoundWords([])
     setFoundLines([])
     setSelection([])
     setActiveWordPreview('')
     setAutoAdvanceCountdown(null)
+    setSeconds(0)
   }
 
   // Set of all found cell keys for fast background highlighting
@@ -257,6 +207,7 @@ export default function WordSearchGame({ onComplete, onExit }) {
     <div
       className="relative w-screen h-screen bg-[#0284c7] flex flex-col items-center justify-between overflow-hidden select-none font-sans"
       onMouseUp={handleMouseUp}
+      onTouchEnd={handleMouseUp}
     >
       {/* 1. TOP WINDOWS-STYLE APP BAR (Image 1 Style) */}
       <div className="w-full bg-[#0284c7] text-white flex items-center justify-between px-4 py-1.5 text-xs">
@@ -271,9 +222,9 @@ export default function WordSearchGame({ onComplete, onExit }) {
         </div>
       </div>
 
-      {/* 2. SUB-HEADER TOOLBAR (Timer, Mode, Actions - Image 1 Style) */}
-      <div className="w-full bg-[#f0f9ff] text-slate-800 flex items-center justify-between px-6 py-2.5 border-b border-sky-200 shadow-sm text-sm">
-        <div className="flex items-center gap-5">
+      {/* 2. SUB-HEADER TOOLBAR (Timer, Active Theme, Mode, Actions - Image 1 Style) */}
+      <div className="w-full bg-[#f0f9ff] text-slate-800 flex flex-wrap items-center justify-between px-4 sm:px-6 py-2 border-b border-sky-200 shadow-sm text-sm gap-2">
+        <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
           <button
             onClick={onExit}
             className="text-slate-600 hover:text-black font-extrabold text-base flex items-center gap-1 cursor-pointer"
@@ -281,59 +232,70 @@ export default function WordSearchGame({ onComplete, onExit }) {
           >
             ←
           </button>
-          <div className="font-mono font-bold text-sky-700 flex items-center gap-1.5">
+          <div className="font-mono font-bold text-sky-700 flex items-center gap-1.5 bg-sky-100/70 px-2.5 py-0.5 rounded-full border border-sky-300">
             <span>⏱️</span>
             <span>{formatTimer(seconds)}</span>
           </div>
-          <span className="font-semibold text-slate-600 text-xs sm:text-sm">
-            Medium - English
-          </span>
-          <span className="hidden sm:inline-block text-[11px] font-mono bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full border border-sky-300">
-            Straight Lines Only: ↔ ↕ ⤢
+
+          {/* Active Theme Pill */}
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full border border-emerald-300 shadow-sm">
+            <span>🏷️ THEME:</span>
+            <span className="uppercase">{puzzleData.theme.name}</span>
+          </div>
+
+          <span className="hidden lg:inline-block text-[11px] font-mono bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full border border-sky-300">
+            Straight Lines: ↔ ↕ ⤢ Diagonal (All Directions)
           </span>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4 text-xs font-medium text-slate-700">
+        <div className="flex items-center gap-2 sm:gap-3 text-xs font-medium text-slate-700">
           <button
             onClick={handleAutoSolve}
-            className="flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold cursor-pointer transition shadow-sm"
+            className="flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold cursor-pointer transition shadow-sm active:scale-95"
           >
             ⚡ Auto Solve
           </button>
-          <button onClick={handleNewPuzzle} className="hover:text-black flex items-center gap-1 cursor-pointer">
-            🔄 New puzzle
+          <button
+            onClick={() => handleNewPuzzle()}
+            className="hover:text-black flex items-center gap-1 px-3 py-1 rounded-full bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold cursor-pointer transition active:scale-95"
+          >
+            🔄 New Puzzle
           </button>
         </div>
       </div>
 
       {/* 3. MAIN WHITE PUZZLE CONTAINER (Faithful Image 1 Reproduction) */}
-      <div className="flex-1 w-full max-w-6xl p-3 sm:p-5 flex items-center justify-center">
-        <div className="w-full h-full max-h-[82vh] bg-white rounded-2xl shadow-2xl border border-sky-100 flex flex-col md:flex-row overflow-hidden p-4 sm:p-6 gap-6">
+      <div className="flex-1 w-full max-w-6xl p-2 sm:p-4 flex items-center justify-center overflow-y-auto">
+        <div className="w-full h-full max-h-[84vh] bg-white rounded-2xl shadow-2xl border border-sky-100 flex flex-col md:flex-row overflow-hidden p-3 sm:p-6 gap-4 sm:gap-6">
           
           {/* LEFT: 12x12 LETTER GRID */}
           <div className="flex-1 flex flex-col items-center justify-center">
             {/* Top Green Word Badges (Image 1 Header Pills) */}
-            <div className="flex items-center justify-center gap-4 mb-3 h-8">
+            <div className="flex items-center justify-center gap-3 mb-2 h-8">
               {activeWordPreview ? (
-                <div className="flex items-center gap-4 animate-fadeIn">
+                <div className="flex items-center gap-3 animate-fadeIn">
                   <span className="px-4 py-1 rounded-full bg-[#22c55e] text-white font-black tracking-wider text-xs uppercase shadow-sm">
                     {activeWordPreview}
                   </span>
-                  <span className="px-4 py-1 rounded-full bg-[#16a34a] text-white font-black tracking-wider text-xs uppercase shadow-sm">
+                  <span className="px-4 py-1 rounded-full bg-[#16a34a] text-white font-black tracking-wider text-xs uppercase shadow-sm hidden sm:inline-block">
                     {activeWordPreview.split('').reverse().join('')}
                   </span>
                 </div>
               ) : (
                 <span className="text-xs font-mono font-bold text-slate-400">
-                  Select words horizontally, vertically, or diagonally
+                  Drag in straight lines (Horizontal, Vertical, or Diagonal)
                 </span>
               )}
             </div>
 
             {/* Letter Grid Container with strict straight-line dragging */}
-            <div className="relative p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <div
+              ref={gridContainerRef}
+              onTouchMove={handleTouchMove}
+              className="relative p-2 rounded-xl bg-slate-50 border border-slate-200 shadow-inner"
+            >
               <div
-                className="grid gap-1 sm:gap-2"
+                className="grid gap-1 sm:gap-1.5 md:gap-2"
                 style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, minmax(0, 1fr))` }}
               >
                 {puzzleData.grid.map((row, y) =>
@@ -345,13 +307,15 @@ export default function WordSearchGame({ onComplete, onExit }) {
                     return (
                       <div
                         key={key}
+                        data-coords={key}
                         onMouseDown={() => handleCellMouseDown(x, y)}
                         onMouseEnter={() => handleCellMouseEnter(x, y)}
-                        className={`h-7 w-7 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-lg flex items-center justify-center font-bold text-sm sm:text-base md:text-lg select-none cursor-pointer transition-all ${
+                        onTouchStart={(e) => handleTouchStart(e, x, y)}
+                        className={`h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs sm:text-base md:text-lg select-none cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-amber-400 text-black scale-105 shadow-md ring-2 ring-amber-500'
+                            ? 'bg-amber-400 text-black scale-105 shadow-md ring-2 ring-amber-500 font-black'
                             : isFound
-                            ? 'bg-[#38bdf8] text-white font-extrabold shadow-sm'
+                            ? 'bg-[#38bdf8] text-white font-black shadow-sm'
                             : 'text-slate-800 hover:bg-sky-100'
                         }`}
                       >
@@ -365,19 +329,19 @@ export default function WordSearchGame({ onComplete, onExit }) {
           </div>
 
           {/* RIGHT: 2-COLUMN TARGET WORD LIST (Image 1 Style) */}
-          <div className="w-full md:w-80 flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:pl-6">
+          <div className="w-full md:w-80 flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-200 pt-3 md:pt-0 md:pl-5">
             <div>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-3">
                 <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                  WORD LIST
+                  WORD LIST ({puzzleData.theme.name})
                 </span>
-                <span className="text-xs font-mono font-bold text-sky-600">
+                <span className="text-xs font-mono font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
                   {foundWords.length} / {puzzleData.placedWords.length} Found
                 </span>
               </div>
 
               {/* 2-Column Word List with strike-throughs */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs sm:text-sm font-bold tracking-wide">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-sm font-bold tracking-wide">
                 {puzzleData.placedWords.map((item) => {
                   const isFound = foundWords.includes(item.word)
                   return (
@@ -405,16 +369,12 @@ export default function WordSearchGame({ onComplete, onExit }) {
             {/* Bottom Progress & Advance Action */}
             <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
               {isAllFound ? (
-                <button
-                  onClick={onComplete}
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2 animate-bounce"
-                >
-                  <span>Sublevel 1 Cleared! Advance to Memory Bot</span>
-                  <span>➔</span>
-                </button>
+                <div className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 animate-bounce">
+                  <span>✓ ALL WORDS FOUND! ADVANCING TO MEMORY BOT...</span>
+                </div>
               ) : (
-                <div className="text-center text-xs text-slate-400">
-                  Drag straight lines (↔ ↕ ⤢) to select words
+                <div className="text-center text-xs text-slate-400 font-mono">
+                  Drag straight lines in any direction: ↔ ↕ ⤢
                 </div>
               )}
             </div>
