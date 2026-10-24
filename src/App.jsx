@@ -5,6 +5,7 @@ import HubScene from './scenes/HubScene'
 import RoomScene from './scenes/RoomScene'
 import LevelTwoScene from './scenes/LevelTwoScene'
 import LevelThreeScene from './scenes/LevelThreeScene'
+import LevelFourScene from './scenes/LevelFourScene'
 
 const App = () => {
   // Pure narrative game progression:
@@ -68,6 +69,17 @@ const App = () => {
       <LevelThreeScene
         onBackToMenu={() => setCurrentScene('menu')}
         onBackToLevelTwo={() => setCurrentScene('level2')}
+        onGoToLevel4={() => setCurrentScene('level4')}
+      />
+    )
+  }
+
+  // 6. Level 4 Scene: The 2D Boss Battle (Moving Platforms, Joker Puppeteer, Trapped Developer, FPS Blaster Combat)
+  if (currentScene === 'level4') {
+    return (
+      <LevelFourScene
+        onBackToMenu={() => setCurrentScene('menu')}
+        onBackToLevelThree={() => setCurrentScene('level3')}
       />
     )
   }

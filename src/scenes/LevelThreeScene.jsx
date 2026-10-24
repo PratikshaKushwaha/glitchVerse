@@ -1,6 +1,6 @@
 import { sound } from '../utils/AudioEngine'
 
-export default function LevelThreeScene({ onBackToMenu, onBackToLevelTwo }) {
+export default function LevelThreeScene({ onBackToMenu, onBackToLevelTwo, onGoToLevel4 }) {
   return (
     <div className="relative w-screen h-screen bg-[#050811] text-white flex flex-col items-center justify-between p-6 select-none font-sans overflow-hidden">
       {/* Background Cybernetic Grid Effect */}
@@ -36,30 +36,35 @@ export default function LevelThreeScene({ onBackToMenu, onBackToLevelTwo }) {
         </div>
 
         <h1 className="text-3xl sm:text-4xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-sky-400 tracking-wider uppercase">
-          LEVEL 3 REACHED
+          SECTOR 3 RESTORED
         </h1>
         <p className="mt-3 text-sm text-gray-300 font-mono leading-relaxed">
-          You have conquered all 4 sublevels of Sector 2: the Word Search, the Memory Bot, the Double Cadgy stack, and the 3 Pinned Riddles.
+          You conquered all 4 sublevels of Sector 2! But an emergency distress signal has just arrived from the Core Chamber...
         </p>
 
-        <div className="w-full my-6 p-4 rounded-2xl bg-cyan-950/60 border border-cyan-500/40 text-xs font-mono text-cyan-200 text-left space-y-1.5">
-          <div><strong className="text-white">STATUS:</strong> Matrix Core Unlocked</div>
-          <div><strong className="text-white">SECTOR INTEGRITY:</strong> Restored (98.4%)</div>
-          <div><strong className="text-white">DEVELOPER FREEDOM:</strong> Imminent</div>
+        <div className="w-full my-6 p-4 rounded-2xl bg-purple-950/40 border border-purple-500/50 text-xs font-mono text-purple-200 text-left space-y-2">
+          <div className="flex items-center gap-2 text-rose-400 font-black">
+            <span>🚨</span>
+            <span>CRITICAL ALERT: THE GLITCH JESTER DETECTED</span>
+          </div>
+          <div><strong className="text-white">HOSTAGE:</strong> The Author / Game Developer</div>
+          <div><strong className="text-white">STATUS:</strong> Held as a puppet on moving platforms above the abyss</div>
+          <div><strong className="text-white">MISSION:</strong> Sever the 3 tether strings, dodge the chaos cards, and defeat the Jester!</div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full">
           <button
             onClick={onBackToLevelTwo}
-            className="flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider cursor-pointer transition"
+            className="py-3.5 px-6 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider cursor-pointer transition"
           >
             Replay Level 2
           </button>
           <button
-            onClick={onBackToMenu}
-            className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 text-black font-black text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:brightness-110 active:scale-95 transition"
+            onClick={onGoToLevel4}
+            className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-rose-500 via-purple-500 to-cyan-400 text-white font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(168,85,247,0.6)] hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2 animate-bounce"
           >
-            Return to Main Menu
+            <span>Enter Level 4: The Puppeteer Showdown</span>
+            <span>➔</span>
           </button>
         </div>
       </div>
