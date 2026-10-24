@@ -71,9 +71,14 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
               ))}
             </div>
 
-            <p className="text-xs text-amber-200/90 text-center mt-4 leading-relaxed font-sans">
-              Sequence is critical. There are <span className="font-bold text-white">6 possible permutations</span> of these 3 digits. Enter your solution on the door lock terminal.
-            </p>
+            <div className="mt-4 p-3 rounded-lg bg-yellow-950/60 border border-yellow-500/40 text-center w-full">
+              <span className="text-xs text-yellow-300 font-bold block">
+                🔑 VAULT KEY COMBINATION: [{roomData.digits.join('')}]
+              </span>
+              <p className="text-[11px] text-gray-300 mt-1">
+                Enter the 3 golden digits on the door keypad lock in the order discovered: <strong className="text-white">{roomData.digits.join('')}</strong>
+              </p>
+            </div>
           </div>
 
           <div className="w-full mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
@@ -131,14 +136,18 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
           {/* Digits Display */}
           <div className="flex items-center gap-2">
             {roomData.code.split('').map((char, index) => {
-              const isGlowingGold = isGolden && index === roomData.goldIndex
+              const isGlowingGold =
+                isGolden &&
+                (index === roomData.goldDigitPos ||
+                  index === roomData.goldIndex ||
+                  char === String(roomData.goldDigit))
 
               return (
                 <div
                   key={index}
                   className={`h-14 w-12 rounded-lg font-mono font-black text-2xl flex items-center justify-center transition-all ${
                     isGlowingGold
-                      ? 'bg-amber-400 text-black border-2 border-yellow-500 scale-110 shadow-[0_0_20px_#f59e0b] animate-pulse'
+                      ? 'bg-amber-400 text-black border-2 border-yellow-500 scale-110 shadow-[0_0_25px_#f59e0b] animate-pulse ring-2 ring-yellow-300 font-black'
                       : 'bg-gray-100 text-gray-800 border border-gray-300'
                   }`}
                 >

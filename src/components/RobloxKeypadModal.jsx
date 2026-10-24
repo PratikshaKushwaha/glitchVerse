@@ -28,7 +28,43 @@ export default function RobloxKeypadModal({
     }
   }, [isOpen])
 
+  const verifyCode = (codeToVerify) => {
+    const isMatch = Array.isArray(expectedCode)
+      ? expectedCode.includes(codeToVerify)
+      : codeToVerify === expectedCode
+
+    if (isMatch) {
+      sound.playDoorUnlock()
+      setIsSuccess(true)
+      setStatus('ACCESS GRANTED!')
+      setTimeout(() => {
+        onCodeSuccess(currentDoorIndex)
+        onClose()
+      }, 700)
+    } else {
+      sound.playDoorLocked()
+      setCode('')
+
+      if (isFinalRoom) {
+        const remainingLivesAfter = lives - 1
+        if (remainingLivesAfter <= 0) {
+          setStatus('SHIELDS DEPLETED — REBOOTING...')
+          onWrongGuess && onWrongGuess()
+          setTimeout(() => {
+            onClose()
+          }, 650)
+        } else {
+          setStatus(`INVALID ORDER! ${remainingLivesAfter} ATTEMPTS LEFT`)
+          onWrongGuess && onWrongGuess()
+        }
+      } else {
+        setStatus('INVALID CIPHER CODE')
+      }
+    }
+  }
+
   const handlePress = (val) => {
+    if (isSuccess) return
     sound.playTypewriter()
     setStatus('')
 
@@ -38,39 +74,24 @@ export default function RobloxKeypadModal({
     }
 
     if (val === '✔') {
-      if (code === expectedCode) {
-        sound.playDoorUnlock()
-        setIsSuccess(true)
-        setStatus('ACCESS GRANTED!')
-        setTimeout(() => {
-          onCodeSuccess(currentDoorIndex)
-          onClose()
-        }, 700)
+      if (code.length === codeLength) {
+        verifyCode(code)
       } else {
-        sound.playDoorLocked()
-        setCode('')
-
-        if (isFinalRoom) {
-          const remainingLivesAfter = lives - 1
-          if (remainingLivesAfter <= 0) {
-            setStatus('SHIELDS DEPLETED — REBOOTING...')
-            onWrongGuess && onWrongGuess()
-            setTimeout(() => {
-              onClose()
-            }, 650)
-          } else {
-            setStatus(`INVALID ORDER! ${remainingLivesAfter} ATTEMPTS LEFT`)
-            onWrongGuess && onWrongGuess()
-          }
-        } else {
-          setStatus('INVALID CIPHER CODE')
-        }
+        setStatus(`ENTER ${codeLength} DIGITS`)
       }
       return
     }
 
     if (code.length < codeLength) {
-      setCode((prev) => prev + val)
+      const nextCode = code + val
+      setCode(nextCode)
+
+      // Automatic verification when full length reached
+      if (nextCode.length === codeLength) {
+        setTimeout(() => {
+          verifyCode(nextCode)
+        }, 150)
+      }
     }
   }
 

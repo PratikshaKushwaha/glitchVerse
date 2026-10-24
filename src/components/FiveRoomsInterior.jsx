@@ -277,17 +277,39 @@ export default function FiveRoomsInterior({
                       <planeGeometry args={[0.45, 0.25]} />
                       <meshStandardMaterial color="#ffffff" roughness={0.9} />
                     </mesh>
-                    <Text
-                      position={[0, 0.005, 0]}
-                      rotation={[-Math.PI / 2, 0, 0]}
-                      fontSize={0.08}
-                      color={roomData?.isGoldenRoom ? '#f59e0b' : '#1e293b'}
-                      fontWeight="bold"
-                      anchorX="center"
-                      anchorY="middle"
-                    >
-                      {roomData?.code}
-                    </Text>
+                    {roomData?.digits ? (
+                      roomData.digits.map((digit, dIdx) => {
+                        const isGold =
+                          roomData.isGoldenRoom &&
+                          dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
+                        return (
+                          <Text
+                            key={dIdx}
+                            position={[(dIdx - 1.5) * 0.08, 0.005, 0]}
+                            rotation={[-Math.PI / 2, 0, 0]}
+                            fontSize={isGold ? 0.095 : 0.075}
+                            color={isGold ? '#eab308' : '#1e293b'}
+                            fontWeight={isGold ? 'black' : 'bold'}
+                            anchorX="center"
+                            anchorY="middle"
+                          >
+                            {digit}
+                          </Text>
+                        )
+                      })
+                    ) : (
+                      <Text
+                        position={[0, 0.005, 0]}
+                        rotation={[-Math.PI / 2, 0, 0]}
+                        fontSize={0.08}
+                        color="#1e293b"
+                        fontWeight="bold"
+                        anchorX="center"
+                        anchorY="middle"
+                      >
+                        {roomData?.code}
+                      </Text>
+                    )}
                   </group>
                 </group>
 
@@ -342,17 +364,39 @@ export default function FiveRoomsInterior({
                     <planeGeometry args={[0.45, 0.25]} />
                     <meshStandardMaterial color="#ffffff" roughness={0.9} />
                   </mesh>
-                  <Text
-                    position={[0, 0.39, 0]}
-                    rotation={[-Math.PI / 2, 0, 0]}
-                    fontSize={0.08}
-                    color={roomData?.isGoldenRoom ? '#f59e0b' : '#1e293b'}
-                    fontWeight="bold"
-                    anchorX="center"
-                    anchorY="middle"
-                  >
-                    {roomData?.code}
-                  </Text>
+                  {roomData?.digits ? (
+                    roomData.digits.map((digit, dIdx) => {
+                      const isGold =
+                        roomData.isGoldenRoom &&
+                        dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
+                      return (
+                        <Text
+                          key={dIdx}
+                          position={[(dIdx - 1.5) * 0.08, 0.39, 0]}
+                          rotation={[-Math.PI / 2, 0, 0]}
+                          fontSize={isGold ? 0.095 : 0.075}
+                          color={isGold ? '#eab308' : '#1e293b'}
+                          fontWeight={isGold ? 'black' : 'bold'}
+                          anchorX="center"
+                          anchorY="middle"
+                        >
+                          {digit}
+                        </Text>
+                      )
+                    })
+                  ) : (
+                    <Text
+                      position={[0, 0.39, 0]}
+                      rotation={[-Math.PI / 2, 0, 0]}
+                      fontSize={0.08}
+                      color="#1e293b"
+                      fontWeight="bold"
+                      anchorX="center"
+                      anchorY="middle"
+                    >
+                      {roomData?.code}
+                    </Text>
+                  )}
                 </group>
               </>
             )}
@@ -376,16 +420,37 @@ export default function FiveRoomsInterior({
                     <planeGeometry args={[0.45, 0.25]} />
                     <meshStandardMaterial color="#fef08a" />
                   </mesh>
-                  <Text
-                    position={[0, 0.2, 0.37]}
-                    fontSize={0.08}
-                    color={roomData?.isGoldenRoom ? '#b45309' : '#1e293b'}
-                    fontWeight="bold"
-                    anchorX="center"
-                    anchorY="middle"
-                  >
-                    {roomData?.code}
-                  </Text>
+                  {roomData?.digits ? (
+                    roomData.digits.map((digit, dIdx) => {
+                      const isGold =
+                        roomData.isGoldenRoom &&
+                        dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
+                      return (
+                        <Text
+                          key={dIdx}
+                          position={[(dIdx - 1.5) * 0.08, 0.2, 0.37]}
+                          fontSize={isGold ? 0.095 : 0.075}
+                          color={isGold ? '#b45309' : '#1e293b'}
+                          fontWeight={isGold ? 'black' : 'bold'}
+                          anchorX="center"
+                          anchorY="middle"
+                        >
+                          {digit}
+                        </Text>
+                      )
+                    })
+                  ) : (
+                    <Text
+                      position={[0, 0.2, 0.37]}
+                      fontSize={0.08}
+                      color="#1e293b"
+                      fontWeight="bold"
+                      anchorX="center"
+                      anchorY="middle"
+                    >
+                      {roomData?.code}
+                    </Text>
+                  )}
                 </group>
 
                 <group position={[3.48, 0.9, cz + 0.5]} rotation={[0, -Math.PI / 2, 0]}>
@@ -426,16 +491,37 @@ export default function FiveRoomsInterior({
                     <planeGeometry args={[0.62, 0.42]} />
                     <meshBasicMaterial color="#0284c7" />
                   </mesh>
-                  <Text
-                    position={[0, 0.3, 0.01]}
-                    fontSize={0.09}
-                    color={roomData?.isGoldenRoom ? '#fef08a' : '#ffffff'}
-                    fontWeight="bold"
-                    anchorX="center"
-                    anchorY="middle"
-                  >
-                    {roomData?.code}
-                  </Text>
+                  {roomData?.digits ? (
+                    roomData.digits.map((digit, dIdx) => {
+                      const isGold =
+                        roomData.isGoldenRoom &&
+                        dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
+                      return (
+                        <Text
+                          key={dIdx}
+                          position={[(dIdx - 1.5) * 0.09, 0.3, 0.01]}
+                          fontSize={isGold ? 0.11 : 0.085}
+                          color={isGold ? '#fde047' : '#ffffff'}
+                          fontWeight={isGold ? 'black' : 'bold'}
+                          anchorX="center"
+                          anchorY="middle"
+                        >
+                          {digit}
+                        </Text>
+                      )
+                    })
+                  ) : (
+                    <Text
+                      position={[0, 0.3, 0.01]}
+                      fontSize={0.09}
+                      color="#ffffff"
+                      fontWeight="bold"
+                      anchorX="center"
+                      anchorY="middle"
+                    >
+                      {roomData?.code}
+                    </Text>
+                  )}
                 </group>
 
                 <group position={[2.5, -0.3, cz - 1.2]}>
@@ -526,20 +612,21 @@ export default function FiveRoomsInterior({
 
                   {/* Instructions on screen */}
                   <Text
-                    position={[0, -0.16, 0.035]}
-                    fontSize={0.055}
-                    color="#cbd5e1"
-                    anchorX="center"
-                  >
-                    Permute 3 keys on Door Keypad (3 lives)
-                  </Text>
-                  <Text
-                    position={[0, -0.25, 0.035]}
-                    fontSize={0.045}
+                    position={[0, -0.13, 0.035]}
+                    fontSize={0.065}
+                    fontWeight="bold"
                     color="#38bdf8"
                     anchorX="center"
                   >
-                    [ Click or press E to Inspect ]
+                    {`VAULT CODE: [ ${levelData.chronologicalGoldCode || levelData.room5SecretCode} ]`}
+                  </Text>
+                  <Text
+                    position={[0, -0.23, 0.035]}
+                    fontSize={0.045}
+                    color="#94a3b8"
+                    anchorX="center"
+                  >
+                    Enter on Door Keypad to Unlock! [Press E]
                   </Text>
                 </group>
 

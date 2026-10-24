@@ -29,7 +29,7 @@ export function generateLevel1Data() {
       if (d === goldDigitPos && goldDigit !== null) {
         digits.push(goldDigit)
       } else {
-        // Random digit 1-9
+        // Random digit 1-9 (distinct from gold digit)
         let rnd = Math.floor(1 + Math.random() * 9)
         if (goldDigit !== null && rnd === goldDigit) {
           rnd = (rnd % 9) + 1
@@ -44,27 +44,16 @@ export function generateLevel1Data() {
       digits,
       goldDigit,
       goldDigitPos,
+      goldIndex: goldDigitPos, // Ensure both property names work reliably!
       isGoldenRoom,
     })
   }
 
-  // 3. For Room 5: Pick a secret permutation of the 3 golden digits
-  // Permutations of 3 elements = 3! = 6 possible combinations
-  const shuffledGolden = [...distinctGoldDigits].sort(() => Math.random() - 0.5)
-  const room5SecretCode = shuffledGolden.join('')
+  // 3. For Room 5:
+  // Chronological order of discovery (Room A -> Room B -> Room C)
+  const chronologicalGoldCode = distinctGoldDigits.join('')
 
-  // Also include Room 5 entry in rooms array for inspection modals
-  rooms.push({
-    roomNumber: 5,
-    code: room5SecretCode,
-    digits: distinctGoldDigits,
-    goldDigit: null,
-    goldDigitPos: -1,
-    isGoldenRoom: true,
-    isRoom5: true,
-  })
-
-  // Compute all 6 valid permutations for reference/hint
+  // Compute all 6 valid permutations (3! = 6)
   const [a, b, c] = distinctGoldDigits
   const allPermutations = [
     `${a}${b}${c}`,
@@ -75,11 +64,36 @@ export function generateLevel1Data() {
     `${c}${b}${a}`,
   ]
 
+  // Pick a secret permutation
+  const shuffledGolden = [...distinctGoldDigits].sort(() => Math.random() - 0.5)
+  const room5SecretCode = shuffledGolden.join('')
+
+  // Acceptable codes for Room 5:
+  // Accepts both the chronological discovery order AND the secret permutation!
+  const acceptedRoom5Codes = Array.from(
+    new Set([chronologicalGoldCode, room5SecretCode])
+  )
+
+  // Also include Room 5 entry in rooms array for inspection modals
+  rooms.push({
+    roomNumber: 5,
+    code: chronologicalGoldCode, // Primary target code
+    secretCode: room5SecretCode,
+    digits: distinctGoldDigits,
+    goldDigit: null,
+    goldDigitPos: -1,
+    goldIndex: -1,
+    isGoldenRoom: true,
+    isRoom5: true,
+  })
+
   return {
     rooms,
     goldenRoomIndices,
     distinctGoldDigits,
+    chronologicalGoldCode,
     room5SecretCode,
+    acceptedRoom5Codes,
     allPermutations,
   }
 }

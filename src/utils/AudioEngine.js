@@ -137,6 +137,10 @@ class AudioEngine {
     osc2.stop(now + 0.5)
   }
 
+  playDoorUnlocked() {
+    this.playDoorUnlock()
+  }
+
   // Door open creak
   playDoorOpen() {
     if (this.isMuted) return

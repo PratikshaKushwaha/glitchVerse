@@ -41,7 +41,10 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
   useEffect(() => {
     if (levelData) {
       console.log(
-        '%c🔑 [FINAL ROOM 5] Correct 3-digit combination: ' + levelData.room5SecretCode,
+        '%c🔑 [FINAL ROOM 5] Chronological Order: ' +
+          levelData.chronologicalGoldCode +
+          ' | Permutation: ' +
+          levelData.room5SecretCode,
         'background: #d97706; color: #ffffff; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 4px;'
       )
       console.log('✨ Golden digits discovered across rooms:', levelData.distinctGoldDigits)
@@ -56,7 +59,8 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
   useEffect(() => {
     if (currentRoomIndex === 4 || activeKeypadDoor === 4 || activeInspectRoom === 4) {
       console.log(
-        '%c[DEBUG ROOM 5 ACTIVE] Secret 3-digit passcode is: ' + levelData.room5SecretCode,
+        '%c[ROOM 5 ACTIVE] Accepted passcodes: ' +
+          levelData.acceptedRoom5Codes?.join(' or '),
         'background: #16a34a; color: #ffffff; font-size: 15px; font-weight: 900; padding: 4px 10px; border-radius: 4px;'
       )
     }
@@ -163,6 +167,17 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
       setDiamonds((d) => d + 50)
       setCurrentRoomIndex(doorIndex + 1)
       sound.playDoorUnlock()
+
+      // Automatically register golden digit if this room was golden
+      const room = levelData.rooms[doorIndex]
+      if (room && room.isGoldenRoom && room.goldDigit !== null) {
+        setFoundGoldenDigits((prev) => {
+          if (!prev.includes(room.goldDigit)) {
+            return [...prev, room.goldDigit]
+          }
+          return prev
+        })
+      }
     } else {
       // Final Room 5 cleared! LEVEL 1 MASTERED!
       // 1. FREEZE TIMER IMMEDIATELY
@@ -213,10 +228,13 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
     }
   }
 
-  // Current expected code for active keypad
+  // Current expected code for active keypad (Room 5 accepts both chronological order and permutation)
   const expectedCode =
     activeKeypadDoor === 4
-      ? levelData.room5SecretCode
+      ? levelData.acceptedRoom5Codes || [
+          levelData.chronologicalGoldCode,
+          levelData.room5SecretCode,
+        ]
       : activeKeypadDoor !== null
       ? levelData.rooms[activeKeypadDoor]?.code
       : ''
