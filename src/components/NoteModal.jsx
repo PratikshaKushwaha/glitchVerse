@@ -10,33 +10,55 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
     }
   }, [isOpen])
 
+  // ESC key to close
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' || e.key === 'KeyE') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen || !roomData) return null
 
   // Special Master Status Terminal Modal for Room 5
   if (roomData.isRoom5) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 select-none font-sans"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="room5-terminal-title"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 select-none font-sans"
+        style={{ overscrollBehavior: 'contain' }}
         onClick={onClose}
       >
         <div
           className="relative w-full max-w-md rounded-2xl bg-[#090d16] p-6 shadow-2xl border-2 border-yellow-400/80 flex flex-col items-center cursor-default pointer-events-auto"
+          style={{ overscrollBehavior: 'contain' }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close cipher terminal"
             className="absolute top-3 right-3 text-gray-400 hover:text-white font-bold text-sm cursor-pointer"
           >
             ✕
           </button>
 
-          <span className="text-[11px] uppercase tracking-widest text-yellow-400 font-mono font-bold mb-2">
-            ★ FINAL ROOM 5: MASTER CIPHER STATUS ★
+          <span
+            id="room5-terminal-title"
+            className="text-[11px] uppercase tracking-widest text-yellow-400 font-mono font-bold mb-2"
+          >
+            CORE CIPHER TERMINAL — SECTOR 05
           </span>
 
           <div className="w-full py-5 px-4 bg-black/60 border border-yellow-500/40 rounded-xl flex flex-col items-center justify-center my-2 font-mono">
             <span className="text-xs text-yellow-200/80 uppercase tracking-widest mb-3">
-              COLLECTED GOLDEN DIGIT KEYS:
+              RECOVERED GOLDEN DIGIT KEYS:
             </span>
             <div className="flex items-center gap-3">
               {roomData.digits.map((digit, idx) => (
@@ -49,23 +71,23 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
               ))}
             </div>
 
-            <p className="text-xs text-amber-200/90 text-center mt-4 leading-relaxed">
-              Order matters! There are <span className="font-bold text-white">3! = 6</span> possible combinations.
-              Enter your guess on the door keypad lock.
+            <p className="text-xs text-amber-200/90 text-center mt-4 leading-relaxed font-sans">
+              Sequence is critical. There are <span className="font-bold text-white">6 possible permutations</span> of these 3 digits. Enter your solution on the door lock terminal.
             </p>
           </div>
 
-          <div className="w-full mt-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
-            <span className="text-xs font-semibold text-yellow-300 block">
-              💡 Debug Note: Correct permutation printed to browser console!
+          <div className="w-full mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center">
+            <span className="text-xs font-mono text-yellow-300 block">
+              OPERATOR LOG: Target sequence verified in developer telemetry console.
             </span>
           </div>
 
           <button
+            type="button"
             onClick={onClose}
             className="mt-4 px-8 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-md active:scale-95 transition"
           >
-            Close Console [E]
+            Close Terminal [E]
           </button>
         </div>
       </div>
@@ -76,71 +98,86 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 select-none font-sans"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`note-room-${roomData.roomNumber}-title`}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 select-none font-sans"
+      style={{ overscrollBehavior: 'contain' }}
       onClick={onClose}
     >
       <div
         className="relative w-full max-w-sm rounded-2xl bg-[#fffdf7] p-6 shadow-2xl border-4 border-[#e2d9c8] flex flex-col items-center rotate-[-1.5deg] cursor-default pointer-events-auto"
+        style={{ overscrollBehavior: 'contain' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
           onClick={onClose}
+          aria-label="Close parchment note"
           className="absolute top-3 right-3 text-gray-400 hover:text-black font-bold text-sm cursor-pointer"
         >
           ✕
         </button>
 
-        <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-2">
-          ROOM {roomData.roomNumber} CIPHER NOTE
+        <span
+          id={`note-room-${roomData.roomNumber}-title`}
+          className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-2 font-mono"
+        >
+          ROOM {roomData.roomNumber} MANUSCRIPT FRAGMENT
         </span>
 
         {/* Paper Note with Code */}
         <div className="w-full py-6 bg-white border border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center shadow-inner my-2">
           {/* Digits Display */}
           <div className="flex items-center gap-2">
-            {roomData.digits.map((digit, idx) => {
-              const isThisDigitGold = isGolden && idx === roomData.goldDigitPos
+            {roomData.code.split('').map((char, index) => {
+              const isGlowingGold = isGolden && index === roomData.goldIndex
+
               return (
                 <div
-                  key={idx}
-                  className={`h-14 w-12 rounded-lg flex items-center justify-center font-mono font-extrabold text-3xl shadow-sm ${
-                    isThisDigitGold
-                      ? 'bg-gradient-to-b from-amber-300 to-yellow-500 text-black border-2 border-amber-600 ring-4 ring-yellow-300/50 scale-110 animate-pulse'
+                  key={index}
+                  className={`h-14 w-12 rounded-lg font-mono font-black text-2xl flex items-center justify-center transition-all ${
+                    isGlowingGold
+                      ? 'bg-amber-400 text-black border-2 border-yellow-500 scale-110 shadow-[0_0_20px_#f59e0b] animate-pulse'
                       : 'bg-gray-100 text-gray-800 border border-gray-300'
                   }`}
                 >
-                  {digit}
+                  {char}
                 </div>
               )
             })}
           </div>
 
-          <span className="text-[11px] text-gray-400 mt-3 font-medium">
-            Door Passcode: <span className="font-bold text-gray-700">{roomData.code}</span>
-          </span>
+          {/* Hint Label */}
+          {isGolden ? (
+            <div className="mt-3 flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-300 rounded-full text-[11px] font-bold text-amber-900 shadow-sm">
+              <span>✨</span>
+              <span>GOLD KEY DIGIT: [{roomData.goldDigit}]</span>
+            </div>
+          ) : (
+            <span className="text-[10px] text-gray-400 font-mono mt-3 uppercase tracking-wider">
+              Door Passcode
+            </span>
+          )}
         </div>
 
-        {/* Golden Digit Alert Banner */}
-        {isGolden ? (
-          <div className="w-full mt-2 p-3 rounded-xl bg-gradient-to-r from-amber-500/20 via-yellow-400/30 to-amber-500/20 border-2 border-yellow-500 text-center">
-            <span className="text-xs font-black text-amber-700 uppercase tracking-wider block">
-              ★ GOLDEN DIGIT FOUND: [ {roomData.goldDigit} ] ★
-            </span>
-            <span className="text-[11px] text-amber-900 font-semibold mt-0.5 block">
-              Remember this digit! It is 1 of the 3 keys needed for Room 5!
-            </span>
-          </div>
-        ) : (
-          <div className="w-full mt-2 p-2 rounded-xl bg-gray-100 border border-gray-200 text-center text-[11px] text-gray-500">
-            No golden digit in this room. Use this code to unlock the door!
-          </div>
-        )}
+        {/* Instructions */}
+        <p className="text-xs text-gray-600 text-center mt-2 leading-relaxed">
+          {isGolden ? (
+            <>
+              Memorize the <strong className="text-amber-700">glowing golden digit</strong>! It is required for the final vault in Room 5.
+            </>
+          ) : (
+            'Input this passcode on the door keypad lock to open the corridor.'
+          )}
+        </p>
 
         <button
+          type="button"
           onClick={onClose}
-          className="mt-4 px-8 py-2.5 rounded-xl bg-[#00a2ff] hover:bg-[#0090e3] text-white font-bold text-xs uppercase tracking-wider cursor-pointer shadow-md active:scale-95 transition"
+          className="mt-4 px-6 py-2 rounded-xl bg-gray-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider cursor-pointer active:scale-95 transition"
         >
-          Got it [E]
+          Fold Note [E]
         </button>
       </div>
     </div>

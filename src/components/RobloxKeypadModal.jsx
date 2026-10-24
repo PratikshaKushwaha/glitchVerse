@@ -51,20 +51,19 @@ export default function RobloxKeypadModal({
         setCode('')
 
         if (isFinalRoom) {
-          // Final room wrong permutation penalty
           const remainingLivesAfter = lives - 1
           if (remainingLivesAfter <= 0) {
-            setStatus('OUT OF LIVES! RESETTING...')
+            setStatus('SHIELDS DEPLETED — REBOOTING...')
             onWrongGuess && onWrongGuess()
             setTimeout(() => {
               onClose()
             }, 650)
           } else {
-            setStatus(`WRONG! ${remainingLivesAfter} LIVES LEFT`)
+            setStatus(`INVALID ORDER! ${remainingLivesAfter} ATTEMPTS LEFT`)
             onWrongGuess && onWrongGuess()
           }
         } else {
-          setStatus('WRONG CODE!')
+          setStatus('INVALID CIPHER CODE')
         }
       }
       return
@@ -99,22 +98,32 @@ export default function RobloxKeypadModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px] p-4 select-none font-sans"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="keypad-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-[2px] p-4 select-none font-sans"
+      style={{ overscrollBehavior: 'contain' }}
       onClick={onClose}
     >
       <div
         className="w-full max-w-[290px] rounded-2xl bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-gray-200 flex flex-col items-center cursor-default pointer-events-auto"
+        style={{ overscrollBehavior: 'contain' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="w-full flex items-center justify-between pb-2 mb-2 border-b border-gray-100">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-black text-gray-700 uppercase tracking-wider">
-              {isFinalRoom ? 'MASTER VAULT KEYPAD' : `ROOM ${currentDoorIndex + 1} KEYPAD`}
+            <span
+              id="keypad-modal-title"
+              className="text-xs font-black text-gray-700 uppercase tracking-wider font-mono"
+            >
+              {isFinalRoom ? 'CORE VAULT LOCK' : `SECTOR 0${currentDoorIndex + 1} DOOR LOCK`}
             </span>
           </div>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close keypad lock"
             className="text-gray-400 hover:text-black font-bold text-sm cursor-pointer"
           >
             ✕
@@ -124,8 +133,8 @@ export default function RobloxKeypadModal({
         {/* Lives Indicator for Final Room */}
         {isFinalRoom && (
           <div className="w-full mb-2 flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-red-50 border border-red-200 text-xs">
-            <span className="font-bold text-red-600">Lives Remaining:</span>
-            <span className="text-base tracking-widest">
+            <span className="font-bold text-red-600 font-mono">ATTEMPTS:</span>
+            <span className="text-base tracking-widest" aria-label={`${lives} lives remaining`}>
               {'❤️'.repeat(Math.max(0, lives))}
               {'🖤'.repeat(Math.max(0, 3 - lives))}
             </span>
@@ -135,11 +144,11 @@ export default function RobloxKeypadModal({
         {/* Digital Screen at Top */}
         <div className="w-full h-14 rounded-xl bg-[#0f172a] border-2 border-gray-300 flex items-center justify-center shadow-inner mb-3 px-3">
           {isSuccess ? (
-            <span className="text-emerald-400 font-extrabold text-base tracking-wider">
-              ✔ {isFinalRoom ? 'VAULT OPEN' : 'UNLOCKED'}
+            <span className="text-emerald-400 font-extrabold text-base tracking-wider font-mono">
+              ✔ {isFinalRoom ? 'VAULT BREACHED' : 'AUTHORIZED'}
             </span>
           ) : status ? (
-            <span className="text-red-400 font-bold text-sm text-center animate-pulse">
+            <span className="text-red-400 font-bold text-xs text-center animate-pulse font-mono">
               {status}
             </span>
           ) : (
@@ -162,8 +171,10 @@ export default function RobloxKeypadModal({
               const isRed = btn === '✖'
               return (
                 <button
+                  type="button"
                   key={btn}
                   onClick={() => handlePress(btn)}
+                  aria-label={isGreen ? 'Submit code' : isRed ? 'Clear code' : `Digit ${btn}`}
                   className={`h-12 rounded-xl font-extrabold text-lg flex items-center justify-center cursor-pointer transition active:scale-95 shadow-md border ${
                     isGreen
                       ? 'bg-[#22c55e] hover:bg-[#16a34a] border-green-600 text-white shadow-green-200 text-xl'
@@ -181,8 +192,8 @@ export default function RobloxKeypadModal({
 
         <p className="text-[11px] text-gray-500 font-medium mt-3 text-center">
           {isFinalRoom
-            ? 'Enter the 3 golden digits in the correct order! (6 permutations)'
-            : 'Click or type numbers on your keyboard'}
+            ? 'Input the 3 recovered golden digits in the exact order.'
+            : 'Click keypad buttons or type directly via numeric keys.'}
         </p>
       </div>
     </div>
