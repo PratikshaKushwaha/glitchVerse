@@ -168,9 +168,25 @@ export default function LevelOneScene({ onReturnToHub }) {
             <span className="text-[10px] text-cyan-400/70 tracking-widest uppercase">
               Lives
             </span>
-            <span className="text-base">
-              {'❤️'.repeat(lives) || '💀 GAME OVER'}
-            </span>
+            <div className="flex items-center gap-1 mt-1">
+              {lives > 0 ? (
+                [1, 2, 3].map((heartIndex) => (
+                  <svg
+                    key={heartIndex}
+                    className={`w-4 h-4 ${
+                      heartIndex <= lives
+                        ? 'fill-rose-500 drop-shadow-[0_0_6px_rgba(244,63,94,0.6)]'
+                        : 'fill-gray-600'
+                    }`}
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                ))
+              ) : (
+                <span className="text-red-400 font-bold text-xs font-mono">[TERMINATED]</span>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-col items-center">
@@ -210,7 +226,7 @@ export default function LevelOneScene({ onReturnToHub }) {
                 ROOM {currentRoom}: THE ABANDONED COMPLEX
               </span>
               <span className="text-xs text-emerald-400">
-                {glitchVisionActive ? '⚡ GLITCH SCANNER ENGAGED' : 'STANDARD VIEW'}
+                {glitchVisionActive ? '[GLITCH SCANNER ENGAGED]' : 'STANDARD VIEW'}
               </span>
             </div>
             <p className="mt-3 text-sm text-cyan-100/80 leading-relaxed">
@@ -232,7 +248,7 @@ export default function LevelOneScene({ onReturnToHub }) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-bold text-yellow-300 uppercase tracking-widest">
-                    ✨ GLITCH RESONANCE DETECTED:
+                    [GLITCH RESONANCE DETECTED]
                   </p>
                   <p className="text-sm mt-1">
                     Hidden UV cipher carved behind the panel:{' '}

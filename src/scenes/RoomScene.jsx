@@ -41,15 +41,15 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
   useEffect(() => {
     if (levelData) {
       console.log(
-        '%c🔑 [FINAL ROOM 5] Chronological Order: ' +
+        '%c[FINAL ROOM 5] Chronological Order: ' +
           levelData.chronologicalGoldCode +
           ' | Permutation: ' +
           levelData.room5SecretCode,
         'background: #d97706; color: #ffffff; font-size: 14px; font-weight: bold; padding: 4px 8px; border-radius: 4px;'
       )
-      console.log('✨ Golden digits discovered across rooms:', levelData.distinctGoldDigits)
+      console.log('[GOLDEN DIGITS] Discovered across rooms:', levelData.distinctGoldDigits)
       console.log(
-        '🚪 Room passcodes (Rooms 1-4):',
+        '[ROOM PASSCODES] (Rooms 1-4):',
         levelData.rooms.filter((r) => r.roomNumber <= 4).map((r) => `Room ${r.roomNumber}: ${r.code}`)
       )
     }
@@ -186,7 +186,7 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
 
       setDiamonds((d) => d + 250)
       setBadgeInfo({
-        title: '★ LEVEL 1 MASTERED! ★',
+        title: 'LEVEL 1 MASTERED',
         subtitle: 'You unlocked the Master Vault and freed the sector! Transitioning to Level 2...',
       })
       setBadgeAwarded(true)

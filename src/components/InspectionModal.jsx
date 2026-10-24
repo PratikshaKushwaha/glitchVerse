@@ -65,9 +65,11 @@ export default function InspectionModal({ object, onClose, onDiscoverClue }) {
           </div>
           <button
             onClick={onClose}
-            className="text-cyan-400/60 hover:text-cyan-200 text-sm cursor-pointer"
+            className="text-cyan-400/60 hover:text-cyan-200 cursor-pointer p-1"
           >
-            ✕
+            <svg className="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
@@ -79,7 +81,7 @@ export default function InspectionModal({ object, onClose, onDiscoverClue }) {
           <div className="mt-4 p-3 rounded bg-yellow-950/40 border border-yellow-500/50 flex items-center justify-between">
             <div>
               <span className="text-[10px] text-yellow-400 uppercase tracking-widest font-bold block">
-                ✨ SECRET CIPHER REVEALED
+                [CIPHER REVEALED]
               </span>
               <span className="text-xl font-bold tracking-widest text-yellow-300">
                 [ 4 - 8 - 2 ]

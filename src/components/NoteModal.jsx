@@ -73,7 +73,7 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
 
             <div className="mt-4 p-3 rounded-lg bg-yellow-950/60 border border-yellow-500/40 text-center w-full">
               <span className="text-xs text-yellow-300 font-bold block">
-                🔑 VAULT KEY COMBINATION: [{roomData.digits.join('')}]
+                [VAULT KEY COMBINATION]: [{roomData.digits.join('')}]
               </span>
               <p className="text-[11px] text-gray-300 mt-1">
                 Enter the 3 golden digits on the door keypad lock in the order discovered: <strong className="text-white">{roomData.digits.join('')}</strong>
@@ -160,7 +160,9 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
           {/* Hint Label */}
           {isGolden ? (
             <div className="mt-3 flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-300 rounded-full text-[11px] font-bold text-amber-900 shadow-sm">
-              <span>✨</span>
+              <svg className="w-3.5 h-3.5 fill-amber-600" viewBox="0 0 24 24">
+                <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+              </svg>
               <span>GOLD KEY DIGIT: [{roomData.goldDigit}]</span>
             </div>
           ) : (

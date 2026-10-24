@@ -156,12 +156,16 @@ export default function HubScene({ onEnterLevelOne }) {
             >
               {!isManuscriptRead ? (
                 <>
-                  <span className="text-base">🔒</span>
+                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                  </svg>
                   <span>DOOR LOCKED — Read the manuscript on the right first</span>
                 </>
               ) : isDoorOpen ? (
                 <>
-                  <span className="text-base animate-pulse">⚡</span>
+                  <svg className="w-4 h-4 fill-cyan-300 animate-pulse shrink-0" viewBox="0 0 24 24">
+                    <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+                  </svg>
                   <span>PORTAL ACTIVE — Walk through or click to enter</span>
                   <span className="ml-1 px-2.5 py-0.5 rounded bg-cyan-400 text-black font-extrabold text-xs">
                     ENTER ↵
@@ -246,8 +250,11 @@ export default function HubScene({ onEnterLevelOne }) {
       {/* Teleport Portal Glitch Flash Transition */}
       {isTransitioning && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-cyan-400 animate-pulse transition-opacity duration-500">
-          <div className="text-center font-mono text-blue font-extrabold text-2xl tracking-widest uppercase">
-            ⚡ ENTERING SECTOR 1...
+          <div className="flex items-center justify-center gap-3 text-center font-mono text-black font-extrabold text-2xl tracking-widest uppercase">
+            <svg className="w-7 h-7 fill-black animate-bounce" viewBox="0 0 24 24">
+              <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+            </svg>
+            <span>ENTERING SECTOR 1...</span>
           </div>
         </div>
       )}

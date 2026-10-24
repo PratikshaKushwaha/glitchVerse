@@ -164,7 +164,7 @@ export default function ManuscriptModal({ isOpen, onClose }) {
             >
               {pageIndex < STORY_PAGES.length - 1
                 ? 'Next Page →'
-                : 'Close & Unlock Door 🔓'}
+                : 'Close & Unlock Door ➔'}
             </button>
           </div>
         </div>

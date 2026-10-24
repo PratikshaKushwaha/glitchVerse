@@ -1,19 +1,85 @@
 import { useState, useEffect, useRef } from 'react'
 import { sound } from '../utils/AudioEngine'
 
-// Card items with vibrant icons matching offline 2-player reference (Image 2)
+// Card items with vibrant themed icons matching offline 2-player reference
 const CARD_TYPES = [
-  { id: 'butterfly', icon: '🦋', name: 'Butterfly', bg: 'bg-[#58a700]' }, // Matches Image 2!
-  { id: 'dice', icon: '🎲', name: 'Dice', bg: 'bg-[#dc2626]' },
-  { id: 'star', icon: '⭐', name: 'Star', bg: 'bg-[#eab308]' },
-  { id: 'cat', icon: '🐱', name: 'Cat', bg: 'bg-[#ec4899]' },
-  { id: 'diamond', icon: '💎', name: 'Diamond', bg: 'bg-[#0284c7]' },
-  { id: 'robot', icon: '🤖', name: 'Robot', bg: 'bg-[#7c3aed]' },
-  { id: 'rocket', icon: '🚀', name: 'Rocket', bg: 'bg-[#0f766e]' },
-  { id: 'pizza', icon: '🍕', name: 'Pizza', bg: 'bg-[#ea580c]' },
-  { id: 'balloon', icon: '🎈', name: 'Balloon', bg: 'bg-[#e11d48]' },
-  { id: 'landscape', icon: '🏞️', name: 'Landscape', bg: 'bg-[#475569]' },
+  { id: 'butterfly', name: 'Butterfly', bg: 'bg-[#58a700]' },
+  { id: 'dice', name: 'Dice', bg: 'bg-[#dc2626]' },
+  { id: 'star', name: 'Star', bg: 'bg-[#eab308]' },
+  { id: 'shield', name: 'Shield', bg: 'bg-[#ec4899]' },
+  { id: 'diamond', name: 'Diamond', bg: 'bg-[#0284c7]' },
+  { id: 'robot', name: 'Robot', bg: 'bg-[#7c3aed]' },
+  { id: 'rocket', name: 'Rocket', bg: 'bg-[#0f766e]' },
+  { id: 'lightning', name: 'Lightning', bg: 'bg-[#ea580c]' },
+  { id: 'heart', name: 'Heart', bg: 'bg-[#e11d48]' },
+  { id: 'key', name: 'Key', bg: 'bg-[#475569]' },
 ]
+
+function renderCardIcon(id, className = 'w-8 h-8 sm:w-10 sm:h-10 text-white fill-current drop-shadow-md') {
+  switch (id) {
+    case 'butterfly':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M12 4c.6 0 1 .4 1 1v14c0 .6-.4 1-1 1s-1-.4-1-1V5c0-.6.4-1 1-1zm-2 2C6 6 3 9 3 13c0 3 2 5 5 5 1 0 1.7-.3 2-.6V6.7C9.7 6.3 9.3 6 10 6zm4 0c-.7 0-1.1.3-1.4.7v10.7c.3.3 1 .6 2 .6 3 0 5-2 5-5 0-4-3-7-7-7z"/>
+        </svg>
+      )
+    case 'dice':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7.5 9C6.67 9 6 8.33 6 7.5S6.67 6 7.5 6 9 6.67 9 7.5 8.33 9 7.5 9zm9 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm0-9c-.83 0-1.5-.67-1.5-1.5S15.67 6 16.5 6s1.5.67 1.5 1.5S17.33 9 16.5 9zm-9 9c-.83 0-1.5-.67-1.5-1.5S6.67 15 7.5 15s1.5.67 1.5 1.5S8.33 18 7.5 18zm4.5-4.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+        </svg>
+      )
+    case 'star':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>
+      )
+    case 'shield':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v4h4v2h-4v4h-2v-4H7v-2h4V7z"/>
+        </svg>
+      )
+    case 'diamond':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M16 2l6 7-10 13L2 9l6-7h8zm-1.4 2H9.4L4.8 9h14.4l-4.6-5zM12 11.5L5.7 10 12 19.3 18.3 10 12 11.5z"/>
+        </svg>
+      )
+    case 'robot':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M12 2a2 2 0 012 2c0 .74-.4 1.38-1 1.72V7h4a3 3 0 013 3v8a3 3 0 01-3 3H7a3 3 0 01-3-3v-8a3 3 0 013-3h4V5.72A2 2 0 0112 2zM7.5 11a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm9 0a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM8 17h8v-1.5H8V17z"/>
+        </svg>
+      )
+    case 'rocket':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M12 2.5s4 3.5 4 8.5c0 2.5-1 4.5-1.5 5.5h-5C9 15.5 8 13.5 8 11c0-5 4-8.5 4-8.5zM6 14.5l-3 4.5h4l1-3.5-2-1zm12 0l2 1 1 3.5h4l-3-4.5h-4zM12 18a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/>
+        </svg>
+      )
+    case 'lightning':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+        </svg>
+      )
+    case 'heart':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      )
+    case 'key':
+    default:
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path d="M7 14a5 5 0 115-5c0 .34-.04.67-.1 1H15v2h2v2h3v2h-4.1c-.58 1.76-2.24 3-4.14 3-2.48 0-4.5-2.02-4.5-4.5-.06-.17-.16-.34-.26-.5zm0-2a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/>
+        </svg>
+      )
+  }
+}
 
 // 10 pairs = 20 cards
 function createShuffledDeck() {
@@ -220,7 +286,7 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
               : 'bg-emerald-500 text-black'
           }`}
         >
-          {isBotTurn ? "🤖 Bot's Turn..." : `👤 ${playerName}'s Turn!`}
+          {isBotTurn ? "BOT'S TURN..." : `${playerName.toUpperCase()}'S TURN!`}
         </div>
 
         {/* Right Pill: EXIT button from Image 2 */}
@@ -264,11 +330,11 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
 
                 {/* CARD FRONT (Green/Vibrant Theme with Icon & Border - Image 2) */}
                 <div
-                  className={`absolute inset-0 rounded-2xl ${card.bg} border-[3.5px] border-white shadow-[0_6px_15px_rgba(0,0,0,0.6)] flex items-center justify-center text-3xl sm:text-4xl transition-transform duration-500 ${
+                  className={`absolute inset-0 rounded-2xl ${card.bg} border-[3.5px] border-white shadow-[0_6px_15px_rgba(0,0,0,0.6)] flex items-center justify-center transition-transform duration-500 ${
                     isFlipped || isMatched ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                   }`}
                 >
-                  <span className="drop-shadow-md">{card.icon}</span>
+                  {renderCardIcon(card.id)}
                 </div>
               </div>
             )
@@ -282,9 +348,9 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
               {liftingMatchCards.map((card) => (
                 <div
                   key={card.uniqueId}
-                  className={`h-28 w-24 sm:h-32 sm:w-28 rounded-3xl ${card.bg} border-4 border-white shadow-[0_25px_50px_rgba(0,0,0,0.9)] flex items-center justify-center text-5xl sm:text-6xl scale-125 transition-transform duration-500 ring-4 ring-yellow-400/80`}
+                  className={`h-28 w-24 sm:h-32 sm:w-28 rounded-3xl ${card.bg} border-4 border-white shadow-[0_25px_50px_rgba(0,0,0,0.9)] flex items-center justify-center scale-125 transition-transform duration-500 ring-4 ring-yellow-400/80`}
                 >
-                  <span className="drop-shadow-2xl">{card.icon}</span>
+                  {renderCardIcon(card.id, 'w-14 h-14 sm:w-16 sm:h-16 text-white fill-current drop-shadow-2xl')}
                 </div>
               ))}
             </div>

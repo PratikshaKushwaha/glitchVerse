@@ -58,17 +58,19 @@ export default function KeypadModal({
           </span>
           <button
             onClick={onClose}
-            className="text-cyan-400/60 hover:text-cyan-200 text-sm cursor-pointer"
+            className="text-cyan-400/60 hover:text-cyan-200 cursor-pointer p-1"
           >
-            ✕
+            <svg className="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
         {/* Display Screen */}
         <div className="w-full h-14 rounded bg-cyan-950/70 border border-cyan-500/60 flex items-center justify-center text-2xl tracking-[0.5em] text-cyan-200 font-bold shadow-inner">
           {isSuccess ? (
-            <span className="text-emerald-400 tracking-normal text-sm">
-              ✔ ACCESS GRANTED
+            <span className="text-emerald-400 tracking-normal text-sm font-bold">
+              [ACCESS GRANTED]
             </span>
           ) : (
             code.padEnd(3, '·')

@@ -107,7 +107,7 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
     if (!currentRiddle) return
     sound.playVictory()
     setIsSuccess(true)
-    setStatusMessage(`★ SOLVED: "${currentRiddle.answer}" IS CORRECT! ★`)
+    setStatusMessage(`SOLVED: "${currentRiddle.answer}" IS CORRECT!`)
 
     setTimeout(() => {
       if (currentRiddleIndex < activeRiddles.length - 1) {
@@ -193,9 +193,11 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
           <button
             onClick={handleShuffleRiddles}
             disabled={isLoadingApi}
-            className="px-3.5 py-1.5 rounded-full bg-purple-700 hover:bg-purple-600 text-white font-bold cursor-pointer transition shadow active:scale-95 text-xs flex items-center gap-1"
+            className="px-3.5 py-1.5 rounded-full bg-purple-700 hover:bg-purple-600 text-white font-bold cursor-pointer transition shadow active:scale-95 text-xs flex items-center gap-1.5"
           >
-            <span>🔄</span>
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
             <span>{isLoadingApi ? 'Fetching...' : 'New Riddles'}</span>
           </button>
           <button
@@ -242,9 +244,11 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
             <div className="border-t border-gray-300/80 pt-3 flex flex-col items-center gap-1.5">
               <button
                 onClick={() => setShowHint(!showHint)}
-                className="text-xs font-mono font-bold text-amber-900 hover:text-black flex items-center gap-1 cursor-pointer transition"
+                className="text-xs font-mono font-bold text-amber-900 hover:text-black flex items-center gap-1.5 cursor-pointer transition"
               >
-                <span>💡</span>
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 017 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                </svg>
                 <span>{showHint ? 'Hide Clue' : 'Reveal Clue & Letter Count'}</span>
               </button>
               {showHint && (
@@ -341,8 +345,10 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
       {isFinalLevelComplete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md animate-fadeIn p-4">
           <div className="max-w-md w-full p-8 rounded-3xl bg-[#0b101d] border-2 border-cyan-400 text-center text-white shadow-[0_0_60px_rgba(6,182,212,0.6)] flex flex-col items-center gap-4 animate-bounce">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center text-4xl shadow-lg">
-              ✨
+            <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center text-white shadow-lg">
+              <svg className="w-10 h-10 fill-current" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
             </div>
             <h2 className="text-2xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-300">
               ALL 3 RIDDLES CONQUERED!

@@ -146,9 +146,9 @@ const App = () => {
                 <span className="text-[10px] text-[#bfcbb8]/70">Enter Name</span>
               </label>
               <div className="flex items-center gap-2">
-                <span className="text-sm opacity-80" aria-hidden="true">
-                  👤
-                </span>
+                <svg className="h-4 w-4 fill-none stroke-[#bfcbb8]" viewBox="0 0 24 24" strokeWidth="2" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
                 <input
                   id="player-name"
                   type="text"

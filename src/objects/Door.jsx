@@ -125,7 +125,7 @@ export default function Door({
             outlineWidth={0.008}
             outlineColor="#000000"
           >
-            {isLocked ? '🔒 [SEALED]' : isOpen ? '⚡ [PORTAL ACTIVE]' : '🔓 [UNLOCKED]'}
+            {isLocked ? '[SEALED]' : isOpen ? '[PORTAL ACTIVE]' : '[UNLOCKED]'}
           </Text>
         </group>
       </group>

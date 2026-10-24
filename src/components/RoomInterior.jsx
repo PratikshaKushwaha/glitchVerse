@@ -284,7 +284,7 @@ export default function RoomInterior({
           color={exitUnlocked ? '#4ade80' : '#f87171'}
           anchorX="center"
         >
-          {exitUnlocked ? '✔ BLAST DOOR UNLOCKED' : '🔒 BLAST DOOR LOCKED'}
+          {exitUnlocked ? '[BLAST DOOR UNLOCKED]' : '[BLAST DOOR LOCKED]'}
         </Text>
 
         <pointLight
@@ -307,7 +307,7 @@ export default function RoomInterior({
               anchorX="center"
               anchorY="middle"
             >
-              ★ HIDDEN CIPHER: [ 4 - 8 - 2 ]
+              [HIDDEN CIPHER: 4 - 8 - 2]
             </Text>
             <pointLight
               ref={glitchLightRef}

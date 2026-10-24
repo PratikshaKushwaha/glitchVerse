@@ -201,7 +201,9 @@ export default function WordSearchGame({ onComplete, onExit }) {
       {/* 1. TOP WINDOWS-STYLE APP BAR (Image 1 Style) */}
       <div className="w-full bg-[#0284c7] text-white flex items-center justify-between px-4 py-1.5 text-xs">
         <div className="flex items-center gap-2">
-          <span className="text-base">🔤</span>
+          <svg className="w-4 h-4 fill-current text-white/90" viewBox="0 0 24 24">
+            <path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/>
+          </svg>
           <span className="font-semibold tracking-wide">Word Search Crossword Puzzles</span>
         </div>
         <div className="flex items-center gap-3">
@@ -222,13 +224,17 @@ export default function WordSearchGame({ onComplete, onExit }) {
             ←
           </button>
           <div className="font-mono font-bold text-sky-700 flex items-center gap-1.5 bg-sky-100/70 px-2.5 py-0.5 rounded-full border border-sky-300">
-            <span>⏱️</span>
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
+            </svg>
             <span>{formatTimer(seconds)}</span>
           </div>
 
           {/* Active Theme Pill */}
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full border border-emerald-300 shadow-sm">
-            <span>🏷️ THEME:</span>
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+            </svg>
             <span className="uppercase">{puzzleData.theme.name}</span>
           </div>
 
@@ -247,9 +253,12 @@ export default function WordSearchGame({ onComplete, onExit }) {
           </button>
           <button
             onClick={() => handleNewPuzzle()}
-            className="hover:text-black flex items-center gap-1 px-3 py-1 rounded-full bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold cursor-pointer transition active:scale-95"
+            className="hover:text-black flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold cursor-pointer transition active:scale-95"
           >
-            🔄 New Puzzle
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            <span>New Puzzle</span>
           </button>
         </div>
       </div>
@@ -363,7 +372,10 @@ export default function WordSearchGame({ onComplete, onExit }) {
                   onClick={() => onComplete && onComplete()}
                   className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer transition animate-bounce"
                 >
-                  <span>✓ ALL WORDS FOUND! ADVANCE TO MEMORY BOT ➔</span>
+                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  </svg>
+                  <span>ALL WORDS FOUND! ADVANCE TO MEMORY BOT ➔</span>
                 </button>
               ) : (
                 <div className="text-center text-xs text-slate-400 font-mono">

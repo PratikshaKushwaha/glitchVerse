@@ -61,7 +61,7 @@ export default function FiveRoomsInterior({
       wallBottomColor: '#581c87',
       floorColor: '#f8fafc',
       rugColor: '#b91c1c',
-      title: '⚡ MASTER VAULT LOCK ⚡',
+      title: 'MASTER VAULT LOCK',
       subtitle: 'Arrange the 3 Golden Digits in the exact order! (3 Lives)',
     },
   ]
@@ -322,8 +322,8 @@ export default function FiveRoomsInterior({
                   <Text position={[0, 0.45, 0.02]} fontSize={0.16} fontWeight="bold" color="#ffffff">
                     GLITCH COMPANY
                   </Text>
-                  <Text position={[0, 0.0, 0.02]} fontSize={0.22} color="#000000">
-                    [ 🐱 🐻 🤖 ]
+                  <Text position={[0, 0.0, 0.02]} fontSize={0.16} fontWeight="bold" color="#000000">
+                    [ CIPHER VAULT ]
                   </Text>
                   <Text position={[0, -0.4, 0.02]} fontSize={0.08} color="#451a03">
                     ESCAPE PUZZLE
@@ -594,7 +594,7 @@ export default function FiveRoomsInterior({
                     color="#f59e0b"
                     anchorX="center"
                   >
-                    ★ MASTER CIPHER STATUS ★
+                    [ MASTER CIPHER STATUS ]
                   </Text>
 
                   {/* Distinct Golden Keys */}

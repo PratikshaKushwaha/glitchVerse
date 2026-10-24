@@ -18,6 +18,8 @@ export default function LevelThreeScene({
   const [currentStage, setCurrentStage] = useState(0)
   const [soundEnabled, setSoundEnabled] = useState(true)
 
+  const [showSwordModal, setShowSwordModal] = useState(false)
+
   useEffect(() => {
     // 1. Attach canvas to render module
     if (!canvasRef.current) return
@@ -33,16 +35,14 @@ export default function LevelThreeScene({
     window.addEventListener('keydown', handleGesture, { once: true })
     window.addEventListener('pointerdown', handleGesture, { once: true })
 
-    // 3. Handle level completion: trigger transition to Level 4
+    // 3. Handle level completion: trigger sword reward & transition to Level 4
     const handleCompleteAll = () => {
-      sound.playDoorUnlocked()
-      setTimeout(() => {
-        if (onGoToLevel4) onGoToLevel4()
-      }, 800)
+      sound.playVictory()
+      setShowSwordModal(true)
     }
 
     // 4. Set initial scene to Level 3 GameScene (Level 0)
-    Scenes.set(new GameScene(0, handleCompleteAll))
+    Scenes.set(new GameScene(0, 3, handleCompleteAll))
 
     // 5. Game Loop
     let last = performance.now()
@@ -190,6 +190,64 @@ export default function LevelThreeScene({
           <span>Reach the golden vortex portal to unlock Sector 4!</span>
         </div>
       </footer>
+
+      {/* ================= SWORD REWARD UNLOCK MODAL ================= */}
+      {showSwordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
+          <div className="max-w-md w-full rounded-3xl bg-[#0e0a24] border-2 border-cyan-400 p-6 sm:p-8 shadow-[0_0_80px_rgba(6,182,212,0.5)] flex flex-col items-center text-center text-white gap-4 animate-bounce">
+            
+            {/* Glowing Sword Emblem */}
+            <div className="relative h-24 w-24 rounded-2xl bg-gradient-to-tr from-cyan-600 via-purple-600 to-pink-500 p-1 flex items-center justify-center shadow-2xl">
+              <div className="absolute inset-0 rounded-2xl bg-cyan-400/30 animate-ping" />
+              <div className="relative h-full w-full rounded-xl bg-[#090616] flex items-center justify-center">
+                {/* Cyber Katana SVG */}
+                <svg className="w-14 h-14 text-cyan-300 fill-current drop-shadow-[0_0_12px_#38bdf8]" viewBox="0 0 24 24">
+                  <path d="M19.78 2.22c-.98-.98-2.56-.98-3.54 0l-9.9 9.9 1.41 1.41 9.9-9.9c.98-.98 2.56-.98 3.54 0 .98.98.98 2.56 0 3.54l-9.9 9.9 1.41 1.41 9.9-9.9c1.95-1.96 1.95-5.12-.02-7.08zM2.81 18.36L4.22 17l2.83 2.83-1.41 1.41-2.83-2.88zm3.54-3.53l1.41-1.41 2.83 2.83-1.41 1.41-2.83-2.83zm2.12-2.12l1.41-1.41 2.83 2.83-1.41 1.41-2.83-2.83z"/>
+                </svg>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-[10px] font-mono font-bold tracking-[0.25em] text-cyan-400 uppercase">
+                SECTOR 3 ANOMALY CORE CONQUERED
+              </div>
+              <h2 className="text-xl sm:text-2xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300 mt-1">
+                CYBER SEVERANCE BLADE ACQUIRED!
+              </h2>
+            </div>
+
+            <p className="text-xs text-gray-300 font-sans leading-relaxed">
+              Forged from the broken gravity matrix. This high-frequency dimensional katana allows you to cleave through corrupted glitch drones and sever the puppet strings binding the Developer in Sector 4!
+            </p>
+
+            {/* Weapon Stats Card */}
+            <div className="w-full grid grid-cols-2 gap-2 text-[11px] font-mono bg-purple-950/40 border border-purple-500/30 rounded-xl p-3 text-left">
+              <div>
+                <span className="text-gray-400 block">TYPE:</span>
+                <span className="text-cyan-300 font-bold">Dimensional Blade</span>
+              </div>
+              <div>
+                <span className="text-gray-400 block">DAMAGE:</span>
+                <span className="text-emerald-400 font-bold">45 DMG + Arc</span>
+              </div>
+              <div className="col-span-2 pt-1 border-t border-purple-500/20">
+                <span className="text-gray-400 block">SPECIAL:</span>
+                <span className="text-amber-300 font-bold">Severs Puppet Tethers & Drones</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                Audio.stopMusic()
+                if (onGoToLevel4) onGoToLevel4()
+              }}
+              className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(6,182,212,0.6)] cursor-pointer transition flex items-center justify-center gap-2"
+            >
+              <span>Equip Blade & Enter Sector 4 ➔</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

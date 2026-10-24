@@ -250,14 +250,14 @@ export default function RobloxRoomInterior({
         >
           GLITCH COMPANY
         </Text>
-        {/* Pixel Character Avatars */}
+        {/* Poster Subtitle */}
         <Text
           position={[0, 0.0, 0.02]}
-          fontSize={0.22}
-          color="#000000"
+          fontSize={0.14}
+          color="#1e293b"
           anchorX="center"
         >
-          [ 🐱 🐻 🤖 ]
+          [ CORE SYSTEM TERMINAL ]
         </Text>
         <Text
           position={[0, -0.4, 0.02]}

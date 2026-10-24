@@ -44,7 +44,7 @@ export default function CadgyWordGame({ onComplete, onExit }) {
     if (isBasicComplete && !autoAdvanceTriggered.current) {
       autoAdvanceTriggered.current = true
       sound.playVictory()
-      setCommentary('🎉 ALL BASIC WORDS SOLVED! ADVANCING TO RIDDLE BOARD...')
+      setCommentary('ALL BASIC WORDS SOLVED! ADVANCING TO RIDDLE BOARD...')
       setCommentaryColor('text-emerald-300 font-extrabold')
       const timeout = setTimeout(() => {
         onComplete && onComplete()
@@ -70,7 +70,7 @@ export default function CadgyWordGame({ onComplete, onExit }) {
           sound.playWordFound()
           setFoundBasicWords((prev) => [...prev, currentWord])
           setScore((s) => s + 100)
-          setCommentary(`✓ "${currentWord}": ${basicMatch.clue} (+100)`)
+          setCommentary(`SOLVED: "${currentWord}" - ${basicMatch.clue} (+100)`)
           setCommentaryColor('text-emerald-400')
         }
         setTimeout(() => {
@@ -90,7 +90,7 @@ export default function CadgyWordGame({ onComplete, onExit }) {
           sound.playVictory()
           setFoundBonusWords((prev) => [...prev, currentWord])
           setScore((s) => s + 150)
-          setCommentary(`★ BONUS WORD DISCOVERED: "${currentWord}": ${bonusMatch.clue} (+150)`)
+          setCommentary(`BONUS DISCOVERED: "${currentWord}" - ${bonusMatch.clue} (+150)`)
           setCommentaryColor('text-sky-400')
         }
         setTimeout(() => {
@@ -170,9 +170,12 @@ export default function CadgyWordGame({ onComplete, onExit }) {
           </button>
           <button
             onClick={() => handleSwitchBoard()}
-            className="px-3 py-1 rounded-full bg-purple-800 hover:bg-purple-700 text-purple-100 font-bold text-xs cursor-pointer transition shadow active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-800 hover:bg-purple-700 text-purple-100 font-bold text-xs cursor-pointer transition shadow active:scale-95"
           >
-            🔄 New Board
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+            <span>New Board</span>
           </button>
           <div className="px-3 py-1 rounded-full bg-purple-950 border border-purple-500/50 text-xs font-mono font-bold text-amber-300 shadow">
             SCORE: {score}
@@ -214,7 +217,13 @@ export default function CadgyWordGame({ onComplete, onExit }) {
                         : 'bg-[#2a1b46] hover:bg-[#3b2760] text-gray-100 border border-purple-500/30 shadow-md hover:scale-102'
                     }`}
                   >
-                    {tile.char}
+                    {tile.isHeart ? (
+                      <svg className="w-5 h-5 fill-rose-400" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                      </svg>
+                    ) : (
+                      tile.char
+                    )}
                   </button>
                 )
               })}
@@ -247,7 +256,7 @@ export default function CadgyWordGame({ onComplete, onExit }) {
             </div>
           ) : (
             <div className="text-[11px] font-mono text-gray-500">
-              ⚡ Auto-verifies immediately upon selecting 5 letters!
+              Auto-verifies immediately upon selecting 5 letters
             </div>
           )}
         </div>
@@ -266,7 +275,10 @@ export default function CadgyWordGame({ onComplete, onExit }) {
               {currentBoard.basicWords.map((b) => (
                 <div key={b.word} className="text-[11px]">
                   {foundBasicWords.includes(b.word) ? (
-                    <span className="text-emerald-300 font-bold">✓ {b.word}: {b.clue}</span>
+                    <span className="text-emerald-300 font-bold flex items-center gap-1">
+                      <svg className="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                      <span>{b.word}: {b.clue}</span>
+                    </span>
                   ) : (
                     <span className="text-gray-400">_____ : {b.clue}</span>
                   )}
@@ -285,7 +297,10 @@ export default function CadgyWordGame({ onComplete, onExit }) {
               {currentBoard.bonusWords.map((b) => (
                 <div key={b.word} className="text-[11px]">
                   {foundBonusWords.includes(b.word) ? (
-                    <span className="text-sky-300 font-bold">★ {b.word}: {b.clue}</span>
+                    <span className="text-sky-300 font-bold flex items-center gap-1">
+                      <svg className="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                      <span>{b.word}: {b.clue}</span>
+                    </span>
                   ) : (
                     <span className="text-gray-500">Bonus Clue: {b.clue}</span>
                   )}
@@ -301,7 +316,8 @@ export default function CadgyWordGame({ onComplete, onExit }) {
             onClick={() => onComplete && onComplete()}
             className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.7)] flex items-center justify-center gap-2 cursor-pointer transition animate-bounce"
           >
-            <span>✓ ALL BASIC WORDS SOLVED! ADVANCE TO RIDDLE BOARD ➔</span>
+            <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span>ALL BASIC WORDS SOLVED! ADVANCE TO RIDDLE BOARD ➔</span>
           </button>
         )}
       </div>
