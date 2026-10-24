@@ -186,18 +186,6 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
     setFlippedIndices((prev) => [...prev, index])
   }
 
-  const handleAutoSolve = () => {
-    const allIds = Array.from(new Set(cards.map((c) => c.id)))
-    setMatchedIds(allIds)
-    setPlayerScore(10)
-    setBotScore(0)
-    setGameOver(true)
-    sound.playVictory()
-    setTimeout(() => {
-      onComplete && onComplete()
-    }, 600)
-  }
-
   return (
     <div className="relative w-screen h-screen bg-[#372f33] text-white flex flex-col items-center justify-between p-4 select-none font-sans overflow-hidden">
       
@@ -207,10 +195,11 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit 
           SUBLEVEL 2: MEMORY BOT MATCH
         </span>
         <button
-          onClick={handleAutoSolve}
-          className="px-3 py-1 rounded-full bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs cursor-pointer shadow"
+          onClick={() => onComplete && onComplete()}
+          className="px-3.5 py-1 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold text-xs cursor-pointer shadow transition active:scale-95"
+          title="Skip Sublevel (Testing)"
         >
-          ⚡ Auto Win
+          Skip Sublevel ➔
         </button>
       </div>
 

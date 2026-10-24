@@ -181,8 +181,9 @@ export default function HubScene({ onEnterLevelOne }) {
       )}
 
       {/* Top Objective Bar */}
-      <div className="pointer-events-none absolute top-5 inset-x-0 flex justify-center px-4 z-30">
-        <div className="max-w-xl w-full flex items-center justify-center px-5 py-2.5 rounded-lg bg-black/75 border border-cyan-500/30 backdrop-blur text-xs sm:text-sm font-mono text-cyan-300/90 shadow-[0_0_25px_rgba(6,182,212,0.15)]">
+      <div className="pointer-events-none absolute top-5 inset-x-0 flex items-center justify-between px-6 z-30">
+        <div className="w-24 hidden md:block" />
+        <div className="max-w-xl w-full flex items-center justify-center px-5 py-2.5 rounded-lg bg-black/75 border border-cyan-500/30 backdrop-blur text-xs sm:text-sm font-mono text-cyan-300/90 shadow-[0_0_25px_rgba(6,182,212,0.15)] pointer-events-auto">
           <div className="flex items-center gap-2.5">
             <span className="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
             <span className="uppercase text-cyan-400 font-bold">Objective:</span>
@@ -192,6 +193,15 @@ export default function HubScene({ onEnterLevelOne }) {
                 : 'The door is unlocked! Walk through the doorway.'}
             </span>
           </div>
+        </div>
+        <div className="pointer-events-auto">
+          <button
+            onClick={onEnterLevelOne}
+            className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 hover:brightness-110 text-black font-extrabold text-xs tracking-wider cursor-pointer shadow-lg transition active:scale-95"
+            title="Skip to Level 1 (Testing)"
+          >
+            Skip to Level 1 ➔
+          </button>
         </div>
       </div>
 

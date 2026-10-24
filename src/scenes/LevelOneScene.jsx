@@ -242,13 +242,12 @@ export default function LevelOneScene({ onReturnToHub }) {
                   </p>
                 </div>
                 <button
-                  className="px-3 py-1 bg-yellow-500 text-black text-xs font-bold rounded cursor-pointer hover:bg-yellow-400"
+                  className="px-3 py-1 bg-amber-500 text-black text-xs font-bold rounded cursor-pointer hover:bg-amber-400"
                   onClick={() => {
-                    setEnteredCode(roomCodes[currentRoom])
-                    sound.playTypewriter()
+                    handleCodeSuccess(currentRoom)
                   }}
                 >
-                  Autofill Code
+                  Skip Room ➔
                 </button>
               </div>
             ) : (

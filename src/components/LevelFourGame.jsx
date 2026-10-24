@@ -980,6 +980,20 @@ export default function LevelFourGame({ playerName = 'Seeker', onComplete, onExi
             <span>SHIELDS:</span>
             <span>{'❤️'.repeat(Math.max(0, playerHp))}</span>
           </div>
+
+          {/* Testing Skip Option */}
+          <button
+            onClick={() => {
+              setBossHp(0)
+              setTethersLeft([false, false, false])
+              setIsVictory(true)
+              sound.playVictory()
+            }}
+            className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:brightness-110 text-black font-extrabold text-xs cursor-pointer shadow transition active:scale-95"
+            title="Defeat Boss immediately (Testing)"
+          >
+            Defeat Boss (Skip) ➔
+          </button>
         </div>
       </div>
 

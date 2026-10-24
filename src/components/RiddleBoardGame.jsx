@@ -145,13 +145,6 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
     }
   }
 
-  // Auto solve for testing
-  const handleAutoSolve = () => {
-    if (!currentRiddle) return
-    setTypedLetters(currentRiddle.answer.split(''))
-    triggerRiddleSolved()
-  }
-
   // Calculate coordinates for circular Word Connect wheel letters
   const numLetters = currentRiddle?.wheelLetters?.length || 6
   const radius = 105 // radius in pixels
@@ -206,10 +199,11 @@ export default function RiddleBoardGame({ onComplete, onExit }) {
             <span>{isLoadingApi ? 'Fetching...' : 'New Riddles'}</span>
           </button>
           <button
-            onClick={handleAutoSolve}
-            className="px-3.5 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer transition shadow text-xs"
+            onClick={() => onComplete && onComplete()}
+            className="px-3.5 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold cursor-pointer transition shadow text-xs active:scale-95"
+            title="Skip to Level 3 (Testing)"
           >
-            ⚡ Auto Solve
+            Skip to Level 3 ➔
           </button>
         </div>
       </div>

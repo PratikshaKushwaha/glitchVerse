@@ -102,6 +102,29 @@ export default function LevelTwoScene({ playerName = 'Seeker', onBackToMenu, onB
           >
             4. Riddle Board
           </button>
+
+          <span>•</span>
+
+          <button
+            onClick={() => {
+              if (stage === 'wordsearch') setStage('memory')
+              else if (stage === 'memory') setStage('cadgy')
+              else if (stage === 'cadgy') setStage('riddle')
+              else if (stage === 'riddle' && onGoToLevel3) onGoToLevel3()
+            }}
+            className="px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-extrabold cursor-pointer transition shadow active:scale-95 text-[10px] sm:text-xs"
+            title="Skip Sublevel for testing"
+          >
+            Skip Sublevel ➔
+          </button>
+
+          <button
+            onClick={onGoToLevel3}
+            className="px-2.5 py-1 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 hover:brightness-110 text-black font-black cursor-pointer transition shadow active:scale-95 text-[10px] sm:text-xs"
+            title="Skip directly to Level 3 for testing"
+          >
+            Skip to Level 3 ➔
+          </button>
         </div>
       </div>
 

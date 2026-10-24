@@ -177,17 +177,6 @@ export default function WordSearchGame({ onComplete, onExit }) {
     }
   }
 
-  const handleAutoSolve = () => {
-    const all = puzzleData.placedWords.map((p) => p.word)
-    const allLines = puzzleData.placedWords.map((p) => ({
-      cells: p.cells,
-      word: p.word,
-    }))
-    setFoundWords(all)
-    setFoundLines(allLines)
-    sound.playVictory()
-  }
-
   const handleNewPuzzle = (specificThemeId = null) => {
     sound.playKeyClick()
     const nextPuzzle = generateThemedWordSearch(specificThemeId)
@@ -250,10 +239,11 @@ export default function WordSearchGame({ onComplete, onExit }) {
 
         <div className="flex items-center gap-2 sm:gap-3 text-xs font-medium text-slate-700">
           <button
-            onClick={handleAutoSolve}
-            className="flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold cursor-pointer transition shadow-sm active:scale-95"
+            onClick={() => onComplete && onComplete()}
+            className="flex items-center gap-1 px-3.5 py-1 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold cursor-pointer transition shadow-sm active:scale-95 text-xs"
+            title="Skip Sublevel (Testing)"
           >
-            ⚡ Auto Solve
+            Skip Sublevel ➔
           </button>
           <button
             onClick={() => handleNewPuzzle()}

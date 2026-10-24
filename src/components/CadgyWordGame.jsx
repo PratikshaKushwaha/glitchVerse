@@ -137,14 +137,6 @@ export default function CadgyWordGame({ onComplete, onExit }) {
     setSelectedTiles(nextSelection)
   }
 
-  // Quick auto-solve for testing
-  const handleAutoSolve = () => {
-    sound.playVictory()
-    const allBasic = currentBoard.basicWords.map((b) => b.word)
-    setFoundBasicWords(allBasic)
-    setScore((s) => s + 300)
-  }
-
   const currentSpelled = selectedTiles.map((t) => t.char)
 
   return (
@@ -170,10 +162,11 @@ export default function CadgyWordGame({ onComplete, onExit }) {
         {/* Puzzle Selector & Controls */}
         <div className="flex items-center gap-2">
           <button
-            onClick={handleAutoSolve}
-            className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs cursor-pointer transition shadow active:scale-95"
+            onClick={() => onComplete && onComplete()}
+            className="px-3.5 py-1 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold text-xs cursor-pointer transition shadow active:scale-95"
+            title="Skip Sublevel (Testing)"
           >
-            ⚡ Auto Solve
+            Skip Sublevel ➔
           </button>
           <button
             onClick={() => handleSwitchBoard()}

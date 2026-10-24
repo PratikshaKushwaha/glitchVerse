@@ -148,14 +148,28 @@ export default function RobloxHUD({
           </button>
         </div>
 
-        {/* Skip Level Button - REMOVED AT FINAL STAGE (ROOM 5)! */}
-        {currentRoomIndex < 4 && !badgeAwarded && (
-          <button
-            onClick={onSkipLevel}
-            className="px-4 py-1.5 rounded-full bg-[#22c55e] hover:bg-[#16a34a] border-[2.5px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.25)] text-white font-extrabold text-sm tracking-wide cursor-pointer transition active:scale-95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-          >
-            Skip Level
-          </button>
+        {/* Skip Level Options for Testing */}
+        {!badgeAwarded && (
+          <div className="flex flex-col gap-1 items-end pointer-events-auto">
+            {currentRoomIndex < 4 && (
+              <button
+                onClick={onSkipLevel}
+                className="px-3.5 py-1 rounded-full bg-[#22c55e] hover:bg-[#16a34a] border-2 border-white shadow text-white font-extrabold text-xs tracking-wide cursor-pointer transition active:scale-95"
+                title="Skip to next room (Testing)"
+              >
+                Skip Room ➔
+              </button>
+            )}
+            {onGoToLevel2 && (
+              <button
+                onClick={onGoToLevel2}
+                className="px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:brightness-110 border-2 border-white shadow text-black font-extrabold text-xs tracking-wide cursor-pointer transition active:scale-95"
+                title="Skip directly to Level 2 (Testing)"
+              >
+                Skip to Level 2 ➔
+              </button>
+            )}
+          </div>
         )}
 
         {/* Golden Digits Tracker Pill */}
