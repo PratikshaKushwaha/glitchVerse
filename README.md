@@ -174,22 +174,21 @@ Level 2 features a dynamic **Atmospheric Environment Altering System** that adap
 
 ---
 
-### Level 4: The Puppeteer Showdown (2.5D Nexus Boss Arena)
+### Level 4: The Final Showdown & Saved Author (Cyber Nexus Boss Arena)
 
-Sector 4 features a unified retro-cyberpunk HUD matching Level 3 aesthetics:
-- **Phase 1: Glitch Drones Infiltration**
-  - Six corrupted glitch drones spawn patrolling on moving platforms and firing glitch sparks.
-  - Player slashes and destroys all 6 drones using the Cyber Severance Blade to breach perimeter security.
-- **Phase 2: Jester Boss Platform Descent**
-  - Defeating the minion wave triggers the descent of the main platform holding **The Glitch Jester** and the **Developer puppet** suspended by 3 electric tether nodes.
-  - Player cuts through the 3 tether nodes to break the Jester's shield and deliver the final blow to free the developer.
-- **XP Progression & Leveling**:
-  - Earn XP by striking enemies, tethers, and the boss.
-  - Leveling up triggers an overcharge visual flash and restores 1 life.
-- **Hit Combo Multiplier**:
-  - Consecutive strikes increment a combo counter (`COMBO: 4x`), multiplying attack damage before resetting after 2.5 seconds.
-- **Lives System**:
-  - 3 Lives represented by SVG shield/heart icons with invulnerability frames and game-over recovery.
+Integrated directly from the dedicated Level 4 codebase (`d:\Downloads\level 4` $\to$ `src/level4_cyber/`):
+- **Engine**: Low-resolution 320×180 virtual framebuffer with CRT bloom, scanlines, cyberpunk city parallax background (`city_bg.jpg`), and dynamic camera framing.
+- **Phase 1: Glitch Pawns Infiltration**
+  - Six corrupted glitch pawns patrol across moving and tiered platforms.
+  - Player uses blaster gun combat (<kbd>F</kbd> / <kbd>E</kbd> / Left Click) and precision jumps/dashes to hunt down and eliminate all 6 pawns.
+- **Phase 2: Final Boss — The Cyber Overlord**
+  - Eliminating the pawns triggers a dramatic incoming warning alarm, spawning the **Cyber Overlord** equipped with heavy plasma cannons.
+  - Dynamic Boss Health Bar (`bossBar`) and player real-time vital graph (`healthGraph`) replace simple heart icons.
+  - Dodge bullet barrages, utilize gravity inversion (<kbd>G</kbd>) and dash (<kbd>Shift</kbd> / <kbd>K</kbd>), and fire counter-shots to deplete the boss's HP.
+- **The Climax: SAVED AUTHOR!**
+  - In direct alignment with the game narrative, defeating the boss triggers the **"SAVED AUTHOR!"** celebration instead of standard victory.
+  - The Author and Creator is permanently liberated from the glitching simulation runtime, followed by the grand narrative epilogue and developer communiqué.
+- **Testing Suite**: Instant skip button on the header HUD and <kbd>K</kbd> / <kbd>L</kbd> hotkeys trigger immediate boss defeat for grading and verification.
 
 ---
 
@@ -257,6 +256,14 @@ d:/Gaming/glitch/src/
 │   ├── parallax.js             # Multi-layered procedural parallax cityscape
 │   ├── settings.js             # Video shaders, palette, assist settings
 │   └── ui.js                   # Pixel-font rendering & menu system
+├── level4_cyber/               # Sector 4 Combat Engine (from d:\Downloads\level 4)
+│   ├── scenes/game.js          # Boss gauntlet, pawn spawns, Cyber Overlord, Saved Author
+│   ├── render.js               # Framebuffer renderer with attachCanvas React integration
+│   ├── input.js                # Multi-pointer and keyboard input system
+│   ├── audio.js                # Web Audio synthesizer with stopMusic lifecycle
+│   ├── parallax.js             # Cityscape parallax with city_bg.jpg bundling
+│   ├── sprites.js              # Player blaster, pawn, boss, and projectile rasterization
+│   └── ui.js                   # High-res vector vital graph & boss health bar
 ├── scenes/                     # Primary Scene Controllers
 │   ├── HubScene.jsx            # 3D threshold portal & manuscript
 │   ├── RoomScene.jsx           # Level 1 controller (5 rooms, codes, timer, lives)
