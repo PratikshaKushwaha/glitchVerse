@@ -5,6 +5,111 @@ import gameLogoImg from '../assets/the_way_out_logo.jpg'
 import endingVoiceAudio from '../assets/ElevenLabs_Untitled_project.mp3'
 import { sound } from '../utils/AudioEngine'
 
+// ================= PIXELATED CHARACTER SPRITE MATRICES =================
+const STUDENT_PIXELS = {
+  palette: {
+    '.': null,
+    'o': '#0f172a', // deep navy outline
+    'h': '#432874', // violet student hair
+    'H': '#7c3aed', // hair highlight
+    's': '#fcd34d', // warm skin tone
+    'e': '#1e1b4b', // eyes
+    'c': '#0284c7', // student blue hoodie
+    'C': '#38bdf8', // hoodie highlight
+    'p': '#1e293b', // jeans
+    'b': '#f1f5f9', // white sneakers
+  },
+  rows: [
+    '....oooooooo....',
+    '...ohhhhhhhho...',
+    '..ohhHhhhhhhho..',
+    '..ohHhhhhhhhhho.',
+    '..ohssssssssho..',
+    '..ohssssssssho..',
+    '..oseesssseeso..',
+    '..osssssssssso..',
+    '...osssssssso...',
+    '...ooccccccoo...',
+    '..occcccccccco..',
+    '..ocCccCccCcco..',
+    '..ocCccCccCcco..',
+    '.osocccccccoso..',
+    '.osocccccccoso..',
+    '..ooccccccoo....',
+    '...oppppoppo....',
+    '...oppppoppo....',
+    '...oppppoppo....',
+    '...oppppoppo....',
+    '...obbboobbbo...',
+    '...oooooooooo...',
+  ],
+}
+
+const FUTURE_SELF_PIXELS = {
+  palette: {
+    '.': null,
+    'o': '#042f2e', // cyber teal outline
+    'g': '#94a3b8', // silver hair
+    'G': '#cbd5e1', // hair highlight
+    's': '#a5f3fc', // holographic skin
+    'v': '#00f2fe', // glowing cyber visor
+    'V': '#e0f2fe', // visor gleam
+    't': '#0f172a', // cyber trench coat
+    'T': '#0891b2', // coat neon trim
+    'c': '#22d3ee', // glowing data conduit
+    'p': '#083344', // pants
+    'b': '#164e63', // boots
+  },
+  rows: [
+    '....oooooooo....',
+    '...oggggggggo...',
+    '..oggGgggggggo..',
+    '..ogssssssssgo..',
+    '..ogvvVvvvvvgo..',
+    '..ogvvvvvvvvgo..',
+    '..osssssssssso..',
+    '...osssssssso...',
+    '...oottttttoo...',
+    '..otTTttttTTto..',
+    '.otttttttttttto.',
+    '.otTtcttttctTto.',
+    '.otTtcttttctTto.',
+    '.oTttcttttcttTo.',
+    '.oTttccccccctTo.',
+    '..otttttttttto..',
+    '..ottttootttto..',
+    '..ottttootttto..',
+    '..ottttootttto..',
+    '...oppppoppo....',
+    '...oppppoppo....',
+    '...obbboobbbo...',
+    '...oooooooooo...',
+  ],
+}
+
+function PixelSprite({ sprite, className = '' }) {
+  const { palette, rows } = sprite
+  const height = rows.length
+  const width = rows[0].length
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className={className}
+      shapeRendering="crispEdges"
+      style={{ imageRendering: 'pixelated' }}
+    >
+      {rows.map((row, y) =>
+        [...row].map((char, x) => {
+          const fill = palette[char]
+          if (!fill) return null
+          return <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={fill} />
+        })
+      )}
+    </svg>
+  )
+}
+
 // The exact scripted narrative dialogue between the Student and their Future Self
 const DIALOGUE_SCRIPT = [
   {
@@ -302,10 +407,8 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
 
             {/* Emerging Holographic Human Figure */}
             <div className="mt-8 flex flex-col items-center animate-bounce">
-              <div className="relative h-28 w-28 rounded-full bg-gradient-to-t from-cyan-500/30 via-emerald-400/40 to-transparent p-1 flex items-center justify-center shadow-[0_0_60px_rgba(6,182,212,0.6)] ring-2 ring-cyan-300">
-                <svg className="w-16 h-16 fill-cyan-200 drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                </svg>
+              <div className="relative h-32 w-24 flex items-center justify-center drop-shadow-[0_0_35px_rgba(6,182,212,0.9)] animate-pulse">
+                <PixelSprite sprite={FUTURE_SELF_PIXELS} className="w-24 h-32" />
               </div>
               <h2 className="mt-4 text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-emerald-200 to-amber-200 tracking-widest uppercase">
                 A FIGURE MATERIALIZES...
@@ -373,24 +476,31 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
             </button>
           </div>
 
-          {/* 2D Visual Scene: Student and Future Self Silhouettes on the Field */}
-          <div className="relative z-10 flex-1 flex items-end justify-between px-8 sm:px-24 pb-8 pointer-events-none">
+          {/* 2D Visual Scene: Pixelated Student and Future Self on the Field */}
+          <div className="relative z-10 flex-1 flex items-end justify-between px-8 sm:px-24 pb-4 sm:pb-8 pointer-events-none">
             {/* Left: The Student (Player) */}
             <div
               className={`flex flex-col items-center transition-all duration-500 ${
                 currentLine.avatar === 'student' ? 'scale-105 opacity-100' : 'scale-95 opacity-80'
               }`}
             >
-              {/* Student Silhouette / Avatar */}
+              {/* Student Pixel Character */}
               <div className="relative flex flex-col items-center">
                 {currentLine.avatar === 'student' && (
                   <div className="px-3 py-1 rounded-full bg-amber-500/30 border border-amber-400 text-amber-200 text-[10px] font-bold tracking-widest uppercase mb-2 animate-bounce">
                     SPEAKING
                   </div>
                 )}
-                <div className="h-28 w-20 sm:h-36 sm:w-24 rounded-2xl bg-gradient-to-t from-gray-900 via-indigo-950 to-amber-900/60 border-2 border-amber-400/50 shadow-[0_0_30px_rgba(245,158,11,0.3)] flex flex-col items-center justify-center p-2 backdrop-blur">
-                  <div className="h-8 w-8 rounded-full bg-amber-200/90 shadow mb-1" />
-                  <div className="h-14 w-12 rounded-lg bg-indigo-900/80 border border-indigo-400/40" />
+                <div
+                  className={`relative transition-all duration-300 ${
+                    currentLine.avatar === 'student'
+                      ? 'scale-110 drop-shadow-[0_0_25px_rgba(245,158,11,0.6)]'
+                      : 'scale-100 opacity-80'
+                  }`}
+                >
+                  <PixelSprite sprite={STUDENT_PIXELS} className="w-20 h-28 sm:w-28 sm:h-38" />
+                  {/* Subtle shadow on the grass */}
+                  <div className="w-16 sm:w-22 h-3.5 mx-auto rounded-full bg-black/60 blur-xs mt-1" />
                 </div>
                 <div className="text-xs font-black text-amber-300 mt-2 font-mono tracking-wider">
                   {playerName.toUpperCase()}
@@ -405,16 +515,27 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
                 currentLine.avatar === 'future_self' ? 'scale-105 opacity-100' : 'scale-95 opacity-80'
               }`}
             >
-              {/* Future Self Hologram Silhouette */}
+              {/* Future Self Pixel Hologram */}
               <div className="relative flex flex-col items-center">
                 {currentLine.avatar === 'future_self' && (
                   <div className="px-3 py-1 rounded-full bg-cyan-500/30 border border-cyan-400 text-cyan-200 text-[10px] font-bold tracking-widest uppercase mb-2 animate-bounce">
                     TRANSMITTING
                   </div>
                 )}
-                <div className="h-28 w-20 sm:h-36 sm:w-24 rounded-2xl bg-gradient-to-t from-cyan-950 via-teal-900 to-cyan-500/40 border-2 border-cyan-400 shadow-[0_0_40px_rgba(6,182,212,0.5)] flex flex-col items-center justify-center p-2 backdrop-blur animate-pulse">
-                  <div className="h-8 w-8 rounded-full bg-cyan-300/90 shadow-[0_0_10px_#22d3ee] mb-1" />
-                  <div className="h-14 w-12 rounded-lg bg-cyan-900/80 border border-cyan-300/60" />
+                <div
+                  className={`relative transition-all duration-300 ${
+                    currentLine.avatar === 'future_self'
+                      ? 'scale-110 drop-shadow-[0_0_35px_rgba(6,182,212,0.9)]'
+                      : 'scale-100 opacity-75'
+                  }`}
+                >
+                  {/* Flipped horizontally to face the student */}
+                  <PixelSprite
+                    sprite={FUTURE_SELF_PIXELS}
+                    className="w-20 h-28 sm:w-28 sm:h-38 -scale-x-100 animate-pulse"
+                  />
+                  {/* Holographic Projection Base Ring */}
+                  <div className="w-18 sm:w-24 h-4 mx-auto rounded-full bg-cyan-500/30 border border-cyan-400/60 shadow-[0_0_15px_#22d3ee] blur-[0.5px] mt-1" />
                 </div>
                 <div className="text-xs font-black text-cyan-300 mt-2 font-mono tracking-wider">
                   FUTURE SELF
