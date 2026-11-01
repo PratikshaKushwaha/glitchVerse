@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import WordSearchGame from '../components/WordSearchGame'
 import MemoryCardGame from '../components/MemoryCardGame'
 import CadgyWordGame from '../components/CadgyWordGame'
@@ -18,6 +18,27 @@ export default function LevelTwoScene({
 
   // Environmental Altering State: 'wood' (Atelier Study) | 'cyber' (Neon Void) | 'glitch' (Corrupted Matrix)
   const [environment, setEnvironment] = useState('wood')
+
+  // Advance sublevel
+  const handleSkipSublevel = () => {
+    if (stage === 'wordsearch') setStage('memory')
+    else if (stage === 'memory') setStage('cadgy')
+    else if (stage === 'cadgy') setStage('riddle')
+    else if (stage === 'riddle' && onGoToLevel3) onGoToLevel3()
+  }
+
+  // Universal K key to skip sublevel
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        handleSkipSublevel()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [stage, onGoToLevel3])
 
   // Environmental purge progression across the 4 sublevels
   const purgePercentage =
@@ -63,8 +84,15 @@ export default function LevelTwoScene({
     setEnvironment((prev) => (prev === 'wood' ? 'cyber' : prev === 'cyber' ? 'glitch' : 'wood'))
   }
 
+  const stagesList = [
+    { id: 'wordsearch', num: 1, label: 'Word Search', color: 'bg-[#38bdf8] text-black' },
+    { id: 'memory', num: 2, label: 'Memory Bot', color: 'bg-[#f59e0b] text-black' },
+    { id: 'cadgy', num: 3, label: 'Double Cadgy', color: 'bg-[#ec4899] text-white' },
+    { id: 'riddle', num: 4, label: 'Riddle Board', color: 'bg-[#10b981] text-black' },
+  ]
+
   return (
-    <div className="relative w-screen h-screen overflow-hidden select-none font-sans">
+    <div className="relative w-full h-dvh min-h-dvh overflow-hidden select-none font-sans flex flex-col">
       
       {/* ================= ENVIRONMENTAL BACKGROUND LAYERS ================= */}
       {/* 1. Rustic Wood Atelier Environment (Uses wood_board.jpg) */}
@@ -108,180 +136,156 @@ export default function LevelTwoScene({
         }}
       />
 
-      {/* ================= STAGE & ENVIRONMENT SELECTOR HEADER BAR ================= */}
-      <div className="absolute top-2 inset-x-0 z-40 flex items-center justify-center pointer-events-none px-2">
-        <div className="flex items-center flex-wrap justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-black/85 border border-white/20 backdrop-blur pointer-events-auto text-[10px] sm:text-xs font-bold text-white shadow-2xl">
-          <span className="text-cyan-400 font-black">LEVEL 2:</span>
-
+      {/* ================= FIXED SLEEK RESPONSIVE NAVIGATION TOPBAR ================= */}
+      <header className="relative z-50 w-full h-12 sm:h-14 bg-black/85 border-b border-white/15 backdrop-blur px-2 sm:px-4 flex items-center justify-between gap-2 shadow-xl shrink-0">
+        
+        {/* Left: Level 2 Title & Stage Segmented Control */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
           <button
-            onClick={() => setStage('wordsearch')}
-            className={`px-2.5 py-1 rounded-full cursor-pointer transition ${
-              stage === 'wordsearch'
-                ? 'bg-[#38bdf8] text-black font-extrabold shadow'
-                : 'text-gray-300 hover:text-white'
-            }`}
+            onClick={onBackToMenu}
+            className="px-2 sm:px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[10px] sm:text-xs font-bold text-gray-300 hover:text-white transition cursor-pointer"
+            title="Return to Menu"
           >
-            1. Word Search
+            ← Menu
           </button>
 
-          <span>•</span>
+          <span className="text-cyan-400 font-black text-xs sm:text-sm tracking-wider shrink-0 hidden xs:inline">
+            LEVEL 2
+          </span>
 
-          <button
-            onClick={() => setStage('memory')}
-            className={`px-2.5 py-1 rounded-full cursor-pointer transition ${
-              stage === 'memory'
-                ? 'bg-[#f59e0b] text-black font-extrabold shadow'
-                : 'text-gray-300 hover:text-white'
-            }`}
-          >
-            2. Memory Bot
-          </button>
+          {/* Responsive Segmented Stage Buttons */}
+          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/10">
+            {stagesList.map((stg) => {
+              const isActive = stage === stg.id
+              return (
+                <button
+                  key={stg.id}
+                  onClick={() => setStage(stg.id)}
+                  className={`px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-extrabold cursor-pointer transition active:scale-95 flex items-center gap-1 ${
+                    isActive
+                      ? `${stg.color} shadow-md`
+                      : 'text-gray-400 hover:text-white hover:bg-white/10'
+                  }`}
+                  title={stg.label}
+                >
+                  <span>{stg.num}</span>
+                  <span className="hidden md:inline">. {stg.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
-          <span>•</span>
-
-          <button
-            onClick={() => setStage('cadgy')}
-            className={`px-2.5 py-1 rounded-full cursor-pointer transition ${
-              stage === 'cadgy'
-                ? 'bg-[#ec4899] text-white font-extrabold shadow'
-                : 'text-gray-300 hover:text-white'
-            }`}
-          >
-            3. Double Cadgy
-          </button>
-
-          <span>•</span>
-
-          <button
-            onClick={() => setStage('riddle')}
-            className={`px-2.5 py-1 rounded-full cursor-pointer transition ${
-              stage === 'riddle'
-                ? 'bg-[#10b981] text-black font-extrabold shadow'
-                : 'text-gray-300 hover:text-white'
-            }`}
-          >
-            4. Riddle Board
-          </button>
-
-          <span>•</span>
-
-          {/* ENVIRONMENT ALTERING BUTTON (User Request) */}
+        {/* Right: Environment Toggle, Purge Meter & Skip Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* ENVIRONMENT ALTERING BUTTON */}
           <button
             onClick={cycleEnvironment}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-yellow-300 font-mono text-[10px] cursor-pointer transition shadow active:scale-95"
+            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-yellow-300 font-mono text-[10px] sm:text-xs cursor-pointer transition shadow active:scale-95"
             title="Alter Level 2 Atmospheric Environment"
           >
-            <span>ENV:</span>
+            <span className="hidden sm:inline">ENV:</span>
             <span className="font-bold text-white uppercase">{environment}</span>
           </button>
 
-          <span>•</span>
-
           {/* Environmental Purge Indicator */}
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-[10px] font-mono text-emerald-300">
+          <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-[10px] sm:text-xs font-mono text-emerald-300">
             <span>PURGE:</span>
             <span className="font-bold">{purgePercentage}%</span>
           </div>
 
-          <span>•</span>
-
+          {/* Skip Sublevel Button */}
           <button
-            onClick={() => {
-              if (stage === 'wordsearch') setStage('memory')
-              else if (stage === 'memory') setStage('cadgy')
-              else if (stage === 'cadgy') setStage('riddle')
-              else if (stage === 'riddle' && onGoToLevel3) onGoToLevel3()
-            }}
-            className="px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-extrabold cursor-pointer transition shadow active:scale-95 text-[10px] sm:text-xs"
-            title="Skip Sublevel for testing"
+            onClick={handleSkipSublevel}
+            className="px-2 sm:px-2.5 py-1 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-extrabold cursor-pointer transition shadow active:scale-95 text-[10px] sm:text-xs"
+            title="Skip Sublevel for testing (Press K or Click)"
           >
-            Skip Sublevel ➔
+            Skip [K] -&gt;
           </button>
 
+          {/* Skip to Level 3 Button */}
           <button
             onClick={onGoToLevel3}
-            className="px-2.5 py-1 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 hover:brightness-110 text-black font-black cursor-pointer transition shadow active:scale-95 text-[10px] sm:text-xs"
+            className="px-2 sm:px-3 py-1 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 hover:brightness-110 text-black font-black cursor-pointer transition shadow active:scale-95 text-[10px] sm:text-xs"
             title="Skip directly to Level 3 for testing"
           >
-            Skip to Level 3 ➔
+            <span className="hidden sm:inline">Skip to </span>Lvl 3 -&gt;
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* ================= SUBLEVEL 1: Word Search Game ================= */}
-      {stage === 'wordsearch' && (
-        <WordSearchGame
-          onComplete={handleWordSearchComplete}
-          onExit={onBackToMenu}
-          environment={environment}
-        />
-      )}
+      {/* ================= MAIN DEDICATED SUBLEVEL CONTENT AREA ================= */}
+      <main className="relative flex-1 w-full min-h-0 overflow-hidden flex flex-col">
+        {/* ================= SUBLEVEL 1: Word Search Game ================= */}
+        {stage === 'wordsearch' && (
+          <WordSearchGame
+            onComplete={handleWordSearchComplete}
+            onExit={onBackToMenu}
+            environment={environment}
+          />
+        )}
 
-      {/* ================= SUBLEVEL 2: Memory Card Match vs Bot ================= */}
-      {stage === 'memory' && (
-        <MemoryCardGame
-          playerName={playerName}
-          onComplete={handleMemoryComplete}
-          onExit={onBackToMenu}
-          environment={environment}
-        />
-      )}
+        {/* ================= SUBLEVEL 2: Memory Card Match vs Bot ================= */}
+        {stage === 'memory' && (
+          <MemoryCardGame
+            playerName={playerName}
+            onComplete={handleMemoryComplete}
+            onExit={onBackToMenu}
+            environment={environment}
+          />
+        )}
 
-      {/* ================= SUBLEVEL 3: Double Cadgy 3D Word Stack ================= */}
-      {stage === 'cadgy' && (
-        <CadgyWordGame
-          onComplete={handleCadgyComplete}
-          onExit={onBackToMenu}
-          environment={environment}
-        />
-      )}
+        {/* ================= SUBLEVEL 3: Double Cadgy 3D Word Stack ================= */}
+        {stage === 'cadgy' && (
+          <CadgyWordGame
+            onComplete={handleCadgyComplete}
+            onExit={onBackToMenu}
+            environment={environment}
+          />
+        )}
 
-      {/* ================= SUBLEVEL 4: Wood Plank Riddle Board ================= */}
-      {stage === 'riddle' && (
-        <RiddleBoardGame
-          onComplete={handleRiddleComplete}
-          onExit={onBackToMenu}
-          environment={environment}
-        />
-      )}
+        {/* ================= SUBLEVEL 4: Pinned Riddle Board & Word Connect ================= */}
+        {stage === 'riddle' && (
+          <RiddleBoardGame
+            onComplete={handleRiddleComplete}
+            onExit={onBackToMenu}
+            environment={environment}
+          />
+        )}
 
-      {/* ================= GRAND LEVEL 2 VICTORY CELEBRATION ================= */}
-      {stage === 'victory' && (
-        <div className="relative w-full h-full flex flex-col items-center justify-center p-6 text-white text-center">
-          <div className="max-w-md w-full bg-black/85 border-2 border-yellow-400/80 rounded-3xl p-8 backdrop-blur shadow-[0_0_60px_rgba(250,204,21,0.35)] flex flex-col items-center animate-bounce">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-200 p-1 flex items-center justify-center shadow-2xl mb-4 text-black">
-              <svg className="w-10 h-10 fill-current" viewBox="0 0 24 24">
-                <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
-              </svg>
-            </div>
+        {/* ================= FINAL VICTORY MODAL ================= */}
+        {badgeAwarded && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
+            <div className="max-w-md w-full p-6 sm:p-8 rounded-3xl bg-[#0b101d] border-2 border-emerald-400 text-center text-white shadow-[0_0_80px_rgba(16,185,129,0.5)] flex flex-col items-center gap-4">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-gradient-to-tr from-emerald-500 to-cyan-400 flex items-center justify-center text-black shadow-lg animate-bounce">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-yellow-300 uppercase tracking-wider">
-              ALL 4 SUBLEVELS CONQUERED!
-            </h1>
-            <p className="mt-2 text-sm text-gray-200 leading-relaxed">
-              You mastered the Word Search, defeated the Bot, cracked Double Cadgy, and decrypted the Master Riddle!
-              The GlitchVerse is nearly saved!
-            </p>
+              <div className="space-y-1">
+                <span className="text-[10px] sm:text-xs font-mono font-bold tracking-widest text-emerald-400 uppercase">
+                  DIMENSION 2 RESTORED
+                </span>
+                <h2 className="text-xl sm:text-2xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 text-balance">
+                  GLITCH MATRIX PURGED!
+                </h2>
+              </div>
 
-            <div className="mt-6 flex flex-col sm:flex-row gap-3 w-full">
-              {onGoToLevel3 && (
-                <button
-                  onClick={onGoToLevel3}
-                  className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-black font-black text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:brightness-110 active:scale-95 transition"
-                >
-                  Enter Level 3 ➔
-                </button>
-              )}
+              <p className="text-xs sm:text-sm text-gray-300 font-sans leading-relaxed text-pretty">
+                All 4 sectors of Level 2 have been cleared. The portal to Sector 3 (Gravity Anomaly) has stabilized.
+              </p>
+
               <button
-                onClick={() => setStage('wordsearch')}
-                className="flex-1 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs uppercase tracking-wider cursor-pointer shadow transition active:scale-95"
+                onClick={onGoToLevel3}
+                className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 hover:brightness-110 active:scale-95 text-black font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg cursor-pointer transition mt-2"
               >
-                Replay Level 2
+                ENTER SECTOR 3: GRAVITY ANOMALY -&gt;
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
     </div>
   )
 }

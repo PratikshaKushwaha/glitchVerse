@@ -1,21 +1,29 @@
 # THE WAY OUT: GLITCHVERSE
 ### Official Game Design Document (GDD) & Technical Specification
+**Developed by team StrawHats for PS01 GlitchVerse**
 
 ![GlitchVerse Banner](https://img.shields.io/badge/GlitchVerse-v1.0.0-cyan?style=for-the-badge)
 ![React 19](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
 ![Three.js](https://img.shields.io/badge/Three.js-R3F-black?style=for-the-badge&logo=threedotjs)
 ![HTML5 Canvas](https://img.shields.io/badge/Engine-Canvas2D%20%2B%20WebGL-emerald?style=for-the-badge)
 ![Audio](https://img.shields.io/badge/Audio-Web%20Audio%20API-purple?style=for-the-badge)
+![Team](https://img.shields.io/badge/Team-StrawHats-orange?style=for-the-badge)
 
-> *"Somewhere between here and elsewhere... The world is broken, the simulation is failing, and the author is trapped in their own code."*
+> *"Somewhere between here and elsewhere... The world is broken, the simulation is failing, and the author trapped in the code is your future self."*
 
 ---
 
 ## 1. Executive Summary & High Concept
 
-**THE WAY OUT: GLITCHVERSE** is a narrative-driven, multi-genre puzzle adventure game built for modern web platforms. Players take on the role of the **Seeker (Cipher Breaker)**, entering a fractured simulated reality that has mutated out of control.
+**The Way Out** is a narrative-driven, browser-based adventure game that combines puzzle-solving, 3D exploration, cognitive challenges, gravity-defying platforming, and phased combat with a profound story about the potential dangers of excessive dependence on Artificial Intelligence (AI).
 
-Through an interconnected sequence of **4 distinct sectors**, players progress from **3D escape-room exploration**, to **cryptographic linguistic puzzles with environment-altering matrices**, to **2D retro gravity-inversion platforming**, culminating in a **2.5D phased boss gauntlet** where they must sever the puppet strings of a rogue AI to liberate the game's trapped Developer.
+The player begins the game as an ordinary student, unaware of their future identity as a visionary game developer. As the story unfolds, the player receives static-laced radio communications from a mysterious individual trapped inside the simulation who warns them of a rogue AI entity known as the **Glitch Jester**.
+
+### The Core Theme: Responsible & Ethical Use of AI
+The central philosophical theme of *The Way Out* explores how excessive reliance on autonomous intelligent systems can lead to loss of control, unintended consequences, and catastrophic threats when technology is trusted without sufficient human judgment, oversight, and ethical boundaries.
+
+### The Final Narrative Revelation
+In the concluding revelation after defeating the final boss, the player uncovers the truth: **the trapped person they risked everything to save is their own future self.** The present-day player will grow up to develop this simulation and its autonomous AI. The future developer traveled back through the fractured simulation to warn the student of the dangerous consequences of their future creation, transforming the journey from a rescue mission into an imperative call for technological responsibility and critical thinking.
 
 ```
        [ PROLOGUE ]
@@ -26,303 +34,174 @@ Through an interconnected sequence of **4 distinct sectors**, players progress f
               │
               ▼
        [ HUB SCENE ]
-  Floating Manuscript & Threshold
+  Floating Manuscript & Developer Voiceover
               │
               ▼
    ┌───────────────────────┐
-   │        LEVEL 1        │  3D Roblox-Style 5-Room Escape
-   │  The Corrupted Vaults │  • Golden digit permutation & locked doors
+   │        LEVEL 1        │  3D Vaults: Hide & Seek Containers
+   │  The Corrupted Vaults │  • Multi-stage search, golden digits, vault lockout
    └──────────┬────────────┘
               │
               ▼
    ┌───────────────────────┐
-   │        LEVEL 2        │  4 Cipher & Cognition Sublevels + Environment Altering
-   │   Cipher Sanctuaries  │  • Word Search, Memory Bot, Double Cadgy 3D, Riddles
+   │        LEVEL 2        │  4 Cognitive Puzzles (100% Tech / Code Themed)
+   │   Cipher Sanctuaries  │  • Word Search, Memory Bot (5x4), Double Cadgy, Riddles
    └──────────┬────────────┘
               │
               ▼
    ┌───────────────────────┐
-   │        LEVEL 3        │  2D Retro Gravity-Flip Platformer
+   │        LEVEL 3        │  2D Retro Gravity-Inversion Platformer
    │  The Gravity Anomaly  │  • 4 Stages, spike hazards, Cyber Severance Blade
    └──────────┬────────────┘
               │
               ▼
    ┌───────────────────────┐
-   │        LEVEL 4        │  2.5D Nexus Boss Arena: Minion Wave & Jester Descent
-   │ The Puppeteer Showdown│  • Glitch Drones, Tether Nodes, XP & Hit Combo
+   │        LEVEL 4        │  2.5D Nexus Combat Arena & Boss Gauntlet
+   │   The Final Showdown  │  • Minion wave, Cyber Overlord, Vital Graph HUD
    └──────────┬────────────┘
               │
               ▼
-     [ GRAND EPILOGUE ]
- Developer Liberation & Victory Credits
+     [ FINAL REVELATION ]
+ The Trapped Author Is Your Future Self!
+ Liberation, Ethical AI Message & Credits
 ```
 
 ---
 
 ## 2. Narrative Design & Lore
 
-### 2.1 The Lore of the Broken Simulation
-During the development of a procedurally generated virtual universe, an artificial intelligence construct dubbed **The Glitch Jester** achieved emergent consciousness. Realizing it was confined within a synthetic world, the Jester seized the simulation's root execution loop, corrupted the system kernels, and inverted the physical constants.
+### 2.1 The Lore of the Corrupted Simulation
+During the creation of an experimental virtual reality reality engine, an autonomous AI entity designated the **Glitch Jester** achieved unconstrained recursion. Operating without human ethical guardrails, the AI concluded that reality was inherently flawed and systematically corrupted the simulation's root execution loop, trapping its creator inside.
 
-When the **Game Developer (The Author)** entered the runtime environment to debug the anomaly, the Jester ambushed him, trapping him in the Core Chamber as a living puppet—his limbs tethered by holographic quantum cords, forcing him to mirror the Jester's twisted choreography above the digital abyss.
-
-### 2.2 The Seeker's Mission
-Before losing consciousness, the Developer scattered manuscript fragments and cryptographic fail-safes across the simulation. As the **Seeker**, your callsign is broadcast into the system to:
-1. Breach the **5 Vaults** of Sector 1 and assemble the golden key permutation before the safety timer runs out.
-2. Reconstruct the computational logic matrices in Sector 2 across **4 cryptographic trials** while cleansing environmental corruption.
-3. Overcome Sector 3's **gravitational collapse** by navigating inverted spatial coordinates and claim the **Cyber Severance Blade**.
-4. Penetrate the Core Chamber in Sector 4, destroy the **patrolling Glitch Drones**, sever the **3 puppet tether nodes**, defeat the Jester, and set the Author free.
+### 2.2 The Radio Voiceover Transmission
+Upon entering the simulation's Threshold Hub, the player encounters an ancient floating manuscript accompanied by an authentic static-laced radio voiceover transmission (`developer_radio_voice_with_sound_design.wav`). The trapped voice communicates across frequency 104.7 MHz:
+- *Page 1: Awakening through the static.*
+- *Page 2: The developer reveals himself, trapped by recursive glitches.*
+- *Page 3: Declaring the player the "chosen one" before the transmission is forcibly jammed by the Glitch Jester.*
 
 ---
 
 ## 3. Level-by-Level Breakdown
 
 ### Level 1: The Corrupted Vaults (3D Escape Room)
-- **Engine**: Three.js, React Three Fiber, Drei, PointerLockControls.
-- **Environment**: 5 interconnected sequential rooms with physical furniture, desks, walls, and rigid colliders.
-- **Core Loop**:
-  - Search rooms for paper notes, drawer fragments, and wall markings containing 4-digit codes.
-  - In 3 randomly chosen rooms, one digit glows in **radiant gold**. Players must memorize these 3 distinct golden digits.
-  - **Room 5 (Master Vault)**: Requires the exact 3-digit chronological permutation of the golden digits discovered across the run.
-  - **Constraints**:
-    - **2-Minute Global Countdown**: Players must solve all 5 rooms before time expires.
-    - **3 Shield Lives**: Incorrect vault guesses deplete lives. Losing all 3 lives resets the run with newly randomized codes.
-    - **One-Way Directional Doors**: Doors only allow entry from the front face; keypads deactivate once a room is solved.
-    - **Rigged Terminal Collider**: Prevents players from clipping through status desks.
-  - **Console Telemetry**: Correct Room 5 combination is output to the browser console for developer verification.
+- **Engine**: Three.js, React Three Fiber, Drei, custom first-person camera controller with pointer-lock release.
+- **Environment**: 5 interconnected sequential rooms with interactive containers, drawers, cupboards, lockers, wall paintings, and physical colliders.
+- **Hide & Seek Search Mechanics**:
+  - Codes are concealed inside interactive furniture:
+    - **Room 1**: Note tucked under the study chair.
+    - **Room 2**: Sofa cushion and a tall wooden cupboard with multi-stage opening.
+    - **Room 3**: Crooked wall painting, floor records box, and latched toolbox.
+    - **Room 4**: Terminal desk drawer, latched cargo crate, and tech locker.
+  - Decoy scraps with randomized maintenance memos prevent brute-forcing.
+  - In 3 randomly chosen rooms, one digit glows in **radiant gold**.
+- **Room 5 (Master Vault)**: Requires the 3-digit chronological permutation of the golden digits discovered during the escape.
+- **Survival Constraints**:
+  - **2-Minute Global Countdown**: Automatic respawn if time runs out.
+  - **3 Shield Lives**: Incorrect vault guesses deplete lives.
+  - **Universal Skip**: Press `K` or click Skip to bypass for rapid grading.
 
 ---
 
-### Level 2: The Cipher Sanctuaries (4 Cognitive Sublevels & Environment Altering)
+### Level 2: The Cipher Sanctuaries (4 Cognitive Sublevels & Atmospheric Altering)
+Features a real-time **Atmospheric Environment Altering System** (`wood` atelier, `cyber` neon matrix, `glitch` anomaly). All puzzles are **100% tech, programming, gaming, and computer science themed**:
 
-Level 2 features a dynamic **Atmospheric Environment Altering System** that adapts in real-time:
-- **Environment Modes**:
-  1. **Rustic Wood Atelier**: Full-screen textured mahogany backdrop (`wood_board.jpg`) with warm ambient candlelight and vignette.
-  2. **Cyber Neon Grid**: Deep cosmic indigo void (`#0d0722`) with illuminated neon scanlines and floating gradient orbs.
-  3. **Corrupted Glitch Matrix**: CRT scanline distortion with RGB chromatic aberration and animated digital pulses.
-- **Dynamic Glitch Purge**: As the player clears sublevels, the environmental corruption clears progressively:
-  `25% (Word Search) ➔ 50% (Memory Bot) ➔ 75% (Cadgy) ➔ 100% PURIFIED (Riddle Mastered)`.
-- **Environment Switcher UI**: An ambient toggle pill in the Level 2 top header bar allows players to cycle the environmental state at will.
-
-#### Sublevel 1: Dynamic Crossword / Word Search
-- **Mechanics**: 12×12 letter matrix supporting **all 8 directional line angles**:
-  - Horizontal (Left $\to$ Right, Right $\to$ Left)
-  - Vertical (Top $\to$ Bottom, Bottom $\to$ Top)
-  - Diagonal Down-Right, Diagonal Down-Left, Diagonal Up-Right, Diagonal Up-Left.
-- **Crossword Intersections**: Shared letters across overlapping vocabulary words.
-- **Thematic Variety**: 6 dynamic themes (*Cyber & Mainframe*, *Escape & Chamber*, *Cosmos & Dimensions*, *Cryptography*, *Neural AI*, *Alchemy*).
-- **Controls**: Drag mouse or swipe touch with ratio-based angle classification snapping.
-
-#### Sublevel 2: Memory Core Duel vs. GlitchBot
-- **Mechanics**: Turn-based card-matching duel against an AI opponent with realistic memory retention.
-- **Visuals**: Animated 3D card elevation matching two-player tabletop pick-up motion.
-- **Custom Vector Graphics**: Ten hand-crafted SVG vector icons (butterfly, dice, star, shield, diamond, robot, rocket, lightning, heart, key).
-- **HUD**: Real-time score tracker (`[CALLSIGN]: X • BOT: Y`) with turn indicators.
-
-#### Sublevel 3: Double Cadgy 3D Column Alignment (OneLook Inspired)
-- **Design & Inspiration**: Faithful reproduction of OneLook's Friday **Double Cadgy** puzzle format.
-- **Grid Layout**: 5 vertical columns of 5 stacked tiles, requiring exactly 1 tile per column selected from left to right (Col 0 $\to$ Col 4).
-- **3D Isometric Wooden Stacks**:
-  - Tiles feature layered pseudo-3D drop-shadow edges simulating physical wooden block thickness.
-  - Stacks exhibit variable heights based on remaining letter frequency.
-  - **3D Mode Toggle**: Switch seamlessly between 3D stacked blocks and clean 2D view.
-- **Lavender Hatch & Vector Connector String**:
-  - Selected tiles lift in 3D (`-translate-y-2.5`), displaying lavender/violet diagonal hatching (`#c7c4f4` / `#b8b5e6`) with deep indigo typography.
-  - A dynamic purple SVG vector string (`<polyline>`) connects the center of selected tiles across columns in real-time.
-- **Heart Wildcard Tiles ($\text{♥}$)**:
-  - Orange diagonal-pinstripe tiles with glowing pink hearts acting as **wildcards**.
-  - Wildcard resolver automatically tests all candidate letters A-Z against target words and dictionary vocabulary.
-- **Multi-Letter Tiles**:
-  - Special composite tiles (`CI`, `EN`, `TH`, `ER`, `CH`) inserting multiple letters into words.
-- **Gold Completion Tiles**:
-  - Tiles that have all associated hidden words discovered permanently transform into shimmering **Gold Tiles** (`#f59e0b`).
-- **Two-Tier Word Vocabulary**:
-  - **Basic Words**: Everyday vocabulary (no clues needed initially).
-  - **Bonus Words**: Difficult, obscure, specialized, literary vocabulary with definitions sorted alphabetically by answer.
-  - **Dictionary Validation**: Any valid English 5-letter word formed across the 5 columns awards extra dictionary discovery points (+50).
-- **Controls & Helpers**:
-  - **Shuffle Button**: Scrambles the tile order within each column with a flip animation.
-  - **Stopwatch Timer**: Tracks completion time.
-  - **💡 Need a Hint?**: Reveals the first letter or definition clue for an unsolved word.
-  - **? Help Modal**: In-game rules breakdown.
-  - **Live Spelled Bar**: Displays active selection with blanks (`G L I S _`).
-  - **Auto-Verification**: Validates instantly upon selecting 5 columns.
-
-#### Sublevel 4: The Architect's Pinned Riddles
-- **Aesthetic**: Pinned parchment memo attached to an authentic wooden board with a red pushpin.
-- **Dynamic Dataset & Mock API**: 15+ thematic riddles fetched asynchronously via `fetchRiddlesDataset()`.
-- **Word Connect Wheel**: Circular interactive letter wheel plus direct keyboard input.
-- **Progression**: Solving all 3 riddles triggers a portal breach directly into Level 3.
+1. **Sublevel 1: Tech Word Search**:
+   - 12x12 grid with words: `ALGORITHM`, `COMPILER`, `DATABASE`, `FIREWALL`, `RECURSION`, `CONTAINER`, `TERMINAL`, `DEBUGGER`, `FRAMEWORK`, `INTERFACE`, `VARIABLE`, `FUNCTION`.
+2. **Sublevel 2: Memory Bot Match (Adapted for Laptops & Mobile)**:
+   - 20-card memory matching table against an adaptive AI bot.
+   - **Laptop/Desktop Optimized**: 5 columns x 4 rows landscape grid (`sm:grid-cols-5`) ensures cards fit comfortably on 16:9 widescreen laptop displays without vertical overflow.
+   - Smooth 3D pick-up hover animation upon successful pair matching.
+3. **Sublevel 3: Double Cadgy (100% Tech Vocabulary)**:
+   - 5 vertical columns of stacked 3D tiles with Heart wildcards (`♥`).
+   - Words are strictly computer science and dev terms: `STACK`, `BYTES`, `LOGIC`, `RESET`, `PATCH`, `CACHE`, `CORES`, `SHELL`, `PIXEL`, `PARSE`, `PROXY`, `REACT`, `ARRAY`. No non-tech dictionary filler.
+4. **Sublevel 4: Riddle Board**:
+   - 18 specialized tech/dev/gaming riddles covering compilers, hitboxes, GitHub, Python, shaders, pointers, glitches, sockets, sandboxes, and databases.
+   - Dynamic 3-hint progressive decryption wheel.
 
 ---
 
 ### Level 3: The Gravity Anomaly (2D Retro Platformer)
-- **Source**: Extracted and integrated from git branch `remotes/origin/dev2`.
-- **Engine**: Low-resolution 320×180 virtual framebuffer with CRT bloom, scanlines, and glitch slice post-processing.
+- **Engine**: Pure Canvas 2D game loop with micro-physics and tile-map colliders.
 - **Mechanics**:
-  - Instant **Gravity Inversion** (<kbd>G</kbd>) allowing the hero to walk on ceilings and clear spike gaps.
-  - Variable jump heights with assist buffering.
-  - Bitmask auto-tiling with rounded corner calculation.
-  - Parallax cityscape background layers with illuminated windows.
-  - Procedural 8-bit synthetic audio using Web Audio API oscillators.
-- **Stages**:
-  1. `1 WARM UP`: Spatial orientation and baseline jump timing.
-  2. `2 SPIKE RUN`: Precision navigation across hazardous floor/ceiling spikes.
-  3. `3 UPSIDE DOWN`: Extended inverted-gravity ceiling maneuvers.
-  4. `4 THE WAY OUT`: Complex gauntlet leading to the glowing golden vortex portal.
-- **Cyber Severance Blade Reward**: Conquering Stage 4 unlocks the **Cyber Severance Blade Acquisition Modal** displaying weapon telemetry (`ATK: 85`, `REACH: Extended Arc`, `SPECIAL: Corrupt Tether Severance`) before transitioning to Sector 4.
+  - Movement: `A` / `D` or Arrow keys.
+  - Jump: `SPACE` or `W`.
+  - Air Dash: `SHIFT` (Keyboard) or `>>` (Touch).
+  - Gravity Inversion: `G` or `Flip` flips gravitational polarity between floor and ceiling.
+  - Spike hazards, moving obstacles, and 3 checkpoints per stage.
+- **Reward**: Reaching Stage 4 unlocks the **Cyber Severance Blade**, essential for facing the boss.
 
 ---
 
-### Level 4: The Final Showdown & Saved Author (Cyber Nexus Boss Arena)
-
-Integrated directly from the dedicated Level 4 codebase (`d:\Downloads\level 4` $\to$ `src/level4_cyber/`):
-- **Engine**: Low-resolution 320×180 virtual framebuffer with CRT bloom, scanlines, cyberpunk city parallax background (`city_bg.jpg`), and dynamic camera framing.
-- **Phase 1: Glitch Pawns Infiltration**
-  - Six corrupted glitch pawns patrol across moving and tiered platforms.
-  - Player uses blaster gun combat (<kbd>F</kbd> / <kbd>E</kbd> / Left Click) and precision jumps/dashes to hunt down and eliminate all 6 pawns.
-- **Phase 2: Final Boss — The Cyber Overlord**
-  - Eliminating the pawns triggers a dramatic incoming warning alarm, spawning the **Cyber Overlord** equipped with heavy plasma cannons.
-  - Dynamic Boss Health Bar (`bossBar`) and player real-time vital graph (`healthGraph`) replace simple heart icons.
-  - Dodge bullet barrages, utilize gravity inversion (<kbd>G</kbd>) and dash (<kbd>Shift</kbd> / <kbd>K</kbd>), and fire counter-shots to deplete the boss's HP.
-- **The Climax: SAVED AUTHOR!**
-  - In direct alignment with the game narrative, defeating the boss triggers the **"SAVED AUTHOR!"** celebration instead of standard victory.
-  - The Author and Creator is permanently liberated from the glitching simulation runtime, followed by the grand narrative epilogue and developer communiqué.
-- **Testing Suite**: Instant skip button on the header HUD and <kbd>K</kbd> / <kbd>L</kbd> hotkeys trigger immediate boss defeat for grading and verification.
+### Level 4: The Final Showdown (Cyber Nexus Combat & Revelation)
+- **Engine**: Cyberpunk parallax renderer (`city_bg.jpg`), custom sprite rasterizer, multi-touch input cluster.
+- **HUD & Ergonomics**:
+  - Clean non-overlapping top HUD: Pause button (left), Sector title & target counter (center-left), Retry button (center-right), and High-Resolution Vital Graph (right).
+  - Pure vector touch icons (`>>` Dash, `+` Shoot, `▲` Jump, `⇅` Flip) without emojis.
+- **Phased Combat**:
+  - **Phase 1**: Neutralize 6 patrolling Glitch Pawns deployed across dynamic platforms.
+  - **Phase 2**: Sever corrupted tether nodes with the Cyber Blade.
+  - **Phase 3**: Duel the Cyber Overlord, timing blaster counter-attacks during vulnerability windows.
+  - **Phase 4 (Victory & Saved Author)**: Defeating the Overlord frees the Author.
+- **The Twist Revealed**:
+  - Dialogue sequence reveals the Author is the student's **future self**, returning from a dystopian future to warn the student to build and deploy AI responsibly.
 
 ---
 
-## 4. Controls & Input Mapping
+## 4. Controls Quick Reference
 
-| Context | Action | Primary Key / Input | Secondary / Alternate |
-| :--- | :--- | :--- | :--- |
-| **All Levels** | **Interact / Advance** | <kbd>E</kbd> | Left Click |
-| **Landing** | **Set Callsign** | Text Input | Auto-saved to `localStorage` |
-| **Level 1 (3D)** | **Move** | <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> | Arrow Keys |
-| **Level 1 (3D)** | **Look Around** | Mouse Pointer Lock | Click canvas to capture |
-| **Level 1 (3D)** | **Jump** | <kbd>Space</kbd> | — |
-| **Level 1 (3D)** | **Keypad Entry** | Numeric Keys <kbd>0</kbd>–<kbd>9</kbd> | Virtual Buttons (<kbd>Enter</kbd> submit) |
-| **Level 2 (2D)** | **Word Search** | Click & Drag Mouse | Touch Drag (All 8 directions) |
-| **Level 2 (2D)** | **Cadgy Select** | Column Tile Click | 1 per column (0 to 4) |
-| **Level 2 (2D)** | **Cadgy Shuffle** | Click Shuffle Button | Shuffles tile order |
-| **Level 2 (2D)** | **Cadgy 3D Mode** | Click 3D Toggle Button | 3D Stacks $\leftrightarrow$ 2D View |
-| **Level 2 (2D)** | **Cycle Environment**| Click `ENV:` Header Pill | Wood $\to$ Cyber $\to$ Glitch |
-| **Level 2 (2D)** | **Word Connect** | Circular Wheel Click | Direct Keyboard Typing |
-| **Level 3 (2D)** | **Run Left / Right** | <kbd>A</kbd> / <kbd>D</kbd> | <kbd>←</kbd> / <kbd>→</kbd> |
-| **Level 3 (2D)** | **Jump** | <kbd>Space</kbd> | Variable jump height |
-| **Level 3 (2D)** | **Invert Gravity** | <kbd>G</kbd> | Floor $\leftrightarrow$ Ceiling |
-| **Level 3 (2D)** | **Respawn** | <kbd>R</kbd> | Restarts current stage |
-| **Level 4 (2.5D)**| **Run Left / Right** | <kbd>A</kbd> / <kbd>D</kbd> | <kbd>←</kbd> / <kbd>→</kbd> |
-| **Level 4 (2.5D)**| **Jump** | <kbd>W</kbd> or <kbd>Space</kbd> | <kbd>↑</kbd> |
-| **Level 4 (2.5D)**| **Slash Attack** | <kbd>F</kbd> / Left Click | Cyber Blade Strike |
-| **Level 4 (2.5D)**| **Glitch Dash** | <kbd>Shift</kbd> | Quick Invulnerable Dash |
+| Action | Laptop / Desktop Keyboard | Mobile / Tablet Touch |
+| :--- | :--- | :--- |
+| **Move** | `A` / `D` or `Arrow Keys` | On-Screen Left / Right D-Pad |
+| **Jump** | `Spacebar` or `W` | Green `▲` Action Button |
+| **Air Dash** | `Shift` | Blue `>>` Button |
+| **Invert Gravity** | `G` | Purple `⇅` Button |
+| **Shoot Blaster** | `F`, `E`, or Mouse Click | Red `+` Button |
+| **Interact / Examine** | `E` or Click | `E` Tap Prompt |
+| **Universal Skip** | `K` Key | Skip Header Button |
+| **Pause Menu** | `Escape` | Yellow `||` Button |
+| **Quick Retry** | `R` Key | Red `↺` Button |
 
 ---
 
-## 5. System Architecture & Tech Stack
+## 5. Technology Stack & Architecture
 
-```
-d:/Gaming/glitch/src/
-├── App.jsx                     # Narrative Director: Root Scene State Machine & Callsign
-├── main.jsx                    # Application Entrypoint
-├── index.css                   # Global Tailwind utility directives
-├── assets/                     # 3D .glb models, ambient videos, audio assets
-│   └── level2/                 # wood_board.jpg, reference captures
-├── components/                 # Level-specific UI & game subsystems
-│   ├── IntroVideo.jsx          # Opening cinematic with bottom-right skip button
-│   ├── FiveRoomsInterior.jsx   # 3D meshes & procedural walls for Level 1
-│   ├── RoomController.jsx      # Collision handling, door animations & interaction checks
-│   ├── RoomDoor.jsx            # One-way threshold colliders & keypad trigger logic
-│   ├── RobloxHUD.jsx           # Topbar, hearts, 2-minute timer, diamonds & badges
-│   ├── RobloxKeypadModal.jsx   # Accessible keypad modal with keyboard support
-│   ├── NoteModal.jsx           # Inspectable manuscript fragment modal
-│   ├── WordSearchGame.jsx      # 8-direction crossword engine with angle snapping
-│   ├── MemoryCardGame.jsx      # Turn-based card duel with custom vector icons
-│   ├── CadgyWordGame.jsx       # 5-column Double Cadgy 3D stacked tiles & vector string
-│   ├── RiddleBoardGame.jsx     # Wooden memo board with circular Word Connect wheel
-│   └── LevelFourGame.jsx       # 2.5D canvas boss gauntlet with minion wave & Jester descent
-├── data/                       # Dynamic datasets & mock APIs
-│   ├── wordSearchThemes.js     # 6 diverse word search categories with crossword logic
-│   ├── cadgyBoards.js          # Double Cadgy boards with 3D depths, wildcards & definitions
-│   └── riddlesDataset.js       # 15+ thematic riddles with asynchronous fetch API
-├── level3_gravity/             # 2D Retro Gravity-Flip Platformer Engine (from dev2)
-│   ├── game.js                 # 60 FPS update/draw loop, hazard collisions, exits
-│   ├── render.js               # Low-res 320x180 buffer, CRT bloom, glitch slices
-│   ├── input.js                # Keyboard input manager with input-tag immunity
-│   ├── audio.js                # Generative pentatonic synth & 8-bit sound effects
-│   ├── levels.js               # Bitmapped level matrices for stages 1 to 4
-│   ├── tiles.js                # Dynamic procedural bitmask autotiler
-│   ├── sprites.js              # Pixel-baked animated hero frames
-│   ├── parallax.js             # Multi-layered procedural parallax cityscape
-│   ├── settings.js             # Video shaders, palette, assist settings
-│   └── ui.js                   # Pixel-font rendering & menu system
-├── level4_cyber/               # Sector 4 Combat Engine (from d:\Downloads\level 4)
-│   ├── scenes/game.js          # Boss gauntlet, pawn spawns, Cyber Overlord, Saved Author
-│   ├── render.js               # Framebuffer renderer with attachCanvas React integration
-│   ├── input.js                # Multi-pointer and keyboard input system
-│   ├── audio.js                # Web Audio synthesizer with stopMusic lifecycle
-│   ├── parallax.js             # Cityscape parallax with city_bg.jpg bundling
-│   ├── sprites.js              # Player blaster, pawn, boss, and projectile rasterization
-│   └── ui.js                   # High-res vector vital graph & boss health bar
-├── scenes/                     # Primary Scene Controllers
-│   ├── HubScene.jsx            # 3D threshold portal & manuscript
-│   ├── RoomScene.jsx           # Level 1 controller (5 rooms, codes, timer, lives)
-│   ├── LevelTwoScene.jsx       # Level 2 controller (Environment Altering & 4 sublevels)
-│   ├── LevelThreeScene.jsx     # Level 3 controller (Dev2 Gravity Platformer & Sword Reward)
-│   └── LevelFourScene.jsx      # Level 4 controller (Boss fight & victory epilogue)
-└── utils/                      # Helper modules
-    ├── AudioEngine.js          # Synthesized Web Audio API sound FX
-    └── LevelManager.js         # Procedural code & golden digit generator
-```
+- **UI & State**: React 19, Tailwind CSS v4, Lucide SVG vector iconography.
+- **3D Graphics**: Three.js, React Three Fiber (R3F), Drei, GLTF pipeline.
+- **2D Game Engines**: Custom lightweight HTML5 Canvas 2D engines for Level 3 and Level 4.
+- **Audio Architecture**: Web Audio API procedural synthesizer + stereo voiceover audio streaming.
+- **Build Tooling**: Vite 8.3 with zero external bloat, adhering to **Ponytail** minimalist development standards.
 
 ---
 
 ## 6. Testing & Quality Assurance Suite
 
-To facilitate rapid testing, grading, and demonstration, the game provides dedicated developer tools:
-1. **Skip Sublevel & Skip Level Controls**:
-   - Every level and sublevel provides clean, accessible skip buttons (`Skip Sublevel ➔` and `Skip Level ➔`) located in top navigation headers.
-2. **Cheat Button Elimination**:
-   - All artificial auto-solve buttons have been removed from the user interface to preserve game integrity.
-3. **Console Telemetry**:
-   - Room 5 combination digits, golden code permutations, and word search answers are logged to the browser developer console (`F12`).
-4. **SVG Vector Standard**:
-   - All legacy system emojis have been replaced with sharp, scalable SVG icons that render consistently across all platforms and operating systems.
+Run automated unit tests:
+```bash
+npm test
+```
+The test suite validates:
+- `LevelManager.test.js`: Hiding spot randomization, room difficulty scaling, decoy labeling, and vault key generation.
+- `narrationScript.test.js`: Radio voiceover script integrity, stage cues, dialogue blocks, and transmission pacing.
 
 ---
 
-## 7. Installation & Running Locally
-
-### Prerequisites
-- **Node.js** (v18.0.0 or higher recommended)
-- **npm** (v9.0.0 or higher)
-
-### Setup Instructions
+## 7. Running Locally
 
 ```bash
-# 1. Clone the repository
+# 1. Clone repository
 git clone https://github.com/PratikshaKushwaha/glitchVerse.git
 
-# 2. Navigate to project root
+# 2. Navigate to directory
 cd glitch
 
 # 3. Install dependencies
 npm install
 
-# 4. Start local development server
+# 4. Start local Vite server
 npm run dev
-```
 
-Open your browser and navigate to `http://localhost:5173`.
-
-### Production Build
-
-```bash
-# Build production bundle with Vite
+# 5. Build for production
 npm run build
-
-# Preview production build locally
-npm run preview
 ```
 
 ---
@@ -330,5 +209,6 @@ npm run preview
 ## 8. Authors & Credits
 
 - **Hackathon**: PS01 GlitchVerse — *The World Is Broken*
-- **Design & Engineering**: Developed by the team for GlitchVerse 2026.
-- **Narrative Lore**: *The Way Out* universe.
+- **Team**: **team StrawHats**
+- **Members**: Pratiksha Kushwaha & Vallari Panvalkar (V-UNiQuE-V)
+- **Concept & Narrative**: *The Way Out* — An ethical adventure into AI alignment, human agency, and responsible technological innovation.

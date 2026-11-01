@@ -14,6 +14,7 @@ export default function RoomController({
   respawnTrigger,
   onGoToLevel2,
   hidingSpots = [],
+  moveInput,
 }) {
   const { camera, gl } = useThree()
 
@@ -216,32 +217,99 @@ export default function RoomController({
       }
     }
 
+    let isTouchInteracting = false
+    let touchStartPos = { x: 0, y: 0, time: 0 }
+    let mouseDownPos = { x: 0, y: 0, time: 0 }
+
     const onMouseDown = (e) => {
-      if (e.button === 0 && !isKeypadOpen && !isInspectingNote) {
+      if (e.target !== dom || isKeypadOpen || isInspectingNote) return
+      if (e.button === 0) {
         isDragging.current = true
         previousMouse.current = { x: e.clientX, y: e.clientY }
+        mouseDownPos = { x: e.clientX, y: e.clientY, time: Date.now() }
         if (!isPointerLocked.current && dom.requestPointerLock) {
           dom.requestPointerLock().catch(() => {})
         }
       }
     }
 
-    const onMouseUp = () => {
+    const onMouseUp = (e) => {
       isDragging.current = false
+      if (e.target === dom && !isKeypadOpen && !isInspectingNote) {
+        const dt = Date.now() - mouseDownPos.time
+        const dist = Math.hypot(e.clientX - mouseDownPos.x, e.clientY - mouseDownPos.y)
+        if (dt < 400 && dist < 12) {
+          for (const obj of interactiveObjects) {
+            const d = Math.hypot(playerPos.current.x - obj.pos[0], playerPos.current.z - obj.pos[2])
+            if (d < obj.radius) {
+              onInteract(obj.id)
+              break
+            }
+          }
+        }
+      }
+    }
+
+    const onTouchStart = (e) => {
+      if (e.target !== dom || isKeypadOpen || isInspectingNote) return
+      if (e.touches.length === 1) {
+        isTouchInteracting = true
+        const touch = e.touches[0]
+        touchStartPos = { x: touch.clientX, y: touch.clientY, time: Date.now() }
+        previousMouse.current = { x: touch.clientX, y: touch.clientY }
+      }
+    }
+
+    const onTouchMove = (e) => {
+      if (!isTouchInteracting || isKeypadOpen || isInspectingNote || e.touches.length === 0) return
+      const touch = e.touches[0]
+      const movementX = touch.clientX - previousMouse.current.x
+      const movementY = touch.clientY - previousMouse.current.y
+      previousMouse.current = { x: touch.clientX, y: touch.clientY }
+
+      yaw.current -= movementX * 0.0035
+      pitch.current -= movementY * 0.0035
+      pitch.current = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, pitch.current))
+    }
+
+    const onTouchEnd = (e) => {
+      if (!isTouchInteracting) return
+      isTouchInteracting = false
+      if (isKeypadOpen || isInspectingNote) return
+      const dt = Date.now() - touchStartPos.time
+      const changed = e.changedTouches[0]
+      if (changed) {
+        const dist = Math.hypot(changed.clientX - touchStartPos.x, changed.clientY - touchStartPos.y)
+        if (dt < 350 && dist < 15) {
+          for (const obj of interactiveObjects) {
+            const d = Math.hypot(playerPos.current.x - obj.pos[0], playerPos.current.z - obj.pos[2])
+            if (d < obj.radius) {
+              onInteract(obj.id)
+              break
+            }
+          }
+        }
+      }
     }
 
     document.addEventListener('pointerlockchange', onPointerLockChange)
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mousedown', onMouseDown)
     window.addEventListener('mouseup', onMouseUp)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
 
     return () => {
       document.removeEventListener('pointerlockchange', onPointerLockChange)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('mouseup', onMouseUp)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
     }
-  }, [gl, isKeypadOpen, isInspectingNote])
+  }, [gl, isKeypadOpen, isInspectingNote, onInteract, interactiveObjects])
 
   // Robust solid collision across 5 connected rooms
   const checkCollision = (testPos) => {
@@ -327,8 +395,9 @@ export default function RoomController({
       }
     }
 
-    // Movement
-    const moveSpeed = (keys.current.sprint ? 3.8 : 2.4) * delta
+    // Movement (keyboard & mobile virtual touch pad)
+    const isSprint = keys.current.sprint || Boolean(moveInput?.sprint)
+    const moveSpeed = (isSprint ? 3.8 : 2.4) * delta
     const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(
       new THREE.Vector3(0, 1, 0),
       yaw.current
@@ -341,19 +410,19 @@ export default function RoomController({
     let isMoving = false
     const moveDelta = new THREE.Vector3()
 
-    if (keys.current.forward) {
+    if (keys.current.forward || moveInput?.forward) {
       moveDelta.add(forward)
       isMoving = true
     }
-    if (keys.current.backward) {
+    if (keys.current.backward || moveInput?.backward) {
       moveDelta.sub(forward)
       isMoving = true
     }
-    if (keys.current.right) {
+    if (keys.current.right || moveInput?.right) {
       moveDelta.add(right)
       isMoving = true
     }
-    if (keys.current.left) {
+    if (keys.current.left || moveInput?.left) {
       moveDelta.sub(right)
       isMoving = true
     }

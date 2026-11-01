@@ -31,10 +31,10 @@ export function getTouchButtons(vp) {
     const vy = v.y || 0;
     const vs = v.s || s;
 
-    // HUD button hit areas (Pause & Retry)
-    const pauseX = vx + 28 * vs;
+    // HUD button hit areas (Pause & Retry - calibrated to top-left HUD)
+    const pauseX = vx + 17 * vs;
     const pauseY = vy + 12 * vs;
-    const retryX = vx + 160 * vs;
+    const retryX = vx + 47 * vs;
     const retryY = vy + 12 * vs;
 
     return [
@@ -42,15 +42,15 @@ export function getTouchButtons(vp) {
         { id: 'left', label: '◀', sub: 'LEFT', x: 54 * s, y: h - 54 * s, r: 32 * s, color: '#18b7ff' },
         { id: 'right', label: '▶', sub: 'RIGHT', x: 132 * s, y: h - 54 * s, r: 32 * s, color: '#18b7ff' },
 
-        // Action Buttons (Bottom-Right Ergonomic Cluster)
+        // Action Buttons (Bottom-Right Ergonomic Cluster - Pure Vector Icons, No Emojis)
         { id: 'jump', label: '▲', sub: 'JUMP', x: w - 58 * s, y: h - 58 * s, r: 36 * s, color: '#39ff14' },
-        { id: 'dash', label: '⚡', sub: 'DASH', x: w - 132 * s, y: h - 48 * s, r: 27 * s, color: '#18b7ff' },
+        { id: 'dash', label: '>>', sub: 'DASH', x: w - 132 * s, y: h - 48 * s, r: 27 * s, color: '#18b7ff' },
         { id: 'gravity', label: '⇅', sub: 'FLIP', x: w - 58 * s, y: h - 132 * s, r: 27 * s, color: '#b180ff' },
-        { id: 'shoot', label: '🎯', sub: 'SHOOT', x: w - 128 * s, y: h - 114 * s, r: 28 * s, color: '#ff3864' },
+        { id: 'shoot', label: '+', sub: 'SHOOT', x: w - 128 * s, y: h - 114 * s, r: 28 * s, color: '#ff3864' },
 
         // Top HUD Quick Buttons
-        { id: 'pause', label: '⏸', sub: '', x: pauseX, y: pauseY, r: 24 * vs, color: '#ffd23a', isHud: true },
-        ...(!Scenes.top || !Scenes.top.won ? [{ id: 'restart', label: '↺', sub: '', x: retryX, y: retryY, r: 26 * vs, color: '#ff4d6d', isHud: true }] : [])
+        { id: 'pause', label: '||', sub: '', x: pauseX, y: pauseY, r: 18 * vs, color: '#ffd23a', isHud: true },
+        ...(!Scenes.top || !Scenes.top.won ? [{ id: 'restart', label: '↺', sub: '', x: retryX, y: retryY, r: 18 * vs, color: '#ff4d6d', isHud: true }] : [])
     ];
 }
 

@@ -24,7 +24,7 @@ export class MenuScene {
     sub(title, items) { this.stack.push(new Menu(title, items, () => this.stack.pop())); }
 
     main() {
-        return new Menu('THE WAY OUT', [
+        return new Menu('SECTOR 3: GRAVITY ANOMALY', [
             B('Start Game', () => Scenes.set(new GameScene())),
             B('Level Select', () => this.levelSelectMenu()),
             B('Settings', () => this.settingsMenu()),
@@ -37,7 +37,7 @@ export class MenuScene {
                 B('Activate 3 CHECKPOINTS per level to save progress', () => {}),
                 B('Survive with 3 LIVES to reach the portal!', () => {})
             ])),
-            B('Credits', () => this.sub('CREDITS', [B('Made by our team for PS01 GlitchVerse', () => { })]))
+            B('Credits', () => this.sub('CREDITS', [B('Made by team StrawHats for PS01 GlitchVerse', () => { })]))
         ]);
     }
     levelSelectMenu() {
@@ -45,7 +45,7 @@ export class MenuScene {
             B('1. Warm Up', () => Scenes.set(new GameScene(0))),
             B('2. Spike Run', () => Scenes.set(new GameScene(1))),
             B('3. Upside Down', () => Scenes.set(new GameScene(2))),
-            B('4. The Way Out', () => Scenes.set(new GameScene(3)))
+            B('4. Gravitational Core', () => Scenes.set(new GameScene(3)))
         ]);
     }
     settingsMenu() {

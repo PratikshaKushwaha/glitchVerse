@@ -184,19 +184,19 @@ export default function RobloxRoomInterior({
         {/* Row 1: 1 2 3 */}
         {/* Row 2: 4 5 6 */}
         {/* Row 3: 7 8 9 */}
-        {/* Row 4: ✔ 0 ✖ */}
+        {/* Row 4: OK 0 X */}
         <group position={[0, -0.05, 0.02]}>
           {[
             ['1', '2', '3'],
             ['4', '5', '6'],
             ['7', '8', '9'],
-            ['✔', '0', '✖'],
+            ['OK', '0', 'X'],
           ].map((row, rIdx) =>
             row.map((btn, cIdx) => {
               const bx = (cIdx - 1) * 0.125
               const by = (1.5 - rIdx) * 0.11
-              const isGreen = btn === '✔'
-              const isRed = btn === '✖'
+              const isGreen = btn === 'OK'
+              const isRed = btn === 'X'
               return (
                 <group key={btn} position={[bx, by, 0]}>
                   <mesh>
@@ -318,7 +318,7 @@ export default function RobloxRoomInterior({
               color="#fef08a"
               anchorX="center"
             >
-              LEVEL 2 NEXT ➔
+              LEVEL 2 NEXT ->
             </Text>
           </group>
         )}

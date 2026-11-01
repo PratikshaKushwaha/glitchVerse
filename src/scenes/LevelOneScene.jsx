@@ -263,7 +263,7 @@ export default function LevelOneScene({ onReturnToHub }) {
                     handleCodeSuccess(currentRoom)
                   }}
                 >
-                  Skip Room ➔
+                  Skip Room -&gt;
                 </button>
               </div>
             ) : (

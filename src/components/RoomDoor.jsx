@@ -114,13 +114,13 @@ export default function RoomDoor({
             ['1', '2', '3'],
             ['4', '5', '6'],
             ['7', '8', '9'],
-            ['✔', '0', '✖'],
+            ['OK', '0', 'X'],
           ].map((row, rIdx) =>
             row.map((btn, cIdx) => {
               const bx = (cIdx - 1) * 0.12
               const by = (1.5 - rIdx) * 0.105
-              const isGreen = btn === '✔'
-              const isRed = btn === '✖'
+              const isGreen = btn === 'OK'
+              const isRed = btn === 'X'
               return (
                 <group key={btn} position={[bx, by, 0]}>
                   <mesh>

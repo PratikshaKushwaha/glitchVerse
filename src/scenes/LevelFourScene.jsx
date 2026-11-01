@@ -5,6 +5,7 @@ import { Audio } from '../level4_cyber/audio.js'
 import { attachCanvas, resize, present } from '../level4_cyber/render.js'
 import { GameScene } from '../level4_cyber/scenes/game.js'
 import { sound } from '../utils/AudioEngine'
+import FinalEndingScene from '../components/FinalEndingScene'
 
 export default function LevelFourScene({
   playerName = 'Seeker',
@@ -92,6 +93,19 @@ export default function LevelFourScene({
     }
   }
 
+  // Universal K key to skip Boss and save Author
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        handleTriggerSkip()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [stage])
+
   const toggleSound = () => {
     const next = !soundEnabled
     setSoundEnabled(next)
@@ -149,9 +163,9 @@ export default function LevelFourScene({
               <button
                 onClick={handleTriggerSkip}
                 className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider cursor-pointer transition shadow"
-                title="Skip Boss & Trigger Saved Author Sequence (Testing)"
+                title="Skip Boss & Trigger Saved Author Sequence (Press K or Click)"
               >
-                Skip Boss ➔
+                Skip Boss [K] -&gt;
               </button>
             </div>
           </header>
@@ -176,7 +190,7 @@ export default function LevelFourScene({
                 <strong className="text-cyan-300 font-mono">W / Space</strong>: Jump
               </span>
               <span>
-                <strong className="text-cyan-300 font-mono">Shift / K</strong>: Dash
+                <strong className="text-cyan-300 font-mono">Shift</strong>: Dash
               </span>
               <span>
                 <strong className="text-rose-400 font-mono">F / E / Click</strong>: Shoot Blaster
@@ -186,109 +200,19 @@ export default function LevelFourScene({
               </span>
             </div>
             <div className="text-yellow-400/90 font-bold hidden md:block">
-              OBJECTIVE: DESTROY 6 PAWNS ➔ DEFEAT OVERLORD ➔ SAVE AUTHOR
+              OBJECTIVE: DESTROY 6 PAWNS -&gt; DEFEAT OVERLORD -&gt; SAVE AUTHOR
             </div>
           </footer>
         </>
       )}
 
-      {/* ================= STAGE 2: SAVED AUTHOR GRAND EPILOGUE (USER REQUEST) ================= */}
+      {/* ================= STAGE 2: FINAL ENDING SCENE (THE WAY OUT) ================= */}
       {stage === 'saved_author' && (
-        <div className="relative w-full h-full flex flex-col items-center justify-between p-6 sm:p-8 bg-gradient-to-b from-[#030712] via-[#09152b] to-[#020617] text-white text-center overflow-y-auto">
-          {/* Animated Cyber Star Matrix */}
-          <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
-
-          {/* TOP EMBLEM & HEADER */}
-          <div className="relative z-10 pt-4 flex flex-col items-center">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-300 to-cyan-400 p-1 flex items-center justify-center shadow-[0_0_50px_rgba(16,185,129,0.6)] mb-3 animate-bounce">
-              <svg className="w-10 h-10 fill-emerald-950" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-              </svg>
-            </div>
-
-            <span className="text-xs font-mono font-bold tracking-[0.35em] uppercase text-emerald-400">
-              MISSION STATUS: SIMULATION LIBERATED
-            </span>
-            <h1 className="text-4xl sm:text-5xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-300 to-amber-300 mt-2">
-              SAVED AUTHOR!
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-300 font-mono mt-1">
-              The Creator is fully rescued from the corrupted runtime kernel!
-            </p>
-          </div>
-
-          {/* NARRATIVE COMMUNIQUE CARD */}
-          <div className="relative z-10 max-w-xl w-full my-6 p-6 sm:p-7 rounded-3xl bg-[#0b1526]/85 border-2 border-emerald-400/50 shadow-[0_0_60px_rgba(16,185,129,0.3)] backdrop-blur flex flex-col items-center gap-4 text-left">
-            <div className="flex items-center gap-3 w-full pb-3 border-b border-white/10">
-              <div className="h-11 w-11 rounded-2xl bg-emerald-950/90 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shadow">
-                <svg className="w-6 h-6 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <div className="text-sm font-black text-white uppercase tracking-wider">
-                  THE AUTHOR & GAME DEVELOPER
-                </div>
-                <div className="text-xs text-emerald-400 font-mono font-bold">
-                  Status: SAVED & RESTORED by {playerName}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-[10px] text-gray-400 uppercase font-mono">Hero Callsign</div>
-                <div className="text-sm font-black text-amber-300 font-mono">{playerName}</div>
-              </div>
-            </div>
-
-            {/* Author's Personal Message */}
-            <p className="text-xs sm:text-sm text-gray-200 leading-relaxed font-sans italic">
-              "You did it, {playerName}! When my AI gained runaway sentience, it seized the physics loop, inverted gravity, and locked me into the simulation as its captive puppet. You solved the 5 vaults, cracked the Double Cadgy ciphers, wielded the Cyber Severance Blade, and destroyed the Overlord in Sector 4. You didn't just clear a level... you saved the author. Thank you for setting me free!"
-            </p>
-
-            {/* Final Stats Grid */}
-            <div className="w-full grid grid-cols-2 gap-2.5 text-xs font-mono pt-3 border-t border-white/10 text-gray-300">
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-black/40 border border-white/5">
-                <svg className="w-4 h-4 text-emerald-400 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-                <span><strong>AUTHOR:</strong> SAVED</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-black/40 border border-white/5">
-                <svg className="w-4 h-4 text-cyan-400 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M7 2v11h3v9l7-12h-4l4-8z" />
-                </svg>
-                <span><strong>PAWNS:</strong> 6 / 6 CLEARED</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-black/40 border border-white/5">
-                <svg className="w-4 h-4 text-rose-400 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                </svg>
-                <span><strong>OVERLORD:</strong> VAPORIZED</span>
-              </div>
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-black/40 border border-white/5">
-                <svg className="w-4 h-4 text-amber-400 fill-current shrink-0" viewBox="0 0 24 24">
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-                <span><strong>HERO RANK:</strong> S-TIER SAVIOR</span>
-              </div>
-            </div>
-          </div>
-
-          {/* ACTION BUTTONS */}
-          <div className="relative z-10 flex flex-col sm:flex-row gap-3 w-full max-w-md pb-4">
-            <button
-              onClick={() => setStage('boss')}
-              className="flex-1 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider cursor-pointer transition active:scale-95 border border-white/15"
-            >
-              Replay Level 4 ↺
-            </button>
-            <button
-              onClick={onBackToMenu}
-              className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.6)] hover:brightness-110 active:scale-95 cursor-pointer transition"
-            >
-              Return to Main Menu ➔
-            </button>
-          </div>
-        </div>
+        <FinalEndingScene
+          playerName={playerName}
+          onRestart={() => setStage('boss')}
+          onBackToMenu={onBackToMenu}
+        />
       )}
 
     </div>

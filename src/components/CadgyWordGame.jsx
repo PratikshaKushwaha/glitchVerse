@@ -389,14 +389,14 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
   }, [currentBoard.bonusWords])
 
   return (
-    <div className="relative w-screen h-screen flex flex-col items-center justify-between overflow-y-auto select-none font-sans p-2 sm:p-4 text-white">
+    <div className="relative w-full h-full min-h-0 flex flex-col items-center justify-between overflow-y-auto select-none font-sans p-2 sm:p-4 text-white">
       
       {/* ================= 1. HEADER LOGO & CADGY BANNER (IMAGE 3 EXACT) ================= */}
-      <div className="w-full max-w-4xl flex flex-col items-center gap-1.5 mt-8 sm:mt-9">
+      <div className="w-full max-w-4xl flex flex-col items-center gap-1 mt-1 sm:mt-2 shrink-0">
         
         {/* DOUBLE CADGY ORANGE BLOCK LOGO */}
         <div className="flex flex-col items-center">
-          <div className="text-[10px] sm:text-xs font-black tracking-[0.45em] text-rose-400 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <div className="text-[10px] sm:text-xs font-black tracking-[0.45em] text-rose-400 uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] [text-wrap:balance]">
             DOUBLE
           </div>
 
@@ -405,7 +405,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
             {['C', 'A', 'D', 'G', 'Y'].map((letter, idx) => (
               <div key={idx} className="flex items-center">
                 <div
-                  className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center font-black text-xl sm:text-2xl text-amber-950 shadow-[0_4px_12px_rgba(245,158,11,0.5),inset_0_2px_0_rgba(255,255,255,0.4)] border border-amber-300"
+                  className="h-[clamp(2rem,5vw,2.75rem)] w-[clamp(2rem,5vw,2.75rem)] rounded-xl flex items-center justify-center font-black text-[clamp(1.1rem,3vw,1.5rem)] text-amber-950 shadow-[0_4px_12px_rgba(245,158,11,0.5),inset_0_2px_0_rgba(255,255,255,0.4)] border border-amber-300"
                   style={{
                     background:
                       'repeating-linear-gradient(45deg, #f59e0b, #f59e0b 4px, #fbbf24 4px, #fbbf24 8px)',
@@ -414,7 +414,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                   {letter}
                 </div>
                 {idx < 4 && (
-                  <div className="w-2.5 sm:w-3.5 h-1.5 bg-gradient-to-r from-amber-500 to-amber-400 shadow" />
+                  <div className="w-2 sm:w-3 h-1 sm:h-1.5 bg-gradient-to-r from-amber-500 to-amber-400 shadow" />
                 )}
               </div>
             ))}
@@ -422,24 +422,24 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
         </div>
 
         {/* Date and Calendar Icon */}
-        <div className="flex items-center gap-1.5 text-xs text-gray-300 font-mono mt-0.5">
+        <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-gray-300 font-mono mt-0.5">
           <span>{currentBoard.dateLabel || 'October 23, 2026'}</span>
-          <svg className="w-3.5 h-3.5 fill-gray-400" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 fill-gray-400 shrink-0" viewBox="0 0 24 24">
             <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
           </svg>
         </div>
 
         {/* CONTROLS TOOLBAR (Score, Timer, Shuffle, 3D, Help) */}
-        <div className="flex items-center flex-wrap justify-center gap-2 mt-1 px-4 py-1.5 rounded-2xl bg-black/70 border border-white/15 backdrop-blur shadow-xl">
+        <div className="flex items-center flex-wrap justify-center gap-1.5 sm:gap-2 mt-1 px-3 sm:px-4 py-1 rounded-2xl bg-black/70 border border-white/15 backdrop-blur shadow-xl text-[10px] sm:text-xs">
           
           {/* Score Pill */}
-          <div className="px-3 py-1 rounded-xl bg-black/60 border border-amber-500/50 text-xs font-mono font-bold text-amber-300 shadow">
-            Score: <span className="text-white text-sm font-black">{score}</span>
+          <div className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-black/60 border border-amber-500/50 font-mono font-bold text-amber-300 shadow">
+            Score: <span className="text-white text-xs sm:text-sm font-black">{score}</span>
           </div>
 
           {/* Stopwatch Timer */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-cyan-300">
-            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-white/5 border border-white/10 font-mono text-cyan-300">
+            <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
             </svg>
             <span>{formatTimer(elapsedSeconds)}</span>
@@ -448,10 +448,10 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           {/* Shuffle Button (Image 3) */}
           <button
             onClick={handleShuffleColumns}
-            className="flex items-center gap-1 px-3 py-1 rounded-xl bg-purple-900/80 hover:bg-purple-800 border border-purple-500/50 text-xs font-bold text-purple-200 cursor-pointer transition active:scale-95 shadow"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-purple-900/80 hover:bg-purple-800 border border-purple-500/50 font-bold text-purple-200 cursor-pointer transition active:scale-95 shadow"
             title="Shuffle tiles in columns"
           >
-            <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
             </svg>
             <span>Shuffle</span>
@@ -460,7 +460,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           {/* 3D Isometric Mode Toggle (Image 3) */}
           <button
             onClick={() => setIs3DMode(!is3DMode)}
-            className={`px-3 py-1 rounded-xl border text-xs font-bold cursor-pointer transition active:scale-95 shadow flex items-center gap-1 ${
+            className={`px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl border font-bold cursor-pointer transition active:scale-95 shadow flex items-center gap-1 ${
               is3DMode
                 ? 'bg-amber-500 text-black border-amber-300 font-black'
                 : 'bg-white/10 text-gray-300 border-white/20 hover:text-white'
@@ -474,9 +474,9 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           {/* Need a Hint Button */}
           <button
             onClick={handleTriggerHint}
-            className="flex items-center gap-1 px-3 py-1 rounded-xl bg-amber-950/80 hover:bg-amber-900 border border-amber-500/50 text-xs font-bold text-amber-200 cursor-pointer transition active:scale-95 shadow"
+            className="flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-amber-950/80 hover:bg-amber-900 border border-amber-500/50 font-bold text-amber-200 cursor-pointer transition active:scale-95 shadow"
           >
-            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" />
             </svg>
             <span>Hint</span>
@@ -485,19 +485,10 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           {/* How to Play Help (?) */}
           <button
             onClick={() => setShowHelpModal(true)}
-            className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-xs font-bold text-gray-300 hover:text-white cursor-pointer transition"
+            className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center font-bold text-gray-300 hover:text-white cursor-pointer transition text-xs"
             title="Cadgy Rules & Help"
           >
             ?
-          </button>
-
-          {/* Skip Sublevel Button (Testing) */}
-          <button
-            onClick={() => onComplete && onComplete()}
-            className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-extrabold text-[11px] cursor-pointer hover:brightness-110 active:scale-95 transition shadow ml-1"
-            title="Skip Sublevel for testing"
-          >
-            Skip ➔
           </button>
         </div>
       </div>
@@ -505,7 +496,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
       {/* ================= 2. 3D ISOMETRIC STACKED TILES BOARD ================= */}
       <div
         ref={boardContainerRef}
-        className="relative w-full max-w-md sm:max-w-lg flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl bg-[#140b22]/90 border-2 border-purple-500/40 shadow-[0_0_60px_rgba(168,85,247,0.3)] backdrop-blur my-auto overflow-visible"
+        className="relative w-full max-w-md sm:max-w-lg flex flex-col items-center justify-center p-3 sm:p-5 rounded-3xl bg-[#140b22]/90 border-2 border-purple-500/40 shadow-[0_0_60px_rgba(168,85,247,0.3)] backdrop-blur my-1 sm:my-auto overflow-visible shrink-0"
       >
         {/* SVG OVERLAY FOR DYNAMIC PURPLE VECTOR CONNECTING STRING (IMAGE 3) */}
         {connectorPoints.length >= 2 && (
@@ -546,9 +537,9 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                     style={{
                       boxShadow: stackShadow,
                     }}
-                    className={`relative h-12 sm:h-14 w-full rounded-2xl flex items-center justify-center font-extrabold text-base sm:text-lg cursor-pointer transition-all duration-200 select-none ${
+                    className={`relative h-[clamp(2.35rem,6.5vw,3.25rem)] w-full rounded-xl sm:rounded-2xl flex items-center justify-center font-extrabold text-[clamp(1rem,2.8vw,1.35rem)] cursor-pointer transition-all duration-200 select-none ${
                       isSelected
-                        ? 'text-indigo-950 scale-105 -translate-y-2.5 ring-2 ring-white z-30'
+                        ? 'text-indigo-950 scale-105 -translate-y-2 ring-2 ring-white z-30'
                         : isGold
                         ? 'bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 text-amber-950 border border-yellow-200 hover:scale-102'
                         : tile.isHeart
@@ -559,7 +550,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                     {/* Selected lavender diagonal pinstripe overlay (Image 3) */}
                     {isSelected && (
                       <div
-                        className="absolute inset-0 rounded-2xl pointer-events-none"
+                        className="absolute inset-0 rounded-xl sm:rounded-2xl pointer-events-none"
                         style={{
                           background:
                             'repeating-linear-gradient(45deg, #c7c4f4, #c7c4f4 4px, #b8b5e6 4px, #b8b5e6 8px)',
@@ -570,7 +561,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                     {/* Heart wildcard diagonal orange pinstripe overlay (Image 3) */}
                     {!isSelected && tile.isHeart && !isGold && (
                       <div
-                        className="absolute inset-0 rounded-2xl pointer-events-none"
+                        className="absolute inset-0 rounded-xl sm:rounded-2xl pointer-events-none"
                         style={{
                           background:
                             'repeating-linear-gradient(45deg, #f59e0b, #f59e0b 4px, #d97706 4px, #d97706 8px)',
@@ -582,7 +573,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                     <span className="relative z-10 flex items-center justify-center font-black">
                       {tile.isHeart ? (
                         <svg
-                          className={`w-6 h-6 ${
+                          className={`w-5 h-5 sm:w-6 sm:h-6 ${
                             isSelected ? 'fill-rose-600' : 'fill-rose-500 drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]'
                           }`}
                           viewBox="0 0 24 24"
@@ -601,31 +592,37 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
         </div>
 
         {/* ================= 3. LIVE SPELLED WORD OUTPUT BAR (IMAGE 3) ================= */}
-        <div className="flex items-center gap-3 sm:gap-4 mt-5 font-mono font-black text-2xl sm:text-3xl tracking-[0.3em] text-white">
+        <div className="flex items-center gap-2 sm:gap-4 mt-3 sm:mt-4 font-mono font-black text-xl sm:text-3xl tracking-[0.25em] text-white">
           {spelledSlots.map((char, idx) => (
             <span
               key={idx}
               className={`transition-all ${
                 char
                   ? char === '♥'
-                    ? 'text-rose-400 scale-110 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]'
+                    ? 'scale-110 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)]'
                     : 'text-purple-300 scale-110 drop-shadow-[0_0_8px_rgba(216,180,254,0.8)]'
                   : 'text-gray-600'
               }`}
             >
-              {char || '_'}
+              {char === '♥' ? (
+                <svg className="w-5 h-5 sm:w-7 sm:h-7 fill-rose-500 drop-shadow-[0_0_8px_rgba(244,63,94,0.8)] inline-block align-middle" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+              ) : (
+                char || '_'
+              )}
             </span>
           ))}
         </div>
 
         {/* Live Commentary / Auto-Verify Feedback */}
-        <div className="h-8 mt-1.5 flex items-center justify-center text-center px-4">
+        <div className="h-7 sm:h-8 mt-1 flex items-center justify-center text-center px-4">
           {commentary ? (
-            <div className={`text-xs sm:text-sm font-bold ${commentaryColor} animate-fadeIn`}>
+            <div className={`text-xs sm:text-sm font-bold ${commentaryColor} animate-fadeIn [text-wrap:pretty]`}>
               {commentary}
             </div>
           ) : (
-            <div className="text-[11px] font-mono text-gray-400">
+            <div className="text-[10px] sm:text-[11px] font-mono text-gray-400 [text-wrap:pretty]">
               Pick 1 tile from each column • Auto-verifies immediately at 5 tiles
             </div>
           )}
@@ -700,7 +697,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
             <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
             </svg>
-            <span>ALL BASIC WORDS CRACKED! ADVANCE TO RIDDLE BOARD ➔</span>
+            <span>ALL BASIC WORDS CRACKED! ADVANCE TO RIDDLE BOARD -&gt;</span>
           </button>
         )}
       </div>
@@ -721,7 +718,9 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                 onClick={() => setShowHelpModal(false)}
                 className="text-gray-400 hover:text-white font-bold p-1 cursor-pointer"
               >
-                ✕
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
               </button>
             </div>
 
@@ -730,7 +729,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                 <strong className="text-purple-300">1. Form Words Left-to-Right:</strong> Select exactly one tile from each of the 5 columns (Col 0 through Col 4).
               </p>
               <p>
-                <strong className="text-rose-400">2. Wildcard Hearts:</strong> Glowing Heart tiles (<span className="text-rose-400 font-bold">♥</span>) are wildcards that can represent any letter needed to complete a valid word.
+                <strong className="text-rose-400">2. Wildcard Hearts:</strong> Glowing Heart tiles (<svg className="w-3.5 h-3.5 fill-rose-500 inline-block align-middle" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>) are wildcards that can represent any letter needed to complete a valid word.
               </p>
               <p>
                 <strong className="text-cyan-300">3. Multi-Letter Tiles:</strong> Tiles with two letters (e.g., CI, EN, TH) insert both letters into the word.

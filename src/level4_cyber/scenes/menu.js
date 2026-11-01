@@ -24,29 +24,30 @@ export class MenuScene {
     sub(title, items) { this.stack.push(new Menu(title, items, () => this.stack.pop())); }
 
     main() {
-        return new Menu('THE WAY OUT', [
-            B('Start Game', () => Scenes.set(new GameScene(2))),
-            B('Level Select', () => this.levelSelectMenu()),
+        return new Menu('SECTOR 4: FINAL SHOWDOWN', [
+            B('Begin Showdown', () => Scenes.set(new GameScene(2))),
+            B('Mission Intel', () => this.missionIntelMenu()),
             B('Settings', () => this.settingsMenu()),
-            B('How To Play', () => this.sub('HOW TO PLAY', [
+            B('Combat Manual', () => this.sub('COMBAT MANUAL', [
                 B('A/D or Arrows: Move left / right', () => {}),
                 B('SPACE or W: Jump   SHIFT or K: Air Dash', () => {}),
-                B('F / J / X / Click or 🎯: Fire gun at enemies', () => {}),
+                B('F / J / X / Click or Shoot: Fire Blaster gun', () => {}),
                 B('G: Flip Gravity between floor & ceiling', () => {}),
                 B('One shot kills pawns; pawn touch deals 1 damage!', () => {}),
                 B('Watch your Vital Health Graph in top-right HUD', () => {}),
                 B('Defeat 6 pawns to face the armed Final Boss!', () => {}),
-                B('Land 10 shots on the boss to win the game!', () => {})
+                B('Land 10 shots on the boss to save the author!', () => {})
             ])),
-            B('Credits', () => this.sub('CREDITS', [B('Made by our team for PS01 GlitchVerse', () => { })]))
+            B('Credits', () => this.sub('CREDITS', [B('Made by team StrawHats for PS01 GlitchVerse', () => { })]))
         ]);
     }
-    levelSelectMenu() {
-        this.sub('LEVEL SELECT', [
-            B('1. Warm Up', () => Scenes.set(new GameScene(0))),
-            B('2. Spike Run', () => Scenes.set(new GameScene(1))),
-            B('3. Upside Down', () => Scenes.set(new GameScene(2))),
-            B('4. The Way Out', () => Scenes.set(new GameScene(3)))
+    missionIntelMenu() {
+        this.sub('MISSION INTEL', [
+            B('Phase 1: Terminate 6 Glitch Pawns', () => {}),
+            B('Phase 2: Sever Corrupted Neural Tethers', () => {}),
+            B('Phase 3: Overlord Duel (Counter Vulnerability)', () => {}),
+            B('Phase 4: Purge Simulation & Save Author', () => {}),
+            B('Engage Boss Now', () => Scenes.set(new GameScene(2)))
         ]);
     }
     settingsMenu() {

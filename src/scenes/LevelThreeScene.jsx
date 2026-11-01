@@ -88,6 +88,20 @@ export default function LevelThreeScene({
     }
   }, [onGoToLevel4])
 
+  // Universal K key to skip to Level 4
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        Audio.stopMusic()
+        if (onGoToLevel4) onGoToLevel4()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onGoToLevel4])
+
   const selectStage = (stageIdx) => {
     sound.playKeyClick()
     setCurrentStage(stageIdx)
@@ -150,8 +164,9 @@ export default function LevelThreeScene({
               if (onGoToLevel4) onGoToLevel4()
             }}
             className="px-3 py-1 rounded bg-gradient-to-r from-rose-500 to-purple-600 hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(236,72,153,0.5)]"
+            title="Skip to Level 4 (Press K or Click)"
           >
-            Skip to Level 4 ➔
+            Skip to Level 4 [K] -&gt;
           </button>
           <button
             onClick={() => {
@@ -181,7 +196,7 @@ export default function LevelThreeScene({
           <span className="text-cyan-400 font-bold">CONTROLS:</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">A</kbd> / <kbd className="px-1 py-0.5 bg-white/10 rounded text-white">D</kbd> Move</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">SPACE</kbd> Jump</span>
-          <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">SHIFT</kbd> / <kbd className="px-1 py-0.5 bg-white/10 rounded text-white">K</kbd> Dash</span>
+          <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">SHIFT</kbd> Dash</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">G</kbd> Flip Gravity</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">ESC</kbd> Pause</span>
           <span><kbd className="px-1 py-0.5 bg-white/10 rounded text-white">R</kbd> Retry</span>
@@ -243,7 +258,7 @@ export default function LevelThreeScene({
               }}
               className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(6,182,212,0.6)] cursor-pointer transition flex items-center justify-center gap-2"
             >
-              <span>Equip Blade & Enter Sector 4 ➔</span>
+              <span>Equip Blade &amp; Enter Sector 4 -&gt;</span>
             </button>
           </div>
         </div>

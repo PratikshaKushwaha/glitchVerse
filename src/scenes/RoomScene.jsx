@@ -32,6 +32,7 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
   const [nearObject, setNearObject] = useState(null)
   const [jumpTrigger, setJumpTrigger] = useState(0)
   const [respawnTrigger, setRespawnTrigger] = useState(0)
+  const [moveInput, setMoveInput] = useState({ forward: false, backward: false, left: false, right: false })
 
   // Feedback notifications
   const [badgeAwarded, setBadgeAwarded] = useState(false)
@@ -160,18 +161,27 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
         return prev
       })
     }
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
     sound.playManuscriptOpen()
     setActiveSpot({ roomIndex, spotIndex })
   }
 
   // Handle opening keypad modal
   const handleInteractKeypad = (doorIndex) => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
     setActiveKeypadDoor(doorIndex)
     sound.playTypewriter()
   }
 
   // Handle inspecting note
   const handleInspectNote = (roomIndex) => {
+    if (typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
     setActiveInspectRoom(roomIndex)
     sound.playTypewriter()
 
@@ -275,14 +285,31 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
     })
   }
 
-  // Skip current level button (Only allowed for Rooms 1 to 4; STRICTLY DISABLED for final Room 5!)
+  // Skip current level button (Press K or click Skip)
   const handleSkipLevel = () => {
-    if (currentRoomIndex >= 4) return // Cannot skip final vault!
+    if (currentRoomIndex >= 4) {
+      if (onGoToLevel2) onGoToLevel2()
+      return
+    }
     const nextDoorToOpen = doorsOpen.findIndex((isOpen) => !isOpen)
     if (nextDoorToOpen !== -1 && nextDoorToOpen < 4) {
       handleCodeSuccess(nextDoorToOpen)
     }
   }
+
+  // Keyboard shortcut K for skip
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (activeKeypadDoor !== null || activeInspectRoom !== null || activeSpot !== null) return
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        handleSkipLevel()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [currentRoomIndex, doorsOpen, onGoToLevel2, activeKeypadDoor, activeInspectRoom, activeSpot])
 
   // Current expected code for active keypad (Room 5 accepts both chronological order and permutation)
   const expectedCode =
@@ -322,6 +349,7 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
             respawnTrigger={respawnTrigger}
             onGoToLevel2={onGoToLevel2}
             hidingSpots={levelData.hidingSpots}
+            moveInput={moveInput}
           />
         </Suspense>
       </Canvas>
@@ -348,6 +376,7 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
         resetMessage={resetMessage}
         onJump={() => setJumpTrigger((t) => t + 1)}
         onGoToLevel2={onGoToLevel2}
+        setMoveInput={setMoveInput}
       />
 
       {/* Proximity Interaction Prompt */}

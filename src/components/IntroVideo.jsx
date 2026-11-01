@@ -6,10 +6,10 @@ export default function IntroVideo({ onFinish }) {
   const [isMuted, setIsMuted] = useState(false)
   const [progress, setProgress] = useState(0)
 
-  // Handle keyboard skip (Space, Escape, Enter)
+  // Handle keyboard skip (Space, Escape, Enter, K)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.code === 'Space' || e.code === 'Escape' || e.code === 'Enter') {
+      if (e.code === 'Space' || e.code === 'Escape' || e.code === 'Enter' || e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
         e.preventDefault()
         onFinish()
       }
@@ -93,13 +93,13 @@ export default function IntroVideo({ onFinish }) {
         <button
           onClick={onFinish}
           className="relative min-w-[210px] flex items-center justify-between gap-3 px-6 py-3.5 rounded-xl bg-[#090d16] hover:bg-black border-2 border-cyan-400 text-xs sm:text-sm font-mono font-black tracking-wider uppercase text-cyan-200 hover:text-white cursor-pointer shadow-[0_0_35px_rgba(6,182,212,0.65)] active:scale-95 transition"
-          title="Skip to Door Scene (Press Space)"
+          title="Skip to Door Scene (Press K or Space)"
         >
           <span>SKIP VIDEO</span>
           <span className="text-[11px] bg-cyan-950 border border-cyan-400/60 px-2 py-0.5 rounded text-cyan-300">
-            SPACE ↵
+            [K] / SPACE ↵
           </span>
-          <span className="text-base">→</span>
+          <span className="text-base">-&gt;</span>
         </button>
       </div>
 

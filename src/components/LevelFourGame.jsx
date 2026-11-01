@@ -1050,7 +1050,7 @@ export default function LevelFourGame({ playerName = 'Seeker', onComplete, onExi
             className="px-3 py-1 rounded bg-gradient-to-r from-rose-500 to-purple-600 hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow"
             title="Defeat Boss immediately (Testing)"
           >
-            Defeat Boss ➔
+            Defeat Boss -&gt;
           </button>
         </div>
       </header>
@@ -1157,7 +1157,7 @@ export default function LevelFourGame({ playerName = 'Seeker', onComplete, onExi
               onClick={onComplete}
               className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:brightness-110 active:scale-95 cursor-pointer transition flex items-center justify-center gap-2 animate-bounce"
             >
-              <span>Conclude Odyssey & Roll Credits ➔</span>
+              <span>Conclude Odyssey & Roll Credits -&gt;</span>
             </button>
           </div>
         </div>

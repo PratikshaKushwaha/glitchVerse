@@ -1139,33 +1139,29 @@ export class GameScene {
         // --- HUD HEADER BAR ---
         box(0, 0, W, 25, 'rgba(8, 6, 20, 0.85)', 'rgba(154, 240, 255, 0.18)');
 
-        // Left: Pause button
-        box(6, 4, 46, 17, 'rgba(255, 210, 58, 0.18)', 'rgba(255, 210, 58, 0.5)', 3);
-        text('⏸ PAUSE', 10, 7, '#ffd23a', 7.5);
+        // Quick Controls Left: Pause & Retry (Zero collision, perfectly spaced)
+        box(4, 4, 26, 17, 'rgba(255, 210, 58, 0.18)', 'rgba(255, 210, 58, 0.5)', 3);
+        text('⏸', 17, 7, '#ffd23a', 8, 'center');
 
-        // Center-Left: Level Title & Mission status
-        text(`SECTOR 4: CYBER NEXUS`, 56, 4, '#9af0ff', 7.5);
-        if (this.bossState === 'inactive') {
-            text(`TARGET: ${this.pawnsKilled}/${this.pawnsTarget} PAWNS`, 56, 14, '#ffd23a', 6.5);
-        } else if (this.bossState === 'warning') {
-            text(`BOSS INCOMING!`, 56, 14, '#ff3864', 6.5);
-        } else if (this.bossState === 'active') {
-            text(`BOSS FIGHT!`, 56, 14, '#ff1744', 6.5);
-        } else if (this.won) {
-            text(`SAVED AUTHOR!`, 56, 14, '#39ff14', 6.5);
+        if (!this.won) {
+            box(34, 4, 26, 17, 'rgba(255, 77, 109, 0.18)', 'rgba(255, 77, 109, 0.5)', 3);
+            text('↺', 47, 7, '#ff4d6d', 8, 'center');
         }
 
-        // Center: Retry Button (REMOVED when boss is defeated!)
-        if (!this.won) {
-            box(W / 2 - 24, 4, 48, 17, 'rgba(255, 77, 109, 0.18)', 'rgba(255, 77, 109, 0.5)', 3);
-            text('↺ RETRY', W / 2, 7, '#ff4d6d', 7.5, 'center');
-        } else {
-            box(W / 2 - 38, 4, 76, 17, 'rgba(57, 255, 20, 0.22)', 'rgba(57, 255, 20, 0.6)', 3);
-            text('SAVED AUTHOR', W / 2, 7, '#39ff14', 7.5, 'center');
+        // Center-Left: Level Title & Mission status (Clean, unobstructed space from x=66 to x=220)
+        text(`SECTOR 4: CYBER NEXUS`, 66, 4, '#9af0ff', 7.5);
+        if (this.bossState === 'inactive') {
+            text(`TARGET: ${this.pawnsKilled}/${this.pawnsTarget} PAWNS`, 66, 14, '#ffd23a', 6.5);
+        } else if (this.bossState === 'warning') {
+            text(`BOSS INCOMING!`, 66, 14, '#ff3864', 6.5);
+        } else if (this.bossState === 'active') {
+            text(`BOSS FIGHT!`, 66, 14, '#ff1744', 6.5);
+        } else if (this.won) {
+            text(`SAVED AUTHOR!`, 66, 14, '#39ff14', 6.5);
         }
 
         // Right: HEALTH GRAPH (Replacing 3 hearts as explicitly requested!)
-        healthGraph(W - 98, 3, 94, 19, this.hp, this.maxHp, this.t);
+        healthGraph(W - 96, 3, 92, 19, this.hp, this.maxHp, this.t);
 
         // Boss Bar (when boss is incoming or active)
         if (this.bossState === 'active' && this.boss) {

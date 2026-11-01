@@ -194,36 +194,38 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
 
   return (
     <div
-      className="relative w-screen h-screen bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-between overflow-hidden select-none font-sans"
+      className="relative w-full h-full min-h-0 bg-slate-950/70 backdrop-blur-sm flex flex-col items-center justify-between overflow-y-auto select-none font-sans"
       onMouseUp={handleMouseUp}
       onTouchEnd={handleMouseUp}
     >
       {/* 1. TOP WINDOWS-STYLE APP BAR (Image 1 Style) */}
-      <div className="w-full bg-[#0284c7] text-white flex items-center justify-between px-4 py-1.5 text-xs">
-        <div className="flex items-center gap-2">
-          <svg className="w-4 h-4 fill-current text-white/90" viewBox="0 0 24 24">
+      <div className="w-full bg-[#0284c7] text-white flex items-center justify-between px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs shrink-0">
+        <div className="flex items-center gap-2 truncate">
+          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current text-white/90 shrink-0" viewBox="0 0 24 24">
             <path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/>
           </svg>
-          <span className="font-semibold tracking-wide">Word Search Crossword Puzzles</span>
+          <span className="font-semibold tracking-wide truncate">Word Search Crossword Puzzles</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="hover:bg-white/20 px-2 py-0.5 rounded text-white cursor-pointer">─</button>
-          <button className="hover:bg-white/20 px-2 py-0.5 rounded text-white cursor-pointer">□</button>
-          <button onClick={onExit} className="hover:bg-red-600 px-2 py-0.5 rounded text-white cursor-pointer">✕</button>
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <button onClick={onExit} className="hover:bg-red-600 px-1.5 py-1 rounded text-white cursor-pointer flex items-center justify-center" title="Close">
+            <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
         </div>
       </div>
 
       {/* 2. SUB-HEADER TOOLBAR (Timer, Active Theme, Mode, Actions - Image 1 Style) */}
-      <div className="w-full bg-[#f0f9ff] text-slate-800 flex flex-wrap items-center justify-between px-4 sm:px-6 py-2 border-b border-sky-200 shadow-sm text-sm gap-2">
-        <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
+      <div className="w-full bg-[#f0f9ff] text-slate-800 flex flex-wrap items-center justify-between px-3 sm:px-6 py-1.5 sm:py-2 border-b border-sky-200 shadow-sm text-xs sm:text-sm gap-2 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
           <button
             onClick={onExit}
-            className="text-slate-600 hover:text-black font-extrabold text-base flex items-center gap-1 cursor-pointer"
+            className="text-slate-600 hover:text-black font-extrabold text-sm sm:text-base flex items-center gap-1 cursor-pointer"
             title="Return to Menu"
           >
             ←
           </button>
-          <div className="font-mono font-bold text-sky-700 flex items-center gap-1.5 bg-sky-100/70 px-2.5 py-0.5 rounded-full border border-sky-300">
+          <div className="font-mono font-bold text-sky-700 flex items-center gap-1.5 bg-sky-100/70 px-2 sm:px-2.5 py-0.5 rounded-full border border-sky-300 text-xs">
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
               <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/>
             </svg>
@@ -231,11 +233,11 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
           </div>
 
           {/* Active Theme Pill */}
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-emerald-50 text-emerald-800 px-3 py-1 rounded-full border border-emerald-300 shadow-sm">
-            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+          <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-700 bg-emerald-50 text-emerald-800 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border border-emerald-300 shadow-sm">
+            <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
             </svg>
-            <span className="uppercase">{puzzleData.theme.name}</span>
+            <span className="uppercase truncate">{puzzleData.theme.name}</span>
           </div>
 
           <span className="hidden lg:inline-block text-[11px] font-mono bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full border border-sky-300">
@@ -243,17 +245,10 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
           </span>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 text-xs font-medium text-slate-700">
-          <button
-            onClick={() => onComplete && onComplete()}
-            className="flex items-center gap-1 px-3.5 py-1 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold cursor-pointer transition shadow-sm active:scale-95 text-xs"
-            title="Skip Sublevel (Testing)"
-          >
-            Skip Sublevel ➔
-          </button>
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
           <button
             onClick={() => handleNewPuzzle()}
-            className="hover:text-black flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold cursor-pointer transition active:scale-95"
+            className="hover:text-black flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-sky-200 hover:bg-sky-300 text-sky-900 font-bold cursor-pointer transition active:scale-95 text-xs"
           >
             <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
               <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
@@ -264,34 +259,34 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
       </div>
 
       {/* 3. MAIN WHITE PUZZLE CONTAINER (Faithful Image 1 Reproduction) */}
-      <div className="flex-1 w-full max-w-6xl p-2 sm:p-4 flex items-center justify-center overflow-y-auto">
-        <div className="w-full h-full max-h-[84vh] bg-white rounded-2xl shadow-2xl border border-sky-100 flex flex-col md:flex-row overflow-hidden p-3 sm:p-6 gap-4 sm:gap-6">
+      <div className="flex-1 w-full max-w-6xl p-2 sm:p-4 flex items-center justify-center min-h-0 overflow-y-auto">
+        <div className="w-full max-h-full bg-white rounded-2xl shadow-2xl border border-sky-100 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden p-3 sm:p-5 gap-3 sm:gap-6">
           
           {/* LEFT: 12x12 LETTER GRID */}
-          <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="flex-1 flex flex-col items-center justify-center min-w-0">
             {/* Top Green Word Badges (Image 1 Header Pills) */}
-            <div className="flex items-center justify-center gap-3 mb-2 h-8">
+            <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1.5 sm:mb-2 min-h-7">
               {activeWordPreview ? (
-                <div className="flex items-center gap-3 animate-fadeIn">
-                  <span className="px-4 py-1 rounded-full bg-[#22c55e] text-white font-black tracking-wider text-xs uppercase shadow-sm">
+                <div className="flex items-center gap-2 sm:gap-3 animate-fadeIn">
+                  <span className="px-3 sm:px-4 py-0.5 sm:py-1 rounded-full bg-[#22c55e] text-white font-black tracking-wider text-[11px] sm:text-xs uppercase shadow-sm">
                     {activeWordPreview}
                   </span>
-                  <span className="px-4 py-1 rounded-full bg-[#16a34a] text-white font-black tracking-wider text-xs uppercase shadow-sm hidden sm:inline-block">
+                  <span className="px-3 sm:px-4 py-0.5 sm:py-1 rounded-full bg-[#16a34a] text-white font-black tracking-wider text-[11px] sm:text-xs uppercase shadow-sm hidden sm:inline-block">
                     {activeWordPreview.split('').reverse().join('')}
                   </span>
                 </div>
               ) : (
-                <span className="text-xs font-mono font-bold text-slate-400">
+                <span className="text-[11px] sm:text-xs font-mono font-bold text-slate-400 text-center [text-wrap:pretty]">
                   Drag in straight lines (Horizontal, Vertical, or Diagonal)
                 </span>
               )}
             </div>
 
-            {/* Letter Grid Container with strict straight-line dragging */}
+            {/* Letter Grid Container with responsive cell sizing */}
             <div
               ref={gridContainerRef}
               onTouchMove={handleTouchMove}
-              className="relative p-2 rounded-xl bg-slate-50 border border-slate-200 shadow-inner"
+              className="relative p-1.5 sm:p-2 rounded-xl bg-slate-50 border border-slate-200 shadow-inner max-w-full overflow-x-auto"
             >
               <div
                 className="grid gap-1 sm:gap-1.5 md:gap-2"
@@ -310,7 +305,7 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
                         onMouseDown={() => handleCellMouseDown(x, y)}
                         onMouseEnter={() => handleCellMouseEnter(x, y)}
                         onTouchStart={(e) => handleTouchStart(e, x, y)}
-                        className={`h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-md sm:rounded-lg flex items-center justify-center font-bold text-xs sm:text-base md:text-lg select-none cursor-pointer transition-all ${
+                        className={`h-[clamp(1.5rem,3.8vw,2.5rem)] w-[clamp(1.5rem,3.8vw,2.5rem)] rounded-md sm:rounded-lg flex items-center justify-center font-bold text-[clamp(0.75rem,1.8vw,1.125rem)] select-none cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-amber-400 text-black scale-105 shadow-md ring-2 ring-amber-500 font-black'
                             : isFound
@@ -327,32 +322,32 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
             </div>
           </div>
 
-          {/* RIGHT: 2-COLUMN TARGET WORD LIST (Image 1 Style) */}
-          <div className="w-full md:w-80 flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-200 pt-3 md:pt-0 md:pl-5">
+          {/* RIGHT: TARGET WORD LIST */}
+          <div className="w-full md:w-80 flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-200 pt-3 md:pt-0 md:pl-5 min-w-0">
             <div>
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-3">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-500">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-2 sm:mb-3">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500 truncate [text-wrap:balance]">
                   WORD LIST ({puzzleData.theme.name})
                 </span>
-                <span className="text-xs font-mono font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                <span className="text-xs font-mono font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 shrink-0">
                   {foundWords.length} / {puzzleData.placedWords.length} Found
                 </span>
               </div>
 
-              {/* 2-Column Word List with strike-throughs */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-sm font-bold tracking-wide">
+              {/* 2-Column Word List with strike-throughs & max-height scroll for mobile */}
+              <div className="grid grid-cols-2 gap-x-3 sm:gap-x-4 gap-y-1.5 sm:gap-y-2 text-xs sm:text-sm font-bold tracking-wide max-h-[30vh] md:max-h-[55vh] overflow-y-auto pr-1">
                 {puzzleData.placedWords.map((item) => {
                   const isFound = foundWords.includes(item.word)
                   return (
                     <div
                       key={item.word}
-                      className={`relative py-0.5 cursor-default transition-all ${
+                      className={`relative py-0.5 cursor-default transition-all truncate ${
                         isFound
                           ? 'text-sky-700 font-extrabold'
                           : 'text-slate-700 hover:text-sky-600'
                       }`}
                     >
-                      <span>{item.word}</span>
+                      <span className="truncate">{item.word}</span>
                       {/* Crisp blue strike-through line matching Image 1 */}
                       {isFound && (
                         <div className="absolute inset-y-0 left-0 right-1 flex items-center pointer-events-none">
@@ -366,19 +361,19 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
             </div>
 
             {/* Bottom Progress & Advance Action */}
-            <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
+            <div className="mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-slate-100 flex flex-col gap-2">
               {isAllFound ? (
                 <button
                   onClick={() => onComplete && onComplete()}
-                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer transition animate-bounce"
+                  className="w-full py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 cursor-pointer transition animate-bounce"
                 >
                   <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                   </svg>
-                  <span>ALL WORDS FOUND! ADVANCE TO MEMORY BOT ➔</span>
+                  <span className="truncate">ALL WORDS FOUND! ADVANCE TO MEMORY BOT -&gt;</span>
                 </button>
               ) : (
-                <div className="text-center text-xs text-slate-400 font-mono">
+                <div className="text-center text-[11px] sm:text-xs text-slate-400 font-mono [text-wrap:pretty]">
                   Drag straight lines in any direction: ↔ ↕ ⤢
                 </div>
               )}

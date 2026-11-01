@@ -27,6 +27,8 @@ export default function HubScene({ onEnterLevelOne }) {
 
   // Portal transition effect
   const [isTransitioning, setIsTransitioning] = useState(false)
+  // Mobile virtual movement input state
+  const [moveInput, setMoveInput] = useState({ forward: false, backward: false, left: false, right: false })
   // Waking blink: plays player_waking_blink_overlay.mp4 when the player is
   // transported into the game world (after the intro video, played or skipped)
   // Starts FALSE so the 3D scene renders first, then we trigger the blink
@@ -38,10 +40,20 @@ export default function HubScene({ onEnterLevelOne }) {
   const wakingStartRef = useRef(null)
   const WAKE_MIN_VISIBLE_MS = 2200
 
-  // Initialize sound on scene start
+  // Initialize sound on scene start & handle universal K skip key
   useEffect(() => {
     sound.init()
-  }, [])
+
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        onEnterLevelOne && onEnterLevelOne()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onEnterLevelOne])
 
   // Called by the BlinkTrigger component (rendered inside Suspense, after scene loads)
   const startWakingBlink = () => {
@@ -92,6 +104,9 @@ export default function HubScene({ onEnterLevelOne }) {
   // Handle interacting with manuscript
   const handleManuscriptInteract = () => {
     if (!isReadingManuscript) {
+      if (typeof document !== 'undefined' && document.pointerLockElement) {
+        document.exitPointerLock()
+      }
       sound.playManuscriptOpen()
       setIsReadingManuscript(true)
     } else {
@@ -99,6 +114,13 @@ export default function HubScene({ onEnterLevelOne }) {
       setIsManuscriptRead(true)
     }
   }
+
+  // Release pointer lock whenever reading manuscript
+  useEffect(() => {
+    if (isReadingManuscript && typeof document !== 'undefined' && document.pointerLockElement) {
+      document.exitPointerLock()
+    }
+  }, [isReadingManuscript])
 
   // Handle interacting with door
   const handleDoorInteract = () => {
@@ -161,6 +183,7 @@ export default function HubScene({ onEnterLevelOne }) {
             isDoorLocked={!isManuscriptRead}
             isDoorOpen={isDoorOpen}
             isFrozen={isWaking && !wakingFading}
+            moveInput={moveInput}
             setIsNearManuscript={setIsNearManuscript}
             setIsNearDoor={setIsNearDoor}
             onInteractManuscript={handleManuscriptInteract}
@@ -259,9 +282,9 @@ export default function HubScene({ onEnterLevelOne }) {
           <button
             onClick={onEnterLevelOne}
             className="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 hover:brightness-110 text-black font-extrabold text-xs tracking-wider cursor-pointer shadow-lg transition active:scale-95"
-            title="Skip to Level 1 (Testing)"
+            title="Skip to Level 1 (Press K or Click)"
           >
-            Skip to Level 1 ➔
+            Skip [K] -&gt;
           </button>
         </div>
       </div>
@@ -279,6 +302,48 @@ export default function HubScene({ onEnterLevelOne }) {
         </div>
         <div>
           <span className="text-cyan-300">E</span> : Interact
+        </div>
+      </div>
+
+      {/* Mobile Touch D-Pad for Virtual Movement (Visible on Mobile/Tablet) */}
+      <div className="absolute bottom-4 left-4 z-30 pointer-events-auto flex flex-col items-center select-none sm:hidden opacity-85">
+        <button
+          onTouchStart={(e) => { e.preventDefault(); setMoveInput((p) => ({ ...p, forward: true })) }}
+          onTouchEnd={() => setMoveInput((p) => ({ ...p, forward: false }))}
+          onMouseDown={() => setMoveInput((p) => ({ ...p, forward: true }))}
+          onMouseUp={() => setMoveInput((p) => ({ ...p, forward: false }))}
+          className="h-11 w-11 rounded-full bg-black/60 border border-cyan-400/50 text-cyan-200 flex items-center justify-center text-sm font-bold shadow active:bg-cyan-500 active:text-black mb-1"
+        >
+          ▲
+        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onTouchStart={(e) => { e.preventDefault(); setMoveInput((p) => ({ ...p, left: true })) }}
+            onTouchEnd={() => setMoveInput((p) => ({ ...p, left: false }))}
+            onMouseDown={() => setMoveInput((p) => ({ ...p, left: true }))}
+            onMouseUp={() => setMoveInput((p) => ({ ...p, left: false }))}
+            className="h-11 w-11 rounded-full bg-black/60 border border-cyan-400/50 text-cyan-200 flex items-center justify-center text-sm font-bold shadow active:bg-cyan-500 active:text-black"
+          >
+            ◀
+          </button>
+          <button
+            onTouchStart={(e) => { e.preventDefault(); setMoveInput((p) => ({ ...p, backward: true })) }}
+            onTouchEnd={() => setMoveInput((p) => ({ ...p, backward: false }))}
+            onMouseDown={() => setMoveInput((p) => ({ ...p, backward: true }))}
+            onMouseUp={() => setMoveInput((p) => ({ ...p, backward: false }))}
+            className="h-11 w-11 rounded-full bg-black/60 border border-cyan-400/50 text-cyan-200 flex items-center justify-center text-sm font-bold shadow active:bg-cyan-500 active:text-black"
+          >
+            ▼
+          </button>
+          <button
+            onTouchStart={(e) => { e.preventDefault(); setMoveInput((p) => ({ ...p, right: true })) }}
+            onTouchEnd={() => setMoveInput((p) => ({ ...p, right: false }))}
+            onMouseDown={() => setMoveInput((p) => ({ ...p, right: true }))}
+            onMouseUp={() => setMoveInput((p) => ({ ...p, right: false }))}
+            className="h-11 w-11 rounded-full bg-black/60 border border-cyan-400/50 text-cyan-200 flex items-center justify-center text-sm font-bold shadow active:bg-cyan-500 active:text-black"
+          >
+            ▶
+          </button>
         </div>
       </div>
 

@@ -68,12 +68,12 @@ export default function RobloxKeypadModal({
     sound.playTypewriter()
     setStatus('')
 
-    if (val === '✖') {
+    if (val === 'CLEAR') {
       setCode('')
       return
     }
 
-    if (val === '✔') {
+    if (val === 'ENTER') {
       if (code.length === codeLength) {
         verifyCode(code)
       } else {
@@ -103,9 +103,9 @@ export default function RobloxKeypadModal({
       if (e.key >= '0' && e.key <= '9') {
         handlePress(e.key)
       } else if (e.key === 'Enter') {
-        handlePress('✔')
+        handlePress('ENTER')
       } else if (e.key === 'Backspace') {
-        handlePress('✖')
+        handlePress('CLEAR')
       } else if (e.key === 'Escape') {
         onClose()
       }
@@ -201,11 +201,11 @@ export default function RobloxKeypadModal({
             ['1', '2', '3'],
             ['4', '5', '6'],
             ['7', '8', '9'],
-            ['✔', '0', '✖'],
+            ['ENTER', '0', 'CLEAR'],
           ].map((row) =>
             row.map((btn) => {
-              const isGreen = btn === '✔'
-              const isRed = btn === '✖'
+              const isGreen = btn === 'ENTER'
+              const isRed = btn === 'CLEAR'
               return (
                 <button
                   type="button"

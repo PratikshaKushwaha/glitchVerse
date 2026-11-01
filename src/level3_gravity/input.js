@@ -44,12 +44,12 @@ export function getTouchButtons(vp) {
 
         // Action Buttons (Bottom-Right Ergonomic Cluster)
         { id: 'jump', label: '▲', sub: 'JUMP', x: w - 58 * s, y: h - 58 * s, r: 36 * s, color: '#39ff14' },
-        { id: 'dash', label: '⚡', sub: 'DASH', x: w - 132 * s, y: h - 48 * s, r: 27 * s, color: '#18b7ff' },
+        { id: 'dash', label: '>>', sub: 'DASH', x: w - 132 * s, y: h - 48 * s, r: 27 * s, color: '#18b7ff' },
         { id: 'gravity', label: '⇅', sub: 'FLIP', x: w - 58 * s, y: h - 132 * s, r: 27 * s, color: '#b180ff' },
 
         // Top HUD Quick Buttons
-        { id: 'pause', label: '⏸', sub: '', x: pauseX, y: pauseY, r: 24 * vs, color: '#ffd23a', isHud: true },
-        { id: 'restart', label: '↺', sub: '', x: retryX, y: retryY, r: 26 * vs, color: '#ff4d6d', isHud: true }
+        { id: 'pause', label: '||', sub: '', x: pauseX, y: pauseY, r: 24 * vs, color: '#ffd23a', isHud: true },
+        { id: 'restart', label: 'R', sub: '', x: retryX, y: retryY, r: 26 * vs, color: '#ff4d6d', isHud: true }
     ];
 }
 
@@ -180,11 +180,11 @@ export const Input = {
     isTouch: () => Boolean(settings.touchControls !== false && isTouch),
     held: a => down.has(settings.keys[a])
         || (a === 'jump' && (down.has('ArrowUp') || down.has('KeyW')))
-        || (a === 'dash' && (down.has('KeyK') || down.has('KeyX') || down.has('ShiftRight')))
+        || (a === 'dash' && (down.has('ShiftLeft') || down.has('ShiftRight') || down.has('KeyX') || down.has('KeyC')))
         || touchHeld.has(a),
     pressed: a => hit.has(settings.keys[a])
         || (a === 'jump' && (hit.has('ArrowUp') || hit.has('KeyW')))
-        || (a === 'dash' && (hit.has('KeyK') || hit.has('KeyX') || hit.has('ShiftRight')))
+        || (a === 'dash' && (hit.has('ShiftLeft') || hit.has('ShiftRight') || hit.has('KeyX') || hit.has('KeyC')))
         || touchHit.has(a),
     rawPressed: c => hit.has(c)
         || (c === 'Escape' && touchHit.has('pause'))

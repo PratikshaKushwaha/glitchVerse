@@ -253,7 +253,7 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit,
   }
 
   return (
-    <div className="relative w-screen h-screen bg-black/45 backdrop-blur-sm text-white flex flex-col items-center justify-between p-4 select-none font-sans overflow-hidden">
+    <div className="relative w-full h-full max-h-full bg-black/45 backdrop-blur-sm text-white flex flex-col items-center justify-between p-2 sm:p-4 select-none font-sans overflow-hidden">
       
       {/* Top Bar matching Image 2 */}
       <div className="w-full max-w-lg flex items-center justify-between pt-2">
@@ -298,9 +298,9 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit,
         </button>
       </div>
 
-      {/* Main 20-Card Table Grid (Image 2 Aesthetic) */}
-      <div className="relative flex-1 w-full max-w-lg flex items-center justify-center p-2">
-        <div className="grid grid-cols-4 gap-2.5 sm:gap-3.5">
+      {/* Main 20-Card Table Grid (Clean 5x4 Landscape Layout, Zero Vertical Overflow) */}
+      <div className="relative flex-1 w-full max-w-2xl flex items-center justify-center p-1 sm:p-2 min-h-0">
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-2 md:gap-2.5">
           {cards.map((card, idx) => {
             const isFlipped = flippedIndices.includes(idx)
             const isMatched = matchedIds.includes(card.id)
@@ -315,26 +315,26 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit,
                   transform: `rotate(${card.tilt}deg)`,
                   visibility: isMatched && !isCurrentlyLifting ? 'hidden' : 'visible',
                 }}
-                className={`relative h-20 w-16 sm:h-24 sm:w-20 rounded-2xl cursor-pointer select-none transition-all duration-300 ${
+                className={`relative w-12 h-16 sm:w-16 sm:h-20 md:w-20 md:h-24 rounded-xl sm:rounded-2xl cursor-pointer select-none transition-all duration-300 ${
                   isMatched ? 'opacity-0' : 'hover:scale-105 active:scale-95'
                 }`}
               >
-                {/* CARD BACK (Warm Mustard Yellow with White Border - Image 2) */}
+                {/* CARD BACK (Warm Mustard Yellow with White Border) */}
                 <div
-                  className={`absolute inset-0 rounded-2xl bg-[#f59e0b] border-[3.5px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform duration-500 ${
+                  className={`absolute inset-0 rounded-xl sm:rounded-2xl bg-[#f59e0b] border-2 sm:border-[3px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center transition-transform duration-500 ${
                     isFlipped || isMatched ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
                   }`}
                 >
-                  <div className="h-4 w-4 rounded-full bg-white/30" />
+                  <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full bg-white/30" />
                 </div>
 
-                {/* CARD FRONT (Green/Vibrant Theme with Icon & Border - Image 2) */}
+                {/* CARD FRONT (Green/Vibrant Theme with Icon & Border) */}
                 <div
-                  className={`absolute inset-0 rounded-2xl ${card.bg} border-[3.5px] border-white shadow-[0_6px_15px_rgba(0,0,0,0.6)] flex items-center justify-center transition-transform duration-500 ${
+                  className={`absolute inset-0 rounded-xl sm:rounded-2xl ${card.bg} border-2 sm:border-[3px] border-white shadow-[0_6px_15px_rgba(0,0,0,0.6)] flex items-center justify-center transition-transform duration-500 ${
                     isFlipped || isMatched ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                   }`}
                 >
-                  {renderCardIcon(card.id)}
+                  {renderCardIcon(card.id, 'w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white fill-current drop-shadow-md')}
                 </div>
               </div>
             )

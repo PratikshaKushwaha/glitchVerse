@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ambientVideo from './assets/enchanted_cottage_ambient.mp4'
+import gameLogoImg from './assets/the_way_out_logo.jpg'
 import IntroVideo from './components/IntroVideo'
 import HubScene from './scenes/HubScene'
 import RoomScene from './scenes/RoomScene'
@@ -122,6 +123,13 @@ const App = () => {
         aria-label="Main menu"
       >
         <div>
+          <div className="mb-4">
+            <img
+              src={gameLogoImg}
+              alt="The Way Out Official Emblem"
+              className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-2xl shadow-2xl drop-shadow-[0_8px_24px_rgba(245,158,11,0.35)] border border-amber-400/40 hover:scale-105 transition-transform duration-300"
+            />
+          </div>
           <h1 className="font-serif text-[clamp(4rem,9vw,7.5rem)] font-medium leading-[.87] tracking-[-.06em] text-[#f7f4eb] drop-shadow-[0_3px_30px_rgba(0,0,0,.22)]">
             <span className="mb-2 block pl-1 text-[.34em] leading-none tracking-[.03em] text-[#c8d4bd]">
               The
@@ -207,7 +215,7 @@ const App = () => {
       </section>
 
       <footer className="absolute bottom-8 right-8 z-10 flex items-center gap-4 text-[.6rem] uppercase tracking-[.12em] text-[#dae2d3]/60 sm:right-[clamp(2rem,12vw,11rem)]">
-        <span>© 2026 The Way Out</span>
+        <span>© 2026 The Way Out • Made by team StrawHats for PS01 GlitchVerse</span>
         <span className="h-px w-8 bg-[#dae2d3]/45" aria-hidden="true" />
         <span className="hidden sm:inline">Press enter to begin</span>
       </footer>

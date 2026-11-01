@@ -13,6 +13,7 @@ export default function FirstPersonController({
   onInteractManuscript,
   onInteractDoor,
   onEnterDoor,
+  moveInput,
 }) {
   const { camera, gl } = useThree()
 
@@ -43,12 +44,8 @@ export default function FirstPersonController({
     const handleKeyDown = (e) => {
       // Frozen during waking overlay: ignore all gameplay keys
       if (isFrozen) return
-      if (isReading) {
-        if (e.key === 'e' || e.key === 'E' || e.key === 'Escape') {
-          onInteractManuscript()
-        }
-        return
-      }
+      // If modal is actively open, yield keyboard events to ManuscriptModal
+      if (isReading) return
 
       switch (e.code) {
         case 'KeyW':
@@ -136,11 +133,14 @@ export default function FirstPersonController({
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isReading, isFrozen, onInteractManuscript, onInteractDoor])
+  }, [isReading, onInteractManuscript, onInteractDoor])
 
-  // Pointer lock & drag controls for mouse look
+  // Pointer lock, drag look, touch look, and click-to-interact
   useEffect(() => {
     const dom = gl.domElement
+    let isTouchInteracting = false
+    let touchStartPos = { x: 0, y: 0, time: 0 }
+    let mouseDownPos = { x: 0, y: 0, time: 0 }
 
     const onPointerLockChange = () => {
       isPointerLocked.current = document.pointerLockElement === dom
@@ -168,37 +168,106 @@ export default function FirstPersonController({
       }
     }
 
+    // Attach mousedown strictly to canvas element (gl.domElement) to prevent hijacking UI buttons/modals
     const onMouseDown = (e) => {
-      // Primary button
-      if (e.button === 0 && !isReading) {
+      if (e.target !== dom || isReading) return
+      if (e.button === 0) {
         isDragging.current = true
         previousMouse.current = { x: e.clientX, y: e.clientY }
+        mouseDownPos = { x: e.clientX, y: e.clientY, time: Date.now() }
         if (!isPointerLocked.current && dom.requestPointerLock) {
           dom.requestPointerLock().catch(() => {})
         }
       }
     }
 
-    const onMouseUp = () => {
+    const onMouseUp = (e) => {
       isDragging.current = false
+      if (e.target === dom && !isReading) {
+        const dt = Date.now() - mouseDownPos.time
+        const dist = Math.hypot(e.clientX - mouseDownPos.x, e.clientY - mouseDownPos.y)
+        // Click to interact on 3D canvas if close to interactive object
+        if (dt < 400 && dist < 12) {
+          const distManuscript = Math.hypot(playerPos.current.x - 0.814, playerPos.current.z - 0.275)
+          const distDoor = Math.hypot(playerPos.current.x - (-0.814), playerPos.current.z - (-0.275))
+          if (distManuscript < 2.5) {
+            onInteractManuscript()
+          } else if (distDoor < 2.8) {
+            onInteractDoor()
+          }
+        }
+      }
+    }
+
+    // Mobile touch look & tap to interact
+    const onTouchStart = (e) => {
+      if (e.target !== dom || isReading) return
+      if (e.touches.length === 1) {
+        isTouchInteracting = true
+        const touch = e.touches[0]
+        touchStartPos = { x: touch.clientX, y: touch.clientY, time: Date.now() }
+        previousMouse.current = { x: touch.clientX, y: touch.clientY }
+      }
+    }
+
+    const onTouchMove = (e) => {
+      if (!isTouchInteracting || isReading || e.touches.length === 0) return
+      const touch = e.touches[0]
+      const movementX = touch.clientX - previousMouse.current.x
+      const movementY = touch.clientY - previousMouse.current.y
+      previousMouse.current = { x: touch.clientX, y: touch.clientY }
+
+      yaw.current -= movementX * 0.0035
+      pitch.current -= movementY * 0.0035
+      pitch.current = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, pitch.current))
+    }
+
+    const onTouchEnd = (e) => {
+      if (!isTouchInteracting) return
+      isTouchInteracting = false
+      if (isReading) return
+
+      const dt = Date.now() - touchStartPos.time
+      const changed = e.changedTouches[0]
+      if (changed) {
+        const dist = Math.hypot(changed.clientX - touchStartPos.x, changed.clientY - touchStartPos.y)
+        // Tap to interact on mobile
+        if (dt < 350 && dist < 15) {
+          const distManuscript = Math.hypot(playerPos.current.x - 0.814, playerPos.current.z - 0.275)
+          const distDoor = Math.hypot(playerPos.current.x - (-0.814), playerPos.current.z - (-0.275))
+          if (distManuscript < 2.5) {
+            onInteractManuscript()
+          } else if (distDoor < 2.8) {
+            onInteractDoor()
+          }
+        }
+      }
     }
 
     document.addEventListener('pointerlockchange', onPointerLockChange)
     window.addEventListener('mousemove', onMouseMove)
-    window.addEventListener('mousedown', onMouseDown)
+    dom.addEventListener('mousedown', onMouseDown)
     window.addEventListener('mouseup', onMouseUp)
+
+    dom.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
 
     return () => {
       document.removeEventListener('pointerlockchange', onPointerLockChange)
       window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mousedown', onMouseDown)
+      dom.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('mouseup', onMouseUp)
+
+      dom.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
     }
-  }, [gl, isReading])
+  }, [gl, isReading, onInteractManuscript, onInteractDoor])
 
   // Frame update
   useFrame((state, delta) => {
-    // Frozen during the waking blink overlay: no movement, no interaction
+    // Frozen during waking overlay: ignore physics & proximity updates
     if (isFrozen) return
 
     // Proximity checks
@@ -223,8 +292,9 @@ export default function FirstPersonController({
       return
     }
 
-    // Walking calculation
-    const moveSpeed = (keys.current.sprint ? 3.5 : 2.0) * delta
+    // Walking calculation (supports both keyboard and mobile touch pad)
+    const isSprint = keys.current.sprint || Boolean(moveInput?.sprint)
+    const moveSpeed = (isSprint ? 3.5 : 2.0) * delta
     const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(
       new THREE.Vector3(0, 1, 0),
       yaw.current
@@ -237,19 +307,19 @@ export default function FirstPersonController({
     let isMoving = false
     const moveDelta = new THREE.Vector3()
 
-    if (keys.current.forward) {
+    if (keys.current.forward || Boolean(moveInput?.forward)) {
       moveDelta.add(forward)
       isMoving = true
     }
-    if (keys.current.backward) {
+    if (keys.current.backward || Boolean(moveInput?.backward)) {
       moveDelta.sub(forward)
       isMoving = true
     }
-    if (keys.current.right) {
+    if (keys.current.right || Boolean(moveInput?.right)) {
       moveDelta.add(right)
       isMoving = true
     }
-    if (keys.current.left) {
+    if (keys.current.left || Boolean(moveInput?.left)) {
       moveDelta.sub(right)
       isMoving = true
     }
