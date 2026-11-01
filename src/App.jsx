@@ -8,6 +8,7 @@ import LevelTwoScene from './scenes/LevelTwoScene'
 import LevelThreeScene from './scenes/LevelThreeScene'
 import LevelFourScene from './scenes/LevelFourScene'
 import FinalBossScene from './scenes/FinalBossScene'
+import FinalEndingScene from './components/FinalEndingScene'
 
 const App = () => {
   // Pure narrative game progression:
@@ -122,8 +123,19 @@ const App = () => {
   if (currentScene === 'finalboss') {
     return (
       <FinalBossScene
-        onBossDefeated={() => setCurrentScene('level4')}
+        onBossDefeated={() => setCurrentScene('afterlife')}
         onExitToHub={() => setCurrentScene('hub')}
+      />
+    )
+  }
+
+  // 8. The Afterlife Holographic Epilogue: Student & Future Self meeting in restored reality
+  if (currentScene === 'afterlife' || currentScene === 'ending') {
+    return (
+      <FinalEndingScene
+        playerName={playerName || 'Seeker'}
+        onRestart={() => setCurrentScene('menu')}
+        onBackToMenu={() => setCurrentScene('menu')}
       />
     )
   }

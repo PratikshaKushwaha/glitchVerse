@@ -26,14 +26,14 @@ button{background:#1a0808;color:var(--fg);border:1px solid var(--red);padding:12
 <div id="vig"></div><canvas id="grain" width="128" height="128"></canvas><div id="hurt"></div><div id="fade"></div>
 <div class="ov" id="pause"><h1>PAUSED</h1><button id="resume">RESUME</button></div>
 <div class="ov" id="dead"><h1>YOU DIED</h1><button onclick="location.reload()">TRY AGAIN</button></div>
-<div class="ov" id="end"><h1>FINAL BOSS DEFEATED</h1><p style="font-size:22px;color:#e8dcd0">DEVELOPER RESCUED</p><div><button onclick="location.reload()">RESTART</button> <button id="cont">CONTINUE</button></div></div>
+<div id="whiteout" style="position:fixed;inset:0;background:#ffffff;opacity:0;pointer-events:none;z-index:99999;"></div>
 <button id="skip" class="h" style="right:18px;top:64px;display:none;pointer-events:auto;padding:6px 12px">Skip</button>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
 const $=id=>document.getElementById(id),R=Math.random,TAU=Math.PI*2,V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z),TOT=8;
 (()=>{const c=$('grain'),x=c.getContext('2d');setInterval(()=>{const d=x.createImageData(128,128);for(let i=0;i<d.data.length;i+=4){d.data[i]=d.data[i+1]=d.data[i+2]=R()*255;d.data[i+3]=255}x.putImageData(d,0,0)},90)})();
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.domElement.tabIndex=0;
 renderer.shadowMap.enabled=true;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;document.body.prepend(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x020101);scene.fog=new THREE.FogExp2(0x120404,.017);
 const cam=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,300);cam.rotation.order='YXZ';scene.add(cam);
@@ -269,7 +269,18 @@ tl.to(boss.scale,{x:.01,y:.01,z:.01,duration:2.5,ease:'power2.in'},3.4).to(boss.
 tl.to(S,{red:0,face:0,eye:0,duration:3},3.5).to(hemi,{intensity:.9,duration:4},3.6).to(spotDev.color,{r:1,g:1,b:1,duration:2},3.6);
 tl.call(()=>{scene.fog.color.set(0x1c2028);scene.fog.density=.012;sfx.swell();Object.assign(freed,{eL:1,wL:1,eR:1,wR:1,kL:1,aL:1,aR:1,ch:1})},null,4.5);
 tl.to(dev.rotation,{x:0,duration:2.2,ease:'power2.inOut'},6).to(dev.position,{y:P.position.y+3,duration:2.2,ease:'power2.inOut'},6).to(look,{y:P.position.y+3.5,duration:2},6);
-tl.call(()=>{playSavedVoice();say('“You... actually made it.”',2100)},null,7.5).call(()=>say('“You saved me.”',2400),null,9.8).call(()=>$('end').classList.add('on'),null,12.8)}
+tl.call(()=>{playSavedVoice();say('“You... actually made it.”',2100)},null,7.5)
+  .call(()=>say('“You saved me.”',2400),null,9.8)
+  .to('#whiteout',{opacity:1,duration:2.8,ease:'power2.inOut'},11.8)
+  .to(hemi,{intensity:5,duration:2.8},11.8)
+  .to(spotDev,{intensity:9,duration:2.8},11.8)
+  .call(()=>{
+    try{
+      if(window.parent&&window.parent!==window){
+        window.parent.postMessage({type:'AFTERLIFE_TRANSITION'},'*');
+      }
+    }catch(e){}
+  },null,14.6)}
 // ---- intro ----
 function intro(){state='intro';$('skip').style.display='block';cam.position.set(0,2.2,4);look.set(0,10,-30);audioInit();AC.resume();
 const tl=gsap.timeline({onComplete:()=>{if(state==='intro')startPlay()}});
@@ -283,17 +294,17 @@ tl.to('#fade',{opacity:0,duration:3},0).call(()=>sfx.impact(),null,.3).to(S,{lum
 .to(look,{x:0,y:25,z:-38,duration:2.5},18).call(()=>{sfx.impact();playPennywiseVoice();say('“YOU FINALLY MADE IT.”',1400)},null,18.8).call(()=>{say('“LET’S SEE IF YOU CAN SAVE YOUR AUTHOR.”',2400)},null,20.3)
 .to(S,{lum:1,duration:2},21).call(awaken,null,24.5).to(cam.position,{x:0,y:3.2,z:-8,duration:3.5,ease:'power2.inOut'},24.5).to(look,{x:0,y:8,z:-16,duration:3},24.5).call(()=>follow=true,null,28).to({},{duration:.01},31.5)
 $('skip').onclick=()=>{tl.progress(1,false);stopPennywiseVoice()}}
-function startPlay(){if(state!=='intro')return;stopPennywiseVoice();if(!awoke)awaken();follow=false;Object.assign(S,{lum:1,face:1,eye:1,spot:1,hin:0,strVis:1,spread:3});$('skip').style.display='none';$('fade').style.opacity=0;gun.visible=true;state='play';yaw=0;pitch=.28;$('hud').style.opacity=1;hud();say('TAKE THE GUN. SHOOT THE STRINGS — NEVER THE DEVELOPER.',3600);lock()}
+function startPlay(){if(state!=='intro')return;stopPennywiseVoice();if(!awoke)awaken();follow=false;Object.assign(S,{lum:1,face:1,eye:1,spot:1,hin:0,strVis:1,spread:3});$('skip').style.display='none';$('fade').style.opacity=0;gun.visible=true;state='play';yaw=0;pitch=.28;$('hud').style.opacity=1;hud();say('TAKE THE GUN. SHOOT THE STRINGS — NEVER THE DEVELOPER.',3600);renderer.domElement.focus();lock()}
 function lock(){try{const p=renderer.domElement.requestPointerLock();if(p&&p.catch)p.catch(()=>free=true)}catch(e){free=true}}
 intro();
 $('resume').onclick=()=>{$('pause').classList.remove('on');state='play';lock()};
-$('cont').onclick=()=>{$('end').classList.remove('on');say('The nightmare is over. To be continued…',6000)};
 document.addEventListener('pointerlockerror',()=>free=true);
 document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement&&state==='play'&&!free){state='pause';$('pause').classList.add('on')}});
-addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyR')reload();if(e.code==='Escape'&&free&&(state==='play'||state==='pause')){state=state==='play'?'pause':'play';$('pause').classList.toggle('on',state==='pause')}});
-addEventListener('keyup',e=>keys[e.code]=false);
+addEventListener('keydown',e=>{keys[e.code]=true;if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='KeyR')reload();if(e.code==='Escape'&&free&&(state==='play'||state==='pause')){state=state==='play'?'pause':'play';$('pause').classList.toggle('on',state==='pause')}});
+addEventListener('keyup',e=>{keys[e.code]=false;if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault()});
+addEventListener('blur',()=>Object.keys(keys).forEach(code=>{keys[code]=false}));
 addEventListener('mousemove',e=>{if(state!=='play'||(!document.pointerLockElement&&!free))return;yaw-=e.movementX*.0022;pitch=Math.max(-1.3,Math.min(1.3,pitch-e.movementY*.0022))});
-addEventListener('mousedown',()=>{if(state==='play'){if(!document.pointerLockElement&&!free)lock();else shoot()}});
+addEventListener('mousedown',()=>{if(state==='play'){renderer.domElement.focus();if(!document.pointerLockElement&&!free)lock();else shoot()}});
 // ---- main loop ----
 const clock=new THREE.Clock(),dummy=new THREE.Object3D(),shoulder=V(),wrist=V(),mid=V();
 function frame(){requestAnimationFrame(frame);const rdt=Math.min(clock.getDelta(),.05);

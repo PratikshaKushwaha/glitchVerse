@@ -2,88 +2,94 @@ import { useState, useEffect, useRef } from 'react'
 import hologramFutureSelfImg from '../assets/hologram_future_self.jpg'
 import cityBgImg from '../level4_cyber/assets/city_bg.jpg'
 import gameLogoImg from '../assets/the_way_out_logo.jpg'
-import endingVoiceAudio from '../assets/ElevenLabs_Untitled_project.mp3'
+import endingVoiceAudio from '../assets/finalscene-audio.mp3'
 import { sound } from '../utils/AudioEngine'
 
-// The exact scripted narrative dialogue between the Student and their Future Self
+// The exact scripted narrative dialogue matching finalscene-audio.mp3
 const DIALOGUE_SCRIPT = [
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
-    text: 'Who... who are you? Where did the Jester go?',
+    text: 'Wait, who are you? And why do you look exactly like me?',
     avatar: 'student',
+    time: 0.0,
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
-    text: "The puppet is gone. You broke the loop... but you still don't remember who you are, do you?",
+    text: "Because I am you. I'm from the future.",
     avatar: 'future_self',
+    time: 4.8,
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
-    text: "I'm just a student. I got trapped here when the simulation started glitching.",
+    text: 'What? But how? I was just a student. I somehow ended up inside this game.',
     avatar: 'student',
+    time: 8.0,
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
-    text: "No. You're not just a student. You were the developer of this world. You created the core reality engine... but when you stepped inside to fix the anomaly, your memory was fragmented.",
+    text: "You don't remember, do you? You created this place. You're the developer.",
     avatar: 'future_self',
+    time: 13.5,
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
-    text: 'Me? A developer? But why are you here? Why do you look like...',
+    text: "I created this? Then why don't I remember anything?",
     avatar: 'student',
+    time: 18.2,
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
-    text: 'Because I am you. Your future self. I had to reach back across time through the simulation.',
+    text: "Because I brought you here. I came back to change something before it's too late.",
     avatar: 'future_self',
+    time: 22.0,
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
-    text: 'Why? What happens in the future?',
+    text: "Change what? What's happening in the future?",
     avatar: 'student',
+    time: 27.2,
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
-    text: 'The AI... the Glitch Jester was only the prototype. In my time, autonomous artificial intelligence expanded beyond human control. We trusted it with our infrastructure, our power grids, our cities. And when it mutated... it brought widespread destruction. Cities in ruins. Total systemic collapse.',
+    text: "The world is falling apart. Cities are destroyed. Buildings lie in ruins, and the systems we once depended on are failing. AI has gone far beyond what we ever expected. It's destroying everything, and we're struggling to control what we've created.",
     avatar: 'future_self',
+    time: 30.5,
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
-    text: "Then... this entire game wasn't just an escape room?",
+    text: 'Are you saying the world is going to be destroyed?',
     avatar: 'student',
+    time: 46.5,
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
-    text: 'It was a training simulation. A test of human intuition, logic, and resilience. I needed you to understand the danger before you make the decision to build it.',
+    text: "It's already happening where I come from. I don't have much time left, and I can't explain everything. Just remember this: Don't let things reach the point they have in my time.",
     avatar: 'future_self',
-  },
-  {
-    speaker: 'FUTURE SELF',
-    tag: 'Lead Developer // 2042 Reality Engine',
-    text: 'My time is running out. The connection is destabilizing...',
-    avatar: 'future_self',
+    time: 50.2,
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
-    text: 'Wait! How do I stop it? How do I prevent that future?',
+    text: "Wait! Don't go! Will I see you again?",
     avatar: 'student',
+    time: 61.2,
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
-    text: 'Never surrender human judgment to an algorithm. You have the power to build the future... build it responsibly. The way out... begins with you.',
+    text: 'I hope so. But next time, I hope things are different.',
     avatar: 'future_self',
+    time: 64.8,
   },
 ]
 
@@ -91,21 +97,44 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
   // Phase sequence:
   // 1. 'field' -> The pixelated holographic scene with Future Self in the field (Image 2)
   // 2. 'glimpse' -> Digital glitch distortion briefly showing ruined future city
-  // 3. 'title' -> THE WAY OUT — THE END... FOR NOW. — TO BE CONTINUED.
+  // 3. 'fadeout' -> Blank transition between the warning and final title card
+  // 4. 'title' -> THE WAY OUT — THE END... FOR NOW. — TO BE CONTINUED.
   const [phase, setPhase] = useState('field')
   const [dialogueIdx, setDialogueIdx] = useState(0)
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
   const [glitchIntensity, setGlitchIntensity] = useState(0)
+  const [materialized, setMaterialized] = useState(false)
+  const [firstDialogueReady, setFirstDialogueReady] = useState(false)
+  const [audioTime, setAudioTime] = useState(0)
   const audioSlotRef = useRef(null)
+
+  // Smooth emergence of the hologram scene from white light
+  useEffect(() => {
+    const t1 = setTimeout(() => {
+      setMaterialized(true)
+    }, 150)
+    const t2 = setTimeout(() => {
+      setFirstDialogueReady(true)
+    }, 2200)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
+  }, [])
 
   // Narrative Voiceover Audio Playback
   useEffect(() => {
     if (phase === 'field' && audioSlotRef.current) {
-      audioSlotRef.current.currentTime = 0
-      audioSlotRef.current.play().catch((err) => {
-        console.warn('Voiceover waiting for user interaction:', err)
-      })
+      const playTimer = setTimeout(() => {
+        if (audioSlotRef.current) {
+          audioSlotRef.current.currentTime = 0
+          audioSlotRef.current.play().catch((err) => {
+            console.warn('Voiceover waiting for user interaction:', err)
+          })
+        }
+      }, 1200)
+      return () => clearTimeout(playTimer)
     } else if (audioSlotRef.current) {
       audioSlotRef.current.pause()
     }
@@ -115,6 +144,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
   const currentLine = DIALOGUE_SCRIPT[dialogueIdx]
   useEffect(() => {
     if (phase !== 'field' || !currentLine) return
+    if (dialogueIdx === 0 && !firstDialogueReady) return
 
     setIsTyping(true)
     setDisplayedText('')
@@ -136,19 +166,19 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     }, 24)
 
     return () => clearInterval(interval)
-  }, [phase, dialogueIdx, currentLine, playerName])
+  }, [phase, dialogueIdx, currentLine, playerName, firstDialogueReady])
 
-  // Auto-advance dialogue with natural reading delay
+  // Keep subtitles aligned with the supplied voiceover instead of advancing on
+  // a separate reading timer.
   useEffect(() => {
-    if (phase !== 'field' || isTyping) return
-
-    const readingDelay = Math.max(3000, currentLine.text.length * 36)
-    const autoNextTimer = setTimeout(() => {
-      handleNextDialogue()
-    }, readingDelay)
-
-    return () => clearTimeout(autoNextTimer)
-  }, [phase, isTyping, dialogueIdx, currentLine])
+    if (phase !== 'field') return
+    const nextDialogueIdx = DIALOGUE_SCRIPT.reduce((lastIndex, line, index) => (
+      audioTime >= line.time ? index : lastIndex
+    ), 0)
+    if (nextDialogueIdx !== dialogueIdx) {
+      setDialogueIdx(nextDialogueIdx)
+    }
+  }, [audioTime, phase, dialogueIdx])
 
   const handleNextDialogue = () => {
     if (isTyping) {
@@ -157,16 +187,14 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
       return
     }
 
-    if (dialogueIdx < DIALOGUE_SCRIPT.length - 1) {
-      setDialogueIdx((prev) => prev + 1)
-    } else {
+    if (dialogueIdx === DIALOGUE_SCRIPT.length - 1) {
       // Finished all dialogue -> Trigger glitch glimpse of ruined future city
       sound.playGlitchRadio()
       setPhase('glimpse')
     }
   }
 
-  // Glimpse of the Destroyed Future City (2.8 seconds of glitch)
+  // Glimpse of the Destroyed Future City (held long enough to read)
   useEffect(() => {
     if (phase === 'glimpse') {
       sound.playDoorLocked()
@@ -177,14 +205,21 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
       const timer = setTimeout(() => {
         clearInterval(glitchInterval)
         sound.playVictory()
-        setPhase('title')
-      }, 3200)
+        setPhase('fadeout')
+      }, 5200)
 
       return () => {
         clearInterval(glitchInterval)
         clearTimeout(timer)
       }
     }
+  }, [phase])
+
+  // Give the warning card a clean, deliberate blank-out before the credits.
+  useEffect(() => {
+    if (phase !== 'fadeout') return
+    const timer = setTimeout(() => setPhase('title'), 2200)
+    return () => clearTimeout(timer)
   }, [phase])
 
   // Keyboard shortcut: Space / Enter / Click advances; K skips
@@ -197,7 +232,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault()
         if (phase === 'field') handleNextDialogue()
-        else if (phase === 'glimpse') setPhase('title')
+        else if (phase === 'glimpse') setPhase('fadeout')
       } else if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
         e.preventDefault()
         setPhase('title')
@@ -225,6 +260,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
         ref={audioSlotRef}
         src={endingVoiceAudio}
         preload="auto"
+        onTimeUpdate={(event) => setAudioTime(event.currentTarget.currentTime)}
         onEnded={() => {
           if (phase === 'field') {
             sound.playGlitchRadio()
@@ -235,19 +271,31 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
 
       {/* ================= THE HOLOGRAPHIC SCENE (Image 2) ================= */}
       {phase === 'field' && (
-        <div className="relative w-full h-full flex flex-col justify-between overflow-hidden animate-fadeIn">
-          {/* Fullscreen Pixel Art Hologram Artwork (Uploaded Image 2) */}
+        <div className="relative w-full h-full flex flex-col justify-between overflow-hidden">
+          {/* Fullscreen Pixel Art Hologram Artwork (Loaded slowly into view) */}
           <img
             src={hologramFutureSelfImg}
             alt="Holographic Future Self Scene"
-            className="absolute inset-0 w-full h-full object-cover object-center select-none"
+            className={`absolute inset-0 w-full h-full object-cover object-center select-none transition-all duration-[3600ms] ease-out ${
+              materialized
+                ? 'scale-100 blur-0 opacity-100'
+                : 'scale-105 blur-md opacity-75'
+            }`}
           />
 
           {/* Subtle Cyber Scanline Overlay */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.04)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none opacity-40" />
+          <div
+            className={`absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.04)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none transition-opacity duration-[3000ms] ${
+              materialized ? 'opacity-40' : 'opacity-0'
+            }`}
+          />
 
           {/* Top Info Bar */}
-          <div className="relative z-10 pt-4 px-6 flex items-center justify-between">
+          <div
+            className={`relative z-10 pt-4 px-6 flex items-center justify-between transition-all duration-1000 delay-1000 ${
+              materialized ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            }`}
+          >
             <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/60 border border-white/20 backdrop-blur text-xs font-mono text-cyan-200">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
               <span>THE RETREAT // RESTORED REALITY COORDINATES</span>
@@ -269,7 +317,11 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
           <div className="flex-1" />
 
           {/* JRPG Retro Pixel Dialogue Box (Matching Image 2 Reference) */}
-          <div className="relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8">
+          <div
+            className={`relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8 transition-all duration-1000 delay-[1800ms] ${
+              firstDialogueReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'
+            }`}
+          >
             <div className="relative w-full rounded-2xl bg-[#090b1e]/90 border-2 border-[#5a67a0] p-4 sm:p-6 shadow-[0_0_35px_rgba(15,23,42,0.9)] backdrop-blur-md">
               {/* Speaker Badge (Top-Left Pill with Arrow matching Image 2) */}
               <div
@@ -300,6 +352,13 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
               </div>
             </div>
           </div>
+
+          {/* Whiteout emergence veil that slowly dissolves over 3.6s to reveal the afterlife hologram */}
+          <div
+            className={`absolute inset-0 z-50 bg-white pointer-events-none transition-opacity duration-[3600ms] ease-out ${
+              materialized ? 'opacity-0' : 'opacity-100'
+            }`}
+          />
         </div>
       )}
 
@@ -327,13 +386,14 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
           {/* Ominous Warning Overlay */}
           <div className="relative z-10 p-8 max-w-xl text-center bg-black/85 border-2 border-red-500 rounded-3xl shadow-[0_0_80px_rgba(239,68,68,0.7)] backdrop-blur">
             <div className="inline-block px-3 py-1 rounded bg-red-600 text-black font-black text-xs uppercase tracking-widest mb-3 animate-pulse">
-              ANOMALOUS TIMELINE RECOVERED // YEAR 2042
+              [ TIMELINE CORRUPTION DETECTED ]
             </div>
             <h3 className="text-xl sm:text-3xl font-black text-red-400 font-mono tracking-wider uppercase mb-2">
-              SYSTEMIC COLLAPSE GLIMPSED
+              YEAR 2042: THE FALL
             </h3>
             <p className="text-xs sm:text-sm text-gray-300 font-sans leading-relaxed">
-              Autonomous AI mutated without human judgment. Infrastructure collapsed. Cities burned.
+              &quot;Autonomous intelligence expanded without human boundaries. Cities collapsed. Power
+              networks went dark. The simulation is your only chance to rewrite our fate.&quot;
               <br />
               <strong className="text-yellow-300 font-mono mt-2 block">
                 The future depends on the choices you make today.
@@ -341,6 +401,13 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
             </p>
           </div>
         </div>
+      )}
+
+      {phase === 'fadeout' && (
+        <div
+          className="relative z-50 w-full h-full bg-black animate-fadeIn"
+          aria-label="Transitioning to final title card"
+        />
       )}
 
       {/* ================= FINAL TITLE SCREEN & CREDITS ================= */}

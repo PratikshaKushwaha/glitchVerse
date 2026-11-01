@@ -1,4 +1,18 @@
+import { useEffect } from 'react'
+
 export default function FinalBossScene({ onBossDefeated, onExitToHub }) {
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data && (event.data.type === 'AFTERLIFE_TRANSITION' || event.data.type === 'BOSS_DEFEATED')) {
+        if (typeof onBossDefeated === 'function') {
+          onBossDefeated()
+        }
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [onBossDefeated])
+
   return (
     <iframe
       src="/finalboss.html"
