@@ -5,12 +5,12 @@ import { Audio } from '../level4_cyber/audio.js'
 import { attachCanvas, resize, present } from '../level4_cyber/render.js'
 import { GameScene } from '../level4_cyber/scenes/game.js'
 import { sound } from '../utils/AudioEngine'
-import FinalEndingScene from '../components/FinalEndingScene'
 
 export default function LevelFourScene({
   playerName = 'Seeker',
   onBackToMenu,
   onBackToLevelThree,
+  onGoToFinalBoss,
 }) {
   const canvasRef = useRef(null)
   const reqIdRef = useRef(null)
@@ -33,10 +33,10 @@ export default function LevelFourScene({
     window.addEventListener('keydown', handleGesture, { once: true })
     window.addEventListener('pointerdown', handleGesture, { once: true })
 
-    // 3. Callback when Author is Saved
+    // 3. Callback when Author is Saved — go straight to Final Boss
     const handleSavedAuthor = () => {
       sound.playVictory()
-      setStage('saved_author')
+      onGoToFinalBoss()
     }
 
     // 4. Initialize Level 4 Boss GameScene
@@ -81,29 +81,6 @@ export default function LevelFourScene({
       Audio.stopMusic()
       attachCanvas(null)
     }
-  }, [stage])
-
-  // Instant testing shortcut to trigger Saved Author sequence
-  const handleTriggerSkip = () => {
-    sound.playVictory()
-    if (Scenes.top && typeof Scenes.top.triggerBossDefeat === 'function') {
-      Scenes.top.triggerBossDefeat()
-    } else {
-      setStage('saved_author')
-    }
-  }
-
-  // Universal K key to skip Boss and save Author
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
-      if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
-        e.preventDefault()
-        handleTriggerSkip()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [stage])
 
   const toggleSound = () => {
@@ -159,13 +136,15 @@ export default function LevelFourScene({
                 {soundEnabled ? 'VOL: ON' : 'VOL: OFF'}
               </button>
 
-              {/* Skip Level Testing Button -> Saved Author */}
+
+
+              {/* Proceed to Final Boss: Pennywise (Author entangled in strings) */}
               <button
-                onClick={handleTriggerSkip}
-                className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider cursor-pointer transition shadow"
-                title="Skip Boss & Trigger Saved Author Sequence (Press K or Click)"
+                onClick={onGoToFinalBoss}
+                className="px-3 py-1 rounded-full bg-gradient-to-r from-rose-500 via-rose-400 to-rose-300 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider cursor-pointer transition shadow"
+                title="Proceed to Final Boss — Pennywise Puppet Master"
               >
-                Skip Boss [K] -&gt;
+                Final Boss ➔
               </button>
             </div>
           </header>
@@ -190,7 +169,7 @@ export default function LevelFourScene({
                 <strong className="text-cyan-300 font-mono">W / Space</strong>: Jump
               </span>
               <span>
-                <strong className="text-cyan-300 font-mono">Shift</strong>: Dash
+                <strong className="text-cyan-300 font-mono">Shift / K</strong>: Dash
               </span>
               <span>
                 <strong className="text-rose-400 font-mono">F / E / Click</strong>: Shoot Blaster
@@ -200,20 +179,13 @@ export default function LevelFourScene({
               </span>
             </div>
             <div className="text-yellow-400/90 font-bold hidden md:block">
-              OBJECTIVE: DESTROY 6 PAWNS -&gt; DEFEAT OVERLORD -&gt; SAVE AUTHOR
+              OBJECTIVE: DESTROY 6 PAWNS ➔ DEFEAT OVERLORD ➔ SAVE AUTHOR
             </div>
           </footer>
         </>
       )}
 
-      {/* ================= STAGE 2: FINAL ENDING SCENE (THE WAY OUT) ================= */}
-      {stage === 'saved_author' && (
-        <FinalEndingScene
-          playerName={playerName}
-          onRestart={() => setStage('boss')}
-          onBackToMenu={onBackToMenu}
-        />
-      )}
+
 
     </div>
   )

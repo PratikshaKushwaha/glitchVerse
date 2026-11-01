@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ambientVideo from './assets/enchanted_cottage_ambient.mp4'
 import gameLogoImg from './assets/the_way_out_logo.jpg'
 import IntroVideo from './components/IntroVideo'
@@ -7,6 +7,7 @@ import RoomScene from './scenes/RoomScene'
 import LevelTwoScene from './scenes/LevelTwoScene'
 import LevelThreeScene from './scenes/LevelThreeScene'
 import LevelFourScene from './scenes/LevelFourScene'
+import FinalBossScene from './scenes/FinalBossScene'
 
 const App = () => {
   // Pure narrative game progression:
@@ -17,6 +18,7 @@ const App = () => {
   const [hasSavedProgress, setHasSavedProgress] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
   const [message, setMessage] = useState('')
+  const ambientVideoRef = useRef(null)
   const [playerName, setPlayerName] = useState(() => {
     try {
       return window.localStorage.getItem('the_way_out_player_name') || 'Seeker'
@@ -27,6 +29,23 @@ const App = () => {
 
   useEffect(() => {
     setHasSavedProgress(window.localStorage.getItem('the-way-out-progress') !== null)
+  }, [])
+
+  // Ambient menu music: start muted (autoplay policy safe) and unmute on first user gesture
+  useEffect(() => {
+    const unmuteAmbience = () => {
+      const v = ambientVideoRef.current
+      if (v && v.muted) {
+        v.muted = false
+        v.play().catch(() => {})
+      }
+    }
+    window.addEventListener('pointerdown', unmuteAmbience)
+    window.addEventListener('keydown', unmuteAmbience)
+    return () => {
+      window.removeEventListener('pointerdown', unmuteAmbience)
+      window.removeEventListener('keydown', unmuteAmbience)
+    }
   }, [])
 
   const beginJourney = (continueJourney = false) => {
@@ -94,6 +113,17 @@ const App = () => {
         playerName={playerName || 'Seeker'}
         onBackToMenu={() => setCurrentScene('menu')}
         onBackToLevelThree={() => setCurrentScene('level3')}
+        onGoToFinalBoss={() => setCurrentScene('finalboss')}
+      />
+    )
+  }
+
+  // 7. Final Boss: PENNYWISE — The Puppet Master (Author entangled in strings, MC shoots strings with gun)
+  if (currentScene === 'finalboss') {
+    return (
+      <FinalBossScene
+        onBossDefeated={() => setCurrentScene('level4')}
+        onExitToHub={() => setCurrentScene('hub')}
       />
     )
   }
@@ -106,10 +136,12 @@ const App = () => {
       }`}
     >
       <video
+        ref={ambientVideoRef}
         className="absolute inset-0 size-full scale-[1.025] object-cover object-center brightness-[.7] saturate-[.72]"
         autoPlay
         loop
         playsInline
+        muted
         aria-hidden="true"
         src={ambientVideo}
       />
