@@ -236,6 +236,9 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (audioSlotRef.current && audioSlotRef.current.paused && phase === 'field') {
+        audioSlotRef.current.play().catch(() => {})
+      }
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault()
         if (phase === 'field') handleNextDialogue()
@@ -254,6 +257,9 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     <div
       className="relative w-screen h-screen overflow-hidden select-none font-mono text-white bg-black flex flex-col justify-between"
       onClick={() => {
+        if (audioSlotRef.current && audioSlotRef.current.paused && phase === 'field') {
+          audioSlotRef.current.play().catch(() => {})
+        }
         if (phase === 'field') handleNextDialogue()
         else if (phase === 'collapse') setPhase('field')
       }}
