@@ -1,35 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { sound } from '../utils/AudioEngine'
-
-const STORY_PAGES = [
-  {
-    speaker: 'DEVELOPER // RADIO COMM [FREQ 104.7 MHZ]',
-    status: 'SIGNAL ESTABLISHED',
-    lines: [
-      'Can you hear me through the static? If you are reading this script... you are the chosen one.',
-      'I was coding the core reality engine when a recursive glitch trapped my consciousness inside this world.',
-      'The architecture of this place is fragmented. Physics and logic are warped.',
-    ],
-  },
-  {
-    speaker: 'DEVELOPER // RADIO COMM [FREQ 104.7 MHZ]',
-    status: 'SECTOR INTEL: LEVEL 1',
-    lines: [
-      'To free me, you must navigate through 4 distorted dimensions.',
-      'Ahead of you lies LEVEL 1: The Abandoned Complex. Eight rooms filled with misplaced memories and locked code doors.',
-      'Use GLITCH VISION (Hold Q) to reveal the hidden golden digits.',
-      'I have unlocked the Teleport Door behind you. Step through when you are ready.',
-    ],
-  },
-]
+import { STORY_PAGES, pageText } from '../data/narrationScript'
+import voiceoverUrl from '../assets/developer_radio_voice_with_sound_design.wav'
 
 export default function ManuscriptModal({ isOpen, onClose }) {
   const [pageIndex, setPageIndex] = useState(0)
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
+  // Voiceover transmission: plays once per reading, across all narration pages
+  const voiceoverRef = useRef(null)
 
   const currentPage = STORY_PAGES[pageIndex]
-  const fullText = currentPage.lines.join('\n\n')
+  const fullText = currentPage ? pageText(currentPage) : ''
+
+  // Play the developer's recorded radio transmission while the script is open
+  useEffect(() => {
+    if (!isOpen) return
+    const audio = new Audio(voiceoverUrl)
+    audio.volume = 1
+    audio.currentTime = 0
+    voiceoverRef.current = audio
+    audio.play().catch(() => {})
+
+    return () => {
+      audio.pause()
+      audio.currentTime = 0
+      voiceoverRef.current = null
+    }
+  }, [isOpen])
 
   // Trigger radio crackle and typewriter effect on page load
   useEffect(() => {
@@ -61,7 +59,7 @@ export default function ManuscriptModal({ isOpen, onClose }) {
     return () => clearInterval(interval)
   }, [isOpen, pageIndex, fullText])
 
-  if (!isOpen) return null
+  if (!isOpen || !currentPage) return null
 
   const handleNextOrClose = () => {
     if (isTyping) {
@@ -79,6 +77,19 @@ export default function ManuscriptModal({ isOpen, onClose }) {
       onClose()
     }
   }
+
+  // Render the revealed prefix block-by-block so stage cues
+  // ([SFX: ...], [Static interference]...) get their own dimmed styling.
+  const blockLengths = currentPage.blocks.map((block) => block.text.length)
+  const revealedBlocks = currentPage.blocks.map((block, blockIdx) => {
+    // + 2 per separator: pageText joins blocks with '\n\n'
+    const start = blockLengths
+      .slice(0, blockIdx)
+      .reduce((acc, len) => acc + len + 2, 0)
+    const end = start + block.text.length
+    const revealed = displayedText.slice(start, Math.min(end, displayedText.length))
+    return { ...block, revealed, blockIdx }
+  })
 
   return (
     <div
@@ -131,12 +142,40 @@ export default function ManuscriptModal({ isOpen, onClose }) {
           </span>
         </div>
 
-        {/* Typewriter Story Narration Box */}
-        <div className="min-h-[170px] whitespace-pre-line font-mono text-sm leading-relaxed text-cyan-100/90 sm:text-base border-l-2 border-cyan-500/50 pl-4 py-2 bg-cyan-950/20 rounded-r-md">
-          {displayedText}
-          {isTyping && (
-            <span className="inline-block w-2 h-4 ml-1 bg-cyan-400 animate-pulse align-middle" />
-          )}
+        {/* Typewriter Story Narration Box (dialogue + radio stage cues) */}
+        <div className="min-h-[170px] max-h-[46vh] overflow-y-auto font-mono text-sm leading-relaxed text-cyan-100/90 sm:text-base border-l-2 border-cyan-500/50 pl-4 py-2 bg-cyan-950/20 rounded-r-md">
+          {revealedBlocks.map((block, bIdx) => {
+            if (!block.revealed) return null
+            if (block.type === 'cue') {
+              return (
+                <p
+                  key={bIdx}
+                  className="italic text-cyan-400/50 text-[11px] sm:text-xs tracking-wide whitespace-pre-line my-1"
+                >
+                  {block.revealed}
+                </p>
+              )
+            }
+            if (block.type === 'system') {
+              return (
+                <p
+                  key={bIdx}
+                  className="text-rose-400 font-bold tracking-[.2em] text-xs sm:text-sm animate-pulse my-2 text-center whitespace-pre-line"
+                >
+                  {block.revealed}
+                </p>
+              )
+            }
+            return (
+              <p key={bIdx} className="whitespace-pre-line my-1">
+                {block.revealed}
+                {isTyping &&
+                  bIdx === revealedBlocks.findLastIndex((b) => b.revealed) && (
+                    <span className="inline-block w-2 h-4 ml-1 bg-cyan-400 animate-pulse align-middle" />
+                  )}
+              </p>
+            )
+          })}
         </div>
 
         {/* Bottom Actions */}

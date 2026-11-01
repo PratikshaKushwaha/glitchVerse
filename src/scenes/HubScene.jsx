@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Environment from '../objects/Environment'
 import Door from '../objects/Door'
@@ -7,6 +7,15 @@ import FirstPersonController from '../components/FirstPersonController'
 import ManuscriptModal from '../components/ManuscriptModal'
 import { sound } from '../utils/AudioEngine'
 import wakingVideo from '../assets/player_waking_blink_overlay.mp4'
+
+// Tiny component that fires the blink callback once the Suspense children have mounted
+// (i.e., after Environment loads and the 3D scene is visible)
+function BlinkTrigger({ onTrigger }) {
+  useEffect(() => {
+    onTrigger()
+  }, [onTrigger])
+  return null
+}
 
 export default function HubScene({ onEnterLevelOne }) {
   // Game state
@@ -18,16 +27,60 @@ export default function HubScene({ onEnterLevelOne }) {
 
   // Portal transition effect
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const [wakingBlink, setWakingBlink] = useState(true)
+  // Waking blink: plays player_waking_blink_overlay.mp4 when the player is
+  // transported into the game world (after the intro video, played or skipped)
+  // Starts FALSE so the 3D scene renders first, then we trigger the blink
+  // over the live scene for the "transmitted into this world" effect
+  const [isWaking, setIsWaking] = useState(false)
+  const [wakingFading, setWakingFading] = useState(false)
+  // The waking moment must be perceptible: suppress skip/fade attempts that
+  // arrive while the player is still being transported (stray clicks/keys)
+  const wakingStartRef = useRef(null)
+  const WAKE_MIN_VISIBLE_MS = 2200
 
   // Initialize sound on scene start
   useEffect(() => {
     sound.init()
-    const timer = setTimeout(() => {
-      setWakingBlink(false)
-    }, 2400)
-    return () => clearTimeout(timer)
   }, [])
+
+  // Called by the BlinkTrigger component (rendered inside Suspense, after scene loads)
+  const startWakingBlink = () => {
+    setIsWaking(true)
+    wakingStartRef.current = Date.now()
+  }
+
+  // End the waking blink: video ended, player pressed a key, or after the
+  // video's expected duration (fallback in case autoplay is blocked)
+  useEffect(() => {
+    if (!isWaking) return
+    if (wakingStartRef.current === null) {
+      wakingStartRef.current = Date.now()
+    }
+
+    const finish = () => {
+      // Defer fade until the blink has been visible for its minimum duration
+      const remaining = Math.max(0, WAKE_MIN_VISIBLE_MS - (Date.now() - wakingStartRef.current))
+      setTimeout(() => setWakingFading(true), remaining)
+    }
+    const endTimer = setTimeout(finish, 7000)
+    const wakeVideo = document.getElementById('waking-blink-video')
+    wakeVideo && wakeVideo.addEventListener('ended', finish)
+    const onSkipKey = (e) => {
+      if (['e', 'E', ' ', 'Spacebar', 'Escape'].includes(e.key)) finish()
+    }
+    const onSkipClick = finish
+    window.addEventListener('keydown', onSkipKey)
+    window.addEventListener('mousedown', onSkipClick)
+    window.addEventListener('touchstart', onSkipClick)
+
+    return () => {
+      clearTimeout(endTimer)
+      wakeVideo && wakeVideo.removeEventListener('ended', finish)
+      window.removeEventListener('keydown', onSkipKey)
+      window.removeEventListener('mousedown', onSkipClick)
+      window.removeEventListener('touchstart', onSkipClick)
+    }
+  }, [isWaking, wakingFading])
 
   // Auto-open door when unlocked and near
   useEffect(() => {
@@ -83,6 +136,9 @@ export default function HubScene({ onEnterLevelOne }) {
           {/* World Environment using environment_collider.glb */}
           <Environment />
 
+          {/* Trigger the waking blink AFTER the scene has loaded and rendered */}
+          <BlinkTrigger onTrigger={startWakingBlink} />
+
           {/* Teleport Door (object_0000) */}
           <Door
             isLocked={!isManuscriptRead}
@@ -99,11 +155,12 @@ export default function HubScene({ onEnterLevelOne }) {
             onInteract={handleManuscriptInteract}
           />
 
-          {/* First-person camera controller */}
+          {/* First-person camera controller (frozen during the waking blink) */}
           <FirstPersonController
             isReading={isReadingManuscript}
             isDoorLocked={!isManuscriptRead}
             isDoorOpen={isDoorOpen}
+            isFrozen={isWaking && !wakingFading}
             setIsNearManuscript={setIsNearManuscript}
             setIsNearDoor={setIsNearDoor}
             onInteractManuscript={handleManuscriptInteract}
@@ -234,11 +291,18 @@ export default function HubScene({ onEnterLevelOne }) {
         }}
       />
 
-      {/* Waking Eye Blink Video Overlay */}
-      {wakingBlink && (
-        <div className="pointer-events-none absolute inset-0 z-40 bg-black transition-opacity duration-1000 flex items-center justify-center">
+      {/* Waking Eye Blink Video Overlay (player transported into the game world) */}
+      {isWaking && (
+        <div
+          className={`pointer-events-none absolute inset-0 z-40 flex items-center justify-center transition-opacity duration-700 ${
+            wakingFading ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          {/* Screen blend: bright eyelid scanlines pulse OVER the live hub scene */}
           <video
-            className="w-full h-full object-cover mix-blend-screen opacity-90"
+            id="waking-blink-video"
+            className="w-full h-full object-cover mix-blend-screen opacity-100"
+            style={{ filter: 'brightness(1.35) contrast(1.1)' }}
             src={wakingVideo}
             autoPlay
             muted

@@ -7,6 +7,7 @@ export default function FirstPersonController({
   isReading,
   isDoorLocked,
   isDoorOpen,
+  isFrozen = false,
   setIsNearManuscript,
   setIsNearDoor,
   onInteractManuscript,
@@ -40,6 +41,8 @@ export default function FirstPersonController({
   // Listen to keyboard
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Frozen during waking overlay: ignore all gameplay keys
+      if (isFrozen) return
       if (isReading) {
         if (e.key === 'e' || e.key === 'E' || e.key === 'Escape') {
           onInteractManuscript()
@@ -133,7 +136,7 @@ export default function FirstPersonController({
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [isReading, onInteractManuscript, onInteractDoor])
+  }, [isReading, isFrozen, onInteractManuscript, onInteractDoor])
 
   // Pointer lock & drag controls for mouse look
   useEffect(() => {
@@ -195,6 +198,9 @@ export default function FirstPersonController({
 
   // Frame update
   useFrame((state, delta) => {
+    // Frozen during the waking blink overlay: no movement, no interaction
+    if (isFrozen) return
+
     // Proximity checks
     const distManuscript = Math.hypot(
       playerPos.current.x - 0.814,

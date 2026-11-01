@@ -7,7 +7,17 @@ export default function FiveRoomsInterior({
   doorsOpen,
   onInteractKeypad,
   onInspectNote,
+  onOpenSpot,
+  spotStages = {},
 }) {
+  // Open stage of a hidden container: 0 = closed, 1.. = partially/fully opened
+  const stageOf = (id) => spotStages[id] || 0
+
+  const openSpot = (id) => (e) => {
+    e.stopPropagation()
+    onOpenSpot && onOpenSpot(id)
+  }
+
   const roomsConfig = [
     // Room 1: Classic Escape Room
     {
@@ -75,7 +85,6 @@ export default function FiveRoomsInterior({
       {/* Render each of the 5 consecutive rooms */}
       {roomsConfig.map((room) => {
         const cz = room.centerZ
-        const roomData = levelData.rooms[room.index]
 
         return (
           <group key={room.index}>
@@ -245,16 +254,10 @@ export default function FiveRoomsInterior({
 
             {/* ================= 6. ROOM-SPECIFIC FURNITURE & CLUES ================= */}
 
-            {/* ROOM 1: Round table with paper note and Yellow Company Billboard */}
+            {/* ROOM 1: Round table with hidden drawer and Yellow Company Billboard */}
             {room.index === 0 && (
               <>
-                <group
-                  position={[-2.2, -0.5, cz - 1.2]}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onInspectNote && onInspectNote(0)
-                  }}
-                >
+                <group position={[-2.2, -0.5, cz - 1.2]}>
                   <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
                     <cylinderGeometry args={[0.75, 0.75, 0.08, 32]} />
                     <meshStandardMaterial color="#b4743c" roughness={0.7} />
@@ -270,47 +273,11 @@ export default function FiveRoomsInterior({
                       <meshStandardMaterial color="#8c5326" roughness={0.8} />
                     </mesh>
                   ))}
+                </group>
 
-                  {/* Paper Note on Table */}
-                  <group position={[-0.05, 0.195, 0]} rotation={[0, -0.2, 0]}>
-                    <mesh rotation={[-Math.PI / 2, 0, 0]}>
-                      <planeGeometry args={[0.45, 0.25]} />
-                      <meshStandardMaterial color="#ffffff" roughness={0.9} />
-                    </mesh>
-                    {roomData?.digits ? (
-                      roomData.digits.map((digit, dIdx) => {
-                        const isGold =
-                          roomData.isGoldenRoom &&
-                          dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
-                        return (
-                          <Text
-                            key={dIdx}
-                            position={[(dIdx - 1.5) * 0.08, 0.005, 0]}
-                            rotation={[-Math.PI / 2, 0, 0]}
-                            fontSize={isGold ? 0.095 : 0.075}
-                            color={isGold ? '#eab308' : '#1e293b'}
-                            fontWeight={isGold ? 'black' : 'bold'}
-                            anchorX="center"
-                            anchorY="middle"
-                          >
-                            {digit}
-                          </Text>
-                        )
-                      })
-                    ) : (
-                      <Text
-                        position={[0, 0.005, 0]}
-                        rotation={[-Math.PI / 2, 0, 0]}
-                        fontSize={0.08}
-                        color="#1e293b"
-                        fontWeight="bold"
-                        anchorX="center"
-                        anchorY="middle"
-                      >
-                        {roomData?.code}
-                      </Text>
-                    )}
-                  </group>
+                {/* Chair with a note tucked under the seat (spot-0-0) */}
+                <group position={[-1.2, -1.0, cz - 0.6]} onClick={openSpot('spot-0-0')}>
+                  <ChairWithNote open={stageOf('spot-0-0') >= 1} />
                 </group>
 
                 {/* Yellow Company Billboard on Right Wall */}
@@ -332,9 +299,33 @@ export default function FiveRoomsInterior({
               </>
             )}
 
-            {/* ROOM 2: Tall Bookshelf and Study Desk with Desk Lamp */}
+            {/* ROOM 2: Tall Bookshelf and Study Desk */}
             {room.index === 1 && (
               <>
+                <group
+                  position={[2.4, -0.4, cz + 0.8]}
+                  rotation={[0, -Math.PI / 2, 0]}
+                >
+                  <mesh position={[0, 0, 0]} castShadow>
+                    <boxGeometry args={[1.6, 0.75, 0.8]} />
+                    <meshStandardMaterial color="#78350f" roughness={0.7} />
+                  </mesh>
+                </group>
+
+                {/* Sofa with a note slipped under the cushion (spot-1-0) */}
+                <group position={[0.9, -1.0, cz + 2.2]} onClick={openSpot('spot-1-0')}>
+                  <SofaCushion open={stageOf('spot-1-0') >= 1} />
+                </group>
+
+                {/* Tall Wooden Cupboard against the left wall (spot-1-1, 2 stages) */}
+                <group position={[-3.15, -1.0, cz - 2.6]} rotation={[0, Math.PI / 2, 0]} onClick={openSpot('spot-1-1')}>
+                  <WoodenCupboard
+                    open={stageOf('spot-1-1') >= 2}
+                    semiOpen={stageOf('spot-1-1') === 1}
+                  />
+                </group>
+
+                {/* Bookshelf (plain furniture — the hiding spot moved to the cupboard) */}
                 <group position={[-3.1, 0.3, cz - 1.0]} rotation={[0, Math.PI / 2, 0]}>
                   <mesh>
                     <boxGeometry args={[1.8, 2.2, 0.5]} />
@@ -347,110 +338,55 @@ export default function FiveRoomsInterior({
                     </mesh>
                   ))}
                 </group>
-
-                <group
-                  position={[2.4, -0.4, cz + 0.8]}
-                  rotation={[0, -Math.PI / 2, 0]}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onInspectNote && onInspectNote(1)
-                  }}
-                >
-                  <mesh position={[0, 0, 0]} castShadow>
-                    <boxGeometry args={[1.6, 0.75, 0.8]} />
-                    <meshStandardMaterial color="#78350f" roughness={0.7} />
-                  </mesh>
-                  <mesh position={[0, 0.38, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                    <planeGeometry args={[0.45, 0.25]} />
-                    <meshStandardMaterial color="#ffffff" roughness={0.9} />
-                  </mesh>
-                  {roomData?.digits ? (
-                    roomData.digits.map((digit, dIdx) => {
-                      const isGold =
-                        roomData.isGoldenRoom &&
-                        dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
-                      return (
-                        <Text
-                          key={dIdx}
-                          position={[(dIdx - 1.5) * 0.08, 0.39, 0]}
-                          rotation={[-Math.PI / 2, 0, 0]}
-                          fontSize={isGold ? 0.095 : 0.075}
-                          color={isGold ? '#eab308' : '#1e293b'}
-                          fontWeight={isGold ? 'black' : 'bold'}
-                          anchorX="center"
-                          anchorY="middle"
-                        >
-                          {digit}
-                        </Text>
-                      )
-                    })
-                  ) : (
-                    <Text
-                      position={[0, 0.39, 0]}
-                      rotation={[-Math.PI / 2, 0, 0]}
-                      fontSize={0.08}
-                      color="#1e293b"
-                      fontWeight="bold"
-                      anchorX="center"
-                      anchorY="middle"
-                    >
-                      {roomData?.code}
-                    </Text>
-                  )}
-                </group>
               </>
             )}
 
-            {/* ROOM 3: Metal Filing Cabinet and Whiteboard */}
+            {/* ROOM 3: Metal Filing Cabinet, Hidden Boxes and Whiteboard */}
             {room.index === 2 && (
               <>
+                {/* Filing Cabinet with searchable top drawer (spot-2-0) */}
                 <group
                   position={[-2.6, 0.1, cz - 1.0]}
                   rotation={[0, Math.PI / 2, 0]}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onInspectNote && onInspectNote(2)
-                  }}
                 >
                   <mesh>
                     <boxGeometry args={[0.9, 1.8, 0.7]} />
                     <meshStandardMaterial color="#475569" roughness={0.7} metalness={0.4} />
                   </mesh>
-                  <mesh position={[0, 0.2, 0.36]}>
-                    <planeGeometry args={[0.45, 0.25]} />
-                    <meshStandardMaterial color="#fef08a" />
-                  </mesh>
-                  {roomData?.digits ? (
-                    roomData.digits.map((digit, dIdx) => {
-                      const isGold =
-                        roomData.isGoldenRoom &&
-                        dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
-                      return (
-                        <Text
-                          key={dIdx}
-                          position={[(dIdx - 1.5) * 0.08, 0.2, 0.37]}
-                          fontSize={isGold ? 0.095 : 0.075}
-                          color={isGold ? '#b45309' : '#1e293b'}
-                          fontWeight={isGold ? 'black' : 'bold'}
-                          anchorX="center"
-                          anchorY="middle"
-                        >
-                          {digit}
-                        </Text>
-                      )
-                    })
-                  ) : (
-                    <Text
-                      position={[0, 0.2, 0.37]}
-                      fontSize={0.08}
-                      color="#1e293b"
-                      fontWeight="bold"
-                      anchorX="center"
-                      anchorY="middle"
-                    >
-                      {roomData?.code}
-                    </Text>
-                  )}
+                  {/* Cabinet face grooves */}
+                  {[-0.2, 0.45, 0.1].map((y, i) => (
+                    <mesh key={i} position={[0, y, 0.37]}>
+                      <boxGeometry args={[0.8, 0.02, 0.02]} />
+                      <meshStandardMaterial color="#334155" metalness={0.4} />
+                    </mesh>
+                  ))}
+                </group>
+
+                {/* Crooked painting hiding a note behind it (spot-2-0) */}
+                <group
+                  position={[-3.44, 1.3, cz + 0.5]}
+                  rotation={[0, Math.PI / 2, 0]}
+                  onClick={openSpot('spot-2-0')}
+                >
+                  <WallPainting open={stageOf('spot-2-0') >= 1} />
+                </group>
+
+                {/* Records Box under the whiteboard (spot-2-1, decoy-or-real) */}
+                <group position={[-1.7, -1.0, cz - 2.4]} onClick={openSpot('spot-2-1')}>
+                  <RecordsBox
+                    open={stageOf('spot-2-1') >= 1}
+                    semiOpen={false}
+                  />
+                </group>
+
+                {/* Latched Toolbox by the rack (spot-2-2, 2 stages) */}
+                <group position={[1.6, -1.0, cz + 0.6]} rotation={[0, -0.4, 0]} onClick={openSpot('spot-2-2')}>
+                  <LatchedContainer
+                    open={stageOf('spot-2-2') >= 2}
+                    semiOpen={stageOf('spot-2-2') === 1}
+                    size={0.55}
+                    bodyColor="#9a3412"
+                  />
                 </group>
 
                 <group position={[3.48, 0.9, cz + 0.5]} rotation={[0, -Math.PI / 2, 0]}>
@@ -462,7 +398,7 @@ export default function FiveRoomsInterior({
                     [ PROJECT MEMO ]
                   </Text>
                   <Text position={[0, -0.1, 0.03]} fontSize={0.08} color="#0369a1" maxWidth={2.0}>
-                    Code stored in the filing cabinet!
+                    Paper hides in drawers... or is it in a box?
                   </Text>
                 </group>
               </>
@@ -491,48 +427,31 @@ export default function FiveRoomsInterior({
                     <planeGeometry args={[0.62, 0.42]} />
                     <meshBasicMaterial color="#0284c7" />
                   </mesh>
-                  {roomData?.digits ? (
-                    roomData.digits.map((digit, dIdx) => {
-                      const isGold =
-                        roomData.isGoldenRoom &&
-                        dIdx === (roomData.goldDigitPos ?? roomData.goldIndex)
-                      return (
-                        <Text
-                          key={dIdx}
-                          position={[(dIdx - 1.5) * 0.09, 0.3, 0.01]}
-                          fontSize={isGold ? 0.11 : 0.085}
-                          color={isGold ? '#fde047' : '#ffffff'}
-                          fontWeight={isGold ? 'black' : 'bold'}
-                          anchorX="center"
-                          anchorY="middle"
-                        >
-                          {digit}
-                        </Text>
-                      )
-                    })
-                  ) : (
-                    <Text
-                      position={[0, 0.3, 0.01]}
-                      fontSize={0.09}
-                      color="#ffffff"
-                      fontWeight="bold"
-                      anchorX="center"
-                      anchorY="middle"
-                    >
-                      {roomData?.code}
-                    </Text>
-                  )}
+                  {/* Terminal Desk Drawer (spot-3-0) */}
+                  <group
+                    position={[0, -0.52, 0.48]}
+                    onClick={openSpot('spot-3-0')}
+                  >
+                    <SlidingDrawer open={stageOf('spot-3-0') >= 1} wood="#334155" />
+                  </group>
                 </group>
 
-                <group position={[2.5, -0.3, cz - 1.2]}>
-                  <mesh position={[0, -0.2, 0]}>
-                    <boxGeometry args={[1.1, 0.9, 1.1]} />
-                    <meshStandardMaterial color="#78350f" roughness={0.9} />
-                  </mesh>
-                  <mesh position={[0.1, 0.6, 0.05]} rotation={[0, 0.2, 0]}>
-                    <boxGeometry args={[0.85, 0.7, 0.85]} />
-                    <meshStandardMaterial color="#92400e" roughness={0.9} />
-                  </mesh>
+                {/* Cargo Crate with Latch (spot-3-1, 2 stages) */}
+                <group position={[2.5, -1.0, cz - 1.2]} onClick={openSpot('spot-3-1')}>
+                  <LatchedContainer
+                    open={stageOf('spot-3-1') >= 2}
+                    semiOpen={stageOf('spot-3-1') === 1}
+                    size={0.9}
+                    bodyColor="#78350f"
+                  />
+                </group>
+
+                {/* Tech Locker by the right wall (spot-3-2) */}
+                <group position={[3.0, -1.0, cz - 2.0]} rotation={[0, -Math.PI / 2, 0]} onClick={openSpot('spot-3-2')}>
+                  <TechLocker
+                    open={stageOf('spot-3-2') >= 1}
+                    semiOpen={false}
+                  />
                 </group>
               </>
             )}
@@ -643,6 +562,290 @@ export default function FiveRoomsInterior({
           </group>
         )
       })}
+    </group>
+  )
+}
+
+/* ======================================================================
+   HIDDEN CONTAINER COMPONENTS
+   Solid meshes the player can search (E or click). `open` = note revealed,
+   `semiOpen` = container is only halfway opened (staged difficulty).
+   ====================================================================== */
+
+// Generic sliding drawer that sticks out of furniture when opened
+function SlidingDrawer({ open, semiOpen, wood = '#a97034' }) {
+  const slide = open ? 0.38 : semiOpen ? 0.18 : 0
+  return (
+    <group>
+      {/* Drawer face + slid-out body */}
+      <group position={[0, 0, slide]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.62, 0.2, 0.3]} />
+          <meshStandardMaterial color={wood} roughness={0.65} />
+        </mesh>
+        {/* Interest hint: inside paper visible when opened */}
+        {(open || semiOpen) && (
+          <mesh position={[0, 0.02, 0.1]} rotation={[-Math.PI / 2, 0, 0.08]}>
+            <planeGeometry args={[0.3, 0.18]} />
+            <meshStandardMaterial
+              color="#fefce8"
+              emissive={open ? '#f5e6a8' : '#000000'}
+              emissiveIntensity={open ? 0.45 : 0}
+              roughness={0.9}
+            />
+          </mesh>
+        )}
+      </group>
+      {/* Front face of the drawer */}
+      <mesh position={[0, 0, 0.16 + slide]}>
+        <boxGeometry args={[0.66, 0.24, 0.05]} />
+        <meshStandardMaterial color={wood} roughness={0.6} />
+      </mesh>
+      {/* Handle */}
+      <mesh position={[0, 0, 0.19 + slide]}>
+        <boxGeometry args={[0.18, 0.045, 0.02]} />
+        <meshStandardMaterial color="#4a3524" metalness={0.55} roughness={0.35} />
+      </mesh>
+    </group>
+  )
+}
+
+// Chair with a note tucked under the seat; the note slides out when searched
+function ChairWithNote({ open }) {
+  return (
+    <group>
+      {/* Seat + backrest */}
+      <mesh position={[0, 0.45, 0]} castShadow>
+        <boxGeometry args={[0.52, 0.06, 0.52]} />
+        <meshStandardMaterial color="#8c5326" roughness={0.75} />
+      </mesh>
+      <mesh position={[0, 0.85, 0.23]} castShadow>
+        <boxGeometry args={[0.52, 0.8, 0.06]} />
+        <meshStandardMaterial color="#8c5326" roughness={0.75} />
+      </mesh>
+      {/* Legs */}
+      {[
+        [-0.21, -0.21],
+        [0.21, -0.21],
+        [-0.21, 0.21],
+        [0.21, 0.21],
+      ].map(([lx, lz], i) => (
+        <mesh key={i} position={[lx, 0.21, lz]}>
+          <cylinderGeometry args={[0.03, 0.03, 0.42, 12]} />
+          <meshStandardMaterial color="#6b3f1d" roughness={0.8} />
+        </mesh>
+      ))}
+      {/* Note under the seat — slides towards the player when found */}
+      <group position={[0, 0.3, open ? 0.45 : 0.05]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0.1]}>
+          <planeGeometry args={[0.22, 0.3]} />
+          <meshStandardMaterial
+            color={open ? '#fde047' : '#cbd5e1'}
+            emissive={open ? '#facc15' : '#000000'}
+            emissiveIntensity={open ? 0.55 : 0}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+// Sofa: cushion lifts to reveal a note on the seat when searched
+function SofaCushion({ open }) {
+  return (
+    <group>
+      {/* Base */}
+      <mesh position={[0, 0.22, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.9, 0.44, 0.8]} />
+        <meshStandardMaterial color="#0f766e" roughness={0.85} />
+      </mesh>
+      {/* Backrest against the back */}
+      <mesh position={[0, 0.75, -0.28]} castShadow>
+        <boxGeometry args={[1.9, 0.7, 0.22]} />
+        <meshStandardMaterial color="#115e59" roughness={0.85} />
+      </mesh>
+      {/* Armrests */}
+      {[-0.83, 0.83].map((lx, i) => (
+        <mesh key={i} position={[lx, 0.5, 0]} castShadow>
+          <boxGeometry args={[0.24, 0.56, 0.8]} />
+          <meshStandardMaterial color="#134e4a" roughness={0.85} />
+        </mesh>
+      ))}
+      {/* Seat cushion — lifts up when searched */}
+      <group position={[0, 0, 0]} rotation={[-(open ? 0.6 : 0), 0, 0]}>
+        <mesh position={[0, 0.49, 0.02]} castShadow>
+          <boxGeometry args={[1.4, 0.14, 0.68]} />
+          <meshStandardMaterial color="#14b8a6" roughness={0.8} />
+        </mesh>
+      </group>
+      {/* Note under the cushion, revealed when open */}
+      {open && (
+        <mesh position={[0.1, 0.46, 0.05]} rotation={[-Math.PI / 2, 0, 0.12]}>
+          <planeGeometry args={[0.26, 0.19]} />
+          <meshStandardMaterial color="#fefce8" emissive="#5eead4" emissiveIntensity={0.45} />
+        </mesh>
+      )}
+    </group>
+  )
+}
+
+// Two-door cupboard: left door ajar at stage 1, both doors open at stage 2
+function WoodenCupboard({ open, semiOpen }) {
+  return (
+    <group>
+      {/* Body */}
+      <mesh position={[0, 1.05, 0]} castShadow receiveShadow>
+        <boxGeometry args={[1.1, 2.1, 0.55]} />
+        <meshStandardMaterial color="#7c4a21" roughness={0.7} />
+      </mesh>
+      {/* Left door (hinged on the left edge) */}
+      <group position={[-0.55, 1.05, 0.28]} rotation={[0, semiOpen || open ? 1.05 : 0, 0]}>
+        <mesh position={[0.27, 0, 0]}>
+          <boxGeometry args={[0.53, 1.98, 0.04]} />
+          <meshStandardMaterial color="#92400e" roughness={0.6} />
+        </mesh>
+      </group>
+      {/* Right door */}
+      <group position={[0.55, 1.05, 0.28]} rotation={[0, open ? -1.05 : 0, 0]}>
+        <mesh position={[-0.27, 0, 0]}>
+          <boxGeometry args={[0.53, 1.98, 0.04]} />
+          <meshStandardMaterial color="#92400e" roughness={0.6} />
+        </mesh>
+      </group>
+      {/* Handles */}
+      {[-0.03, 0.03].map((lx, i) => (
+        <mesh key={i} position={[lx, 1.05, 0.33]}>
+          <boxGeometry args={[0.03, 0.16, 0.03]} />
+          <meshStandardMaterial color="#eab308" metalness={0.7} roughness={0.3} />
+        </mesh>
+      ))}
+      {/* Note on the inner shelf, revealed when both doors open */}
+      {open && (
+        <mesh position={[0, 1.0, 0.1]} rotation={[-Math.PI / 2, 0, 0.08]}>
+          <planeGeometry args={[0.26, 0.18]} />
+          <meshStandardMaterial color="#fefce8" emissive="#fbbf24" emissiveIntensity={0.5} />
+        </mesh>
+      )}
+    </group>
+  )
+}
+
+// Wall painting on a hinge: swings out to reveal a note stuck behind it
+function WallPainting({ open }) {
+  return (
+    <group>
+      {/* Canvas on a hinge along its left edge; swings out when searched */}
+      <group position={[-0.45, 0, 0]} rotation={[0, open ? -1.0 : -0.06, 0]}>
+        <mesh position={[0.45, 0, 0]} castShadow>
+          <boxGeometry args={[0.9, 0.7, 0.05]} />
+          <meshStandardMaterial color="#b45309" roughness={0.6} />
+        </mesh>
+        <mesh position={[0.45, 0, 0.032]}>
+          <planeGeometry args={[0.74, 0.56]} />
+          <meshStandardMaterial color="#7dd3fc" roughness={0.4} />
+        </mesh>
+        <Text position={[0.45, 0, 0.04]} fontSize={0.1} color="#0f172a">
+          SUNSET
+        </Text>
+      </group>
+      {/* Note behind the painting, revealed when it swings open */}
+      {open && (
+        <mesh position={[0.05, -0.05, 0.03]} rotation={[0, -0.15, 0]}>
+          <planeGeometry args={[0.24, 0.17]} />
+          <meshStandardMaterial color="#fefce8" emissive="#f5e6a8" emissiveIntensity={0.5} />
+        </mesh>
+      )}
+    </group>
+  )
+}
+
+// Sturdier latched container (toolbox / crate): lid tilts open over stages
+function LatchedContainer({ open, semiOpen, size = 0.6, bodyColor = '#b45309' }) {
+  const lidAngle = open ? -0.95 : semiOpen ? -0.35 : 0
+  return (
+    <group>
+      {/* Body on floor */}
+      <mesh position={[0, size / 4, 0]} castShadow receiveShadow>
+        <boxGeometry args={[size, size / 2, size]} />
+        <meshStandardMaterial color={bodyColor} roughness={0.7} metalness={0.35} />
+      </mesh>
+      {/* Slanted lid */}
+      <group position={[0, size / 2, -size / 2]} rotation={[lidAngle, 0, 0]}>
+        <mesh>
+          <boxGeometry args={[size * 1.04, 0.07, size * 1.04]} />
+          <meshStandardMaterial color="#78350f" roughness={0.6} metalness={0.35} />
+        </mesh>
+      </group>
+      {/* Latch */}
+      <mesh position={[0, size / 2, size / 2 + 0.01]}>
+        <boxGeometry args={[0.1, 0.12, 0.03]} />
+        <meshStandardMaterial color="#eab308" metalness={0.7} roughness={0.3} />
+      </mesh>
+      {/* Paper visible inside when opened */}
+      {open && (
+        <mesh position={[0, size / 2 + 0.02, 0]} rotation={[-Math.PI / 2, 0, 0.15]}>
+          <planeGeometry args={[0.28, 0.2]} />
+          <meshStandardMaterial color="#fefce8" emissive="#f5e6a8" emissiveIntensity={0.5} />
+        </mesh>
+      )}
+    </group>
+  )
+}
+
+// Tech locker: door slides sideways ajar with a blue glow when opened
+function TechLocker({ open, semiOpen }) {
+  const slide = open ? -0.5 : semiOpen ? -0.22 : 0
+  return (
+    <group>
+      {/* Locker body against the wall */}
+      <mesh position={[0, 1.0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.75, 2.0, 0.55]} />
+        <meshStandardMaterial color="#334155" roughness={0.5} metalness={0.6} />
+      </mesh>
+      {/* Sliding door */}
+      <group position={[slide, 0, 0]}>
+        <mesh position={[0, 1.0, 0.29]}>
+          <boxGeometry args={[0.68, 1.84, 0.04]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.7} roughness={0.35} />
+        </mesh>
+        {/* Handle + glow seam */}
+        <mesh position={[open || semiOpen ? 0.24 : -0.28, 1.0, 0.33]}>
+          <boxGeometry args={[0.06, 0.2, 0.03]} />
+          <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={0.8} />
+        </mesh>
+      </group>
+      {/* Note shelf inside, visible when opened */}
+      {open && (
+        <mesh position={[0.1, 1.0, 0.15]} rotation={[-Math.PI / 2, 0, 0.1]}>
+          <planeGeometry args={[0.26, 0.18]} />
+          <meshStandardMaterial color="#fefce8" emissive="#7dd3fc" emissiveIntensity={0.35} />
+        </mesh>
+      )}
+    </group>
+  )
+}
+
+// Records box: small box on floor, lid lifts slightly over stages
+function RecordsBox({ open, semiOpen }) {
+  return (
+    <group>
+      <mesh position={[0, 0.16, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.55, 0.34, 0.42]} />
+        <meshStandardMaterial color="#57534e" roughness={0.75} />
+      </mesh>
+      <group position={[0, 0.35, 0]} rotation={[-(open ? 0.7 : semiOpen ? 0.3 : 0), 0, 0]}>
+        <mesh>
+          <boxGeometry args={[0.6, 0.06, 0.46]} />
+          <meshStandardMaterial color="#292524" roughness={0.6} />
+        </mesh>
+      </group>
+      {open && (
+        <mesh position={[0, 0.36, 0.05]} rotation={[-Math.PI / 2, 0, 0.1]}>
+          <planeGeometry args={[0.24, 0.17]} />
+          <meshStandardMaterial color="#fefce8" emissive="#f5e6a8" emissiveIntensity={0.4} />
+        </mesh>
+      )}
     </group>
   )
 }

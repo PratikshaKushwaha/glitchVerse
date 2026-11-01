@@ -108,7 +108,6 @@ const App = () => {
         className="absolute inset-0 size-full scale-[1.025] object-cover object-center brightness-[.7] saturate-[.72]"
         autoPlay
         loop
-        muted
         playsInline
         aria-hidden="true"
         src={ambientVideo}
@@ -137,6 +136,7 @@ const App = () => {
         <div>
           <nav className="flex w-full flex-col items-stretch gap-3" aria-label="Game actions">
             {/* Player Name Input Field Option */}
+            
             <div className="w-full flex flex-col gap-1.5 rounded-sm border border-white/20 bg-black/40 p-3 backdrop-blur transition-all focus-within:border-[#dce8d3]">
               <label
                 htmlFor="player-name"

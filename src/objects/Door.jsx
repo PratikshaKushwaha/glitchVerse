@@ -60,6 +60,9 @@ export default function Door({
       scale={baseScale}
       onClick={(e) => {
         e.stopPropagation()
+        // Require proximity: clicking the door from across the screen
+        // must not teleport the player or toggle the manuscript flow
+        if (!isNear) return
         onInteract && onInteract()
       }}
     >
@@ -86,6 +89,7 @@ export default function Door({
           position={[0, 0, 0]}
           onClick={(e) => {
             e.stopPropagation()
+            if (!isNear) return
             onInteract && onInteract()
           }}
         >
@@ -103,6 +107,7 @@ export default function Door({
             position={[0, 0, 0.01]}
             onClick={(e) => {
               e.stopPropagation()
+              if (!isNear) return
               onInteract && onInteract()
             }}
           >

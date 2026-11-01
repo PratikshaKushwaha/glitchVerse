@@ -25,6 +25,10 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
   // Modal states
   const [activeKeypadDoor, setActiveKeypadDoor] = useState(null)
   const [activeInspectRoom, setActiveInspectRoom] = useState(null)
+  // Hidden container states: open stages per spot + the spot currently revealed
+  const [spotStages, setSpotStages] = useState({})
+  const [activeSpot, setActiveSpot] = useState(null)
+  const [hintMessage, setHintMessage] = useState('')
   const [nearObject, setNearObject] = useState(null)
   const [jumpTrigger, setJumpTrigger] = useState(0)
   const [respawnTrigger, setRespawnTrigger] = useState(0)
@@ -103,6 +107,10 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
     isLevelCompletedRef.current = false
     setDiamonds((d) => Math.max(0, d - 100))
     setRespawnTrigger((t) => t + 1)
+    // Hide & seek containers reset: drawers close, real code re-randomized
+    setSpotStages({})
+    setActiveSpot(null)
+    setHintMessage('')
 
     setTimeout(() => {
       setResetMessage('')
@@ -112,6 +120,48 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
   // Handle 2-minute timer expiry
   const handleTimeExpired = () => {
     resetBackToRoom1('TIME EXPIRED! (2:00 limit). Sent back to Room 1 & codes re-randomized.')
+  }
+
+  // Auto-clear the hint banner a few seconds after it appears
+  useEffect(() => {
+    if (!hintMessage) return
+    const timer = setTimeout(() => setHintMessage(''), 2600)
+    return () => clearTimeout(timer)
+  }, [hintMessage])
+
+  // Open a hidden container (drawer / cupboard / crate). Multi-stage containers
+  // require several E presses before the note is revealed.
+  const handleOpenSpot = (spotId) => {
+    const match = /^spot-(\d)-(\d)$/.exec(spotId)
+    if (!match) return
+    const roomIndex = parseInt(match[1], 10)
+    const spotIndex = parseInt(match[2], 10)
+    const spot = levelData.hidingSpots?.[roomIndex]?.spots?.[spotIndex]
+    if (!spot) return
+
+    const stage = (spotStages[spotId] || 0) + 1
+    sound.playDoorLocked() // creak of the container sliding open
+
+    if (stage < spot.stages) {
+      // Only halfway open — extra pull needed (difficulty scaling)
+      setSpotStages((prev) => ({ ...prev, [spotId]: stage }))
+      setHintMessage(`${spot.name}: opened halfway... pull again!`)
+      return
+    }
+
+    // Fully opened: reveal the note at first look
+    setSpotStages((prev) => ({ ...prev, [spotId]: stage }))
+    const room = levelData.rooms[roomIndex]
+    if (room && room.isGoldenRoom && room.goldDigit !== null) {
+      setFoundGoldenDigits((prev) => {
+        if (!prev.includes(room.goldDigit)) {
+          return [...prev, room.goldDigit]
+        }
+        return prev
+      })
+    }
+    sound.playManuscriptOpen()
+    setActiveSpot({ roomIndex, spotIndex })
   }
 
   // Handle opening keypad modal
@@ -138,6 +188,7 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
     if (action === 'close') {
       setActiveKeypadDoor(null)
       setActiveInspectRoom(null)
+      setActiveSpot(null)
       return
     }
 
@@ -150,6 +201,11 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
     if (action.startsWith('note-')) {
       const idx = parseInt(action.split('-')[1], 10)
       handleInspectNote(idx)
+      return
+    }
+
+    if (action.startsWith('spot-')) {
+      handleOpenSpot(action)
       return
     }
   }
@@ -253,22 +309,25 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
             doorsOpen={doorsOpen}
             onInteractKeypad={handleInteractKeypad}
             onInspectNote={handleInspectNote}
+            onOpenSpot={handleOpenSpot}
+            spotStages={spotStages}
           />
           <RoomController
             isKeypadOpen={activeKeypadDoor !== null}
-            isInspectingNote={activeInspectRoom !== null}
+            isInspectingNote={activeInspectRoom !== null || activeSpot !== null}
             onInteract={handleControllerInteract}
             setNearObject={setNearObject}
             doorsOpen={doorsOpen}
             jumpTrigger={jumpTrigger}
             respawnTrigger={respawnTrigger}
             onGoToLevel2={onGoToLevel2}
+            hidingSpots={levelData.hidingSpots}
           />
         </Suspense>
       </Canvas>
 
       {/* Crosshair */}
-      {activeKeypadDoor === null && activeInspectRoom === null && (
+      {activeKeypadDoor === null && activeInspectRoom === null && activeSpot === null && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="h-1.5 w-1.5 rounded-full bg-black/60" />
         </div>
@@ -292,7 +351,7 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
       />
 
       {/* Proximity Interaction Prompt */}
-      {nearObject && activeKeypadDoor === null && activeInspectRoom === null && (
+      {nearObject && activeKeypadDoor === null && activeInspectRoom === null && activeSpot === null && (
         <div className="pointer-events-none absolute bottom-20 inset-x-0 flex justify-center z-30">
           <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black/85 border-2 border-white shadow-xl text-white text-sm font-bold backdrop-blur animate-bounce">
             <kbd className="px-2 py-0.5 rounded bg-[#00a2ff] border border-white text-white font-extrabold text-xs">
@@ -301,8 +360,22 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
             <span>
               {nearObject.id.startsWith('keypad')
                 ? `Type on ${nearObject.name}`
-                : `Inspect ${nearObject.name}`}
+                : nearObject.id.startsWith('note')
+                ? `Inspect ${nearObject.name}`
+                : `Search ${nearObject.name}`}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Container Search Hint Banner (multi-stage containers) */}
+      {hintMessage && activeSpot === null && activeInspectRoom === null && (
+        <div className="pointer-events-none absolute top-16 inset-x-0 flex justify-center z-40">
+          <div className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-amber-950/95 border-2 border-amber-400 shadow-xl text-amber-100 text-xs font-bold font-mono backdrop-blur animate-bounce">
+            <svg className="w-4 h-4 fill-amber-300 shrink-0" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <span>{hintMessage}</span>
           </div>
         </div>
       )}
@@ -318,11 +391,26 @@ export default function RoomScene({ playerName = 'Seeker', onGoToLevel2 }) {
         onWrongGuess={handleWrongGuess}
       />
 
-      {/* Note / Clue Inspection Modal */}
+      {/* Note / Clue Inspection Modal (decrypted containers + master terminal) */}
       <NoteModal
-        isOpen={activeInspectRoom !== null}
-        roomData={activeInspectRoom !== null ? levelData.rooms[activeInspectRoom] : null}
-        onClose={() => setActiveInspectRoom(null)}
+        isOpen={activeInspectRoom !== null || activeSpot !== null}
+        roomData={
+          activeInspectRoom !== null
+            ? levelData.rooms[activeInspectRoom]
+            : activeSpot
+            ? levelData.rooms[activeSpot.roomIndex]
+            : null
+        }
+        spot={
+          activeSpot
+            ? levelData.hidingSpots?.[activeSpot.roomIndex]?.spots?.[activeSpot.spotIndex] ??
+              null
+            : null
+        }
+        onClose={() => {
+          setActiveInspectRoom(null)
+          setActiveSpot(null)
+        }}
       />
     </div>
   )

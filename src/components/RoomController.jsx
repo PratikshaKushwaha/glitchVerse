@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { sound } from '../utils/AudioEngine'
+import { ROOM_CENTER_Z } from '../utils/LevelManager'
 
 export default function RoomController({
   isKeypadOpen,
@@ -12,6 +13,7 @@ export default function RoomController({
   jumpTrigger,
   respawnTrigger,
   onGoToLevel2,
+  hidingSpots = [],
 }) {
   const { camera, gl } = useThree()
 
@@ -38,6 +40,15 @@ export default function RoomController({
   const walkTime = useRef(0)
   const lastFootstep = useRef(0)
 
+  // One-shot Level 2 teleport guard (re-armed whenever the vault door closes)
+  const hasRedirectedRef = useRef(false)
+
+  useEffect(() => {
+    if (!doorsOpen[4]) {
+      hasRedirectedRef.current = false
+    }
+  }, [doorsOpen])
+
   // Handle respawn back to Room 1
   useEffect(() => {
     if (respawnTrigger) {
@@ -47,20 +58,28 @@ export default function RoomController({
     }
   }, [respawnTrigger])
 
-  // Interactive items across all 5 rooms (open keypads are filtered out so they are NEVER available once door opens)
+  // Interactive items across all 5 rooms (open keypads are filtered out so they are NEVER available once door opens).
+  // Hidden-container search spots come from levelData.hidingSpots and are mapped
+  // onto absolute world positions using each room's centre Z.
+  // Room door keypads (rooms 0-3) are also included so E key works on them.
+  const roomKeypads = [
+    { id: 'keypad-0', name: 'Room 1 Keypad', pos: [1.05, 0.2, ROOM_CENTER_Z[0] - 3.5], radius: 2.0, doorIdx: 0 },
+    { id: 'keypad-1', name: 'Room 2 Keypad', pos: [1.05, 0.2, ROOM_CENTER_Z[1] - 3.5], radius: 2.0, doorIdx: 1 },
+    { id: 'keypad-2', name: 'Room 3 Keypad', pos: [1.05, 0.2, ROOM_CENTER_Z[2] - 3.5], radius: 2.0, doorIdx: 2 },
+    { id: 'keypad-3', name: 'Room 4 Keypad', pos: [1.05, 0.2, ROOM_CENTER_Z[3] - 3.5], radius: 2.0, doorIdx: 3 },
+  ]
   const interactiveObjects = [
-    // Room 1
-    { id: 'note-0', name: 'Note on Round Table', pos: [-2.2, 0.2, -1.2], radius: 1.8, doorIdx: null },
-    { id: 'keypad-0', name: 'Room 1 Keypad', pos: [1.05, 0.2, -3.5], radius: 1.8, doorIdx: 0 },
-    // Room 2
-    { id: 'note-1', name: 'Note on Study Desk', pos: [2.4, 0.2, -6.2], radius: 1.8, doorIdx: null },
-    { id: 'keypad-1', name: 'Room 2 Keypad', pos: [1.05, 0.2, -10.5], radius: 1.8, doorIdx: 1 },
-    // Room 3
-    { id: 'note-2', name: 'Memo on Filing Cabinet', pos: [-2.6, 0.2, -15.0], radius: 1.8, doorIdx: null },
-    { id: 'keypad-2', name: 'Room 3 Keypad', pos: [1.05, 0.2, -17.5], radius: 1.8, doorIdx: 2 },
-    // Room 4
-    { id: 'note-3', name: 'Log on Terminal Desk', pos: [-2.4, 0.2, -20.5], radius: 1.8, doorIdx: null },
-    { id: 'keypad-3', name: 'Room 4 Keypad', pos: [1.05, 0.2, -24.5], radius: 1.8, doorIdx: 3 },
+    ...hidingSpots.flatMap(({ roomIndex, spots }) =>
+      spots.map((spot) => ({
+        id: spot.id,
+        name: spot.name,
+        pos: [spot.pos[0], 0.2, ROOM_CENTER_Z[roomIndex] + spot.pos[1]],
+        radius: 1.8,
+        doorIdx: null,
+      }))
+    ),
+    // Room 1-4 door keypads
+    ...roomKeypads,
     // Room 5
     { id: 'note-4', name: 'Master Cipher Console', pos: [-2.4, 0.2, -28.0], radius: 2.2, doorIdx: null },
     { id: 'keypad-4', name: 'Final Vault Keypad', pos: [1.05, 0.2, -31.5], radius: 1.8, doorIdx: 4 },
@@ -259,8 +278,14 @@ export default function RoomController({
     // 4. Furniture collisions (rigged obstacles)
     // Room 1 Table
     if (testPos.x > -2.9 && testPos.x < -1.5 && testPos.z > -1.9 && testPos.z < -0.5) return true
+    // Room 1 Chair (note spot under it)
+    if (testPos.x > -1.55 && testPos.x < -0.85 && testPos.z > -2.0 && testPos.z < -1.2) return true
     // Room 2 Desk
     if (testPos.x > 1.6 && testPos.x < 3.2 && testPos.z > -7.0 && testPos.z < -5.4) return true
+    // Room 2 Sofa (cushion spot)
+    if (testPos.x > -0.05 && testPos.x < 1.85 && testPos.z > -4.2 && testPos.z < -3.4) return true
+    // Room 2 Cupboard (2-stage open)
+    if (testPos.x > -3.43 && testPos.x < -2.87 && testPos.z > -9.15 && testPos.z < -8.05) return true
     // Room 3 Filing Cabinet
     if (testPos.x > -3.2 && testPos.x < -2.0 && testPos.z > -15.8 && testPos.z < -14.2) return true
     // Room 4 Terminal Desk
@@ -365,7 +390,10 @@ export default function RoomController({
     }
 
     // If final Room 5 vault exit door is opened and player steps through it, enter Level 2!
-    if (doorsOpen[4] && playerPos.current.z < -31.6) {
+    // Guard guarantees Level 2 is only reachable after the final vault code is
+    // accepted (doorsOpen[4]) and fires once per completion.
+    if (doorsOpen[4] && !hasRedirectedRef.current && playerPos.current.z < -31.6) {
+      hasRedirectedRef.current = true
       onGoToLevel2 && onGoToLevel2()
     }
 

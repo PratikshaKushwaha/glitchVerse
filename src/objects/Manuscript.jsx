@@ -92,6 +92,9 @@ export default function Manuscript({
       onPointerOut={() => setHovered(false)}
       onClick={(e) => {
         e.stopPropagation()
+        // Only respond to clicks when the player is actually close to it;
+        // otherwise a stray click anywhere on the screen opens the modal
+        if (!isNear) return
         onInteract && onInteract()
       }}
     >

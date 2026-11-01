@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export default function NoteModal({ isOpen, roomData, onClose }) {
+export default function NoteModal({ isOpen, roomData, spot, onClose }) {
   // Exit pointer lock immediately when inspection opens so mouse is free
   useEffect(() => {
     if (isOpen) {
@@ -100,6 +100,72 @@ export default function NoteModal({ isOpen, roomData, onClose }) {
   }
 
   const isGolden = roomData.isGoldenRoom && roomData.goldDigit !== null
+
+  // Decoy scrap found in a decoy container: clearly a dead end, keeps the
+  // player searching without falsely presenting the real room code.
+  if (spot && !spot.isReal) {
+    return (
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`decoy-room-${roomData.roomNumber}-title`}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4 select-none font-sans"
+        style={{ overscrollBehavior: 'contain' }}
+        onClick={onClose}
+      >
+        <div
+          className="relative w-full max-w-sm rounded-2xl bg-[#efe6d4] p-6 shadow-2xl border-4 border-[#cbb896] flex flex-col items-center rotate-[2deg] cursor-default pointer-events-auto"
+          style={{ overscrollBehavior: 'contain' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close old memo"
+            className="absolute top-3 right-3 text-gray-500 hover:text-black font-bold text-sm cursor-pointer"
+          >
+            ✕
+          </button>
+
+          <span
+            id={`decoy-room-${roomData.roomNumber}-title`}
+            className="text-[10px] uppercase tracking-widest text-[#92653d] font-bold mb-2 font-mono"
+          >
+            ROOM {roomData.roomNumber} — {spot.decoyLabel?.toUpperCase() || 'OLD PAPER'}
+          </span>
+
+          {/* Faded digits: this is NOT the door code */}
+          <div className="w-full py-6 bg-[#f6f0e1] border border-dashed border-[#cbb896] rounded-xl flex flex-col items-center justify-center shadow-inner my-2 opacity-80">
+            <div className="flex items-center gap-2 grayscale">
+              {spot.code.split('').map((char, index) => (
+                <div
+                  key={index}
+                  className="h-14 w-12 rounded-lg font-mono font-black text-2xl flex items-center justify-center bg-gray-200 text-gray-500 border border-gray-300 line-through decoration-rose-400/80 decoration-2"
+                >
+                  {char}
+                </div>
+              ))}
+            </div>
+            <span className="mt-3 px-3 py-1 bg-[#f4c7c3] border border-[#e6a9a2] rounded-full text-[11px] font-bold text-[#7d2323] shadow-sm uppercase">
+              Wrong Code — Dead End
+            </span>
+          </div>
+
+          <p className="text-xs text-[#6d5a41] text-center mt-2 leading-relaxed">
+            This stale memo belongs to some other drawer... <strong>The real code must be hidden elsewhere in this room!</strong>
+          </p>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-4 px-6 py-2 rounded-xl bg-[#7f5f3a] hover:bg-[#6b4e2e] text-white font-bold text-xs uppercase tracking-wider cursor-pointer active:scale-95 transition"
+          >
+            Throw Memo Aside [E]
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
