@@ -1,8 +1,8 @@
-# THE WAY OUT: GLITCHVERSE
+# THE WAY OUT
 ### Official Game Design Document (GDD) & Technical Specification
-**Developed by team StrawHats for PS01 GlitchVerse**
+**Developed by team StrawHats**
 
-![GlitchVerse Banner](https://img.shields.io/badge/GlitchVerse-v1.0.0-cyan?style=for-the-badge)
+![The Way Out Banner](https://img.shields.io/badge/TheWayOut-v1.0.0-cyan?style=for-the-badge)
 ![React 19](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
 ![Three.js](https://img.shields.io/badge/Three.js-R3F-black?style=for-the-badge&logo=threedotjs)
 ![HTML5 Canvas](https://img.shields.io/badge/Engine-Canvas2D%20%2B%20WebGL-emerald?style=for-the-badge)
@@ -208,7 +208,6 @@ npm run build
 
 ## 8. Authors & Credits
 
-- **Hackathon**: PS01 GlitchVerse — *The World Is Broken*
 - **Team**: **team StrawHats**
 - **Members**: Pratiksha Kushwaha & Vallari Panvalkar (V-UNiQuE-V)
 - **Concept & Narrative**: *The Way Out* — An ethical adventure into AI alignment, human agency, and responsible technological innovation.

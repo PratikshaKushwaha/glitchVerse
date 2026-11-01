@@ -38,7 +38,7 @@ export class MenuScene {
                 B('Defeat 6 pawns to face the armed Final Boss!', () => {}),
                 B('Land 10 shots on the boss to save the author!', () => {})
             ])),
-            B('Credits', () => this.sub('CREDITS', [B('Made by team StrawHats for PS01 GlitchVerse', () => { })]))
+            B('Credits', () => this.sub('CREDITS', [B('Made by team StrawHats', () => { })]))
         ]);
     }
     missionIntelMenu() {

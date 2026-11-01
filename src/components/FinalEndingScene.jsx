@@ -631,7 +631,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
           {/* Top Filler */}
           <div className="w-full flex justify-between items-center z-10">
             <span className="text-[10px] font-mono text-cyan-400 tracking-widest uppercase">
-              PS01 GLITCHVERSE // EPILOGUE
+              THE WAY OUT // EPILOGUE
             </span>
             <span className="text-[10px] font-mono text-amber-400 tracking-widest uppercase">
               STORY BY TEAM STRAWHATS
@@ -671,7 +671,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
           {/* Bottom Actions & Credits */}
           <div className="relative z-10 w-full max-w-md flex flex-col gap-3 pt-4">
             <div className="text-[11px] font-mono text-gray-400">
-              Made with pride by <strong>team StrawHats</strong> for PS01 GlitchVerse
+              Made with pride by <strong>team StrawHats</strong>
             </div>
 
             <div className="flex gap-3 w-full">

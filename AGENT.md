@@ -1,5 +1,4 @@
-Build a single-player 3D puzzle and adventure game called "THE WAY OUT",
-made for the hackathon problem statement "GlitchVerse - The World Is Broken".
+Build a single-player 3D puzzle and adventure game called "THE WAY OUT".
 
 Platform: playable on desktop, with WASD movement, mouse look, E to interact,
 and Shift to sprint.

@@ -215,7 +215,7 @@ const App = () => {
       </section>
 
       <footer className="absolute bottom-8 right-8 z-10 flex items-center gap-4 text-[.6rem] uppercase tracking-[.12em] text-[#dae2d3]/60 sm:right-[clamp(2rem,12vw,11rem)]">
-        <span>© 2026 The Way Out • Made by team StrawHats for PS01 GlitchVerse</span>
+        <span>© 2026 The Way Out • Made by team StrawHats</span>
         <span className="h-px w-8 bg-[#dae2d3]/45" aria-hidden="true" />
         <span className="hidden sm:inline">Press enter to begin</span>
       </footer>

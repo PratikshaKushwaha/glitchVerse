@@ -15,7 +15,7 @@ export default function InspectionModal({ object, onClose, onDiscoverClue }) {
       case 'cabinet':
         return {
           title: 'RUSTED FILING CABINET',
-          desc: 'The drawers are rusted shut. Inside one half-open slot are water-damaged project logs titled "Project GlitchVerse - Core Architecture". No keycodes found here.',
+          desc: 'The drawers are rusted shut. Inside one half-open slot are water-damaged project logs titled "The Way Out - Core Architecture". No keycodes found here.',
           isClue: false,
         }
       case 'crates':

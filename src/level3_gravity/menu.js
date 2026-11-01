@@ -37,7 +37,7 @@ export class MenuScene {
                 B('Activate 3 CHECKPOINTS per level to save progress', () => {}),
                 B('Survive with 3 LIVES to reach the portal!', () => {})
             ])),
-            B('Credits', () => this.sub('CREDITS', [B('Made by team StrawHats for PS01 GlitchVerse', () => { })]))
+            B('Credits', () => this.sub('CREDITS', [B('Made by team StrawHats', () => { })]))
         ]);
     }
     levelSelectMenu() {

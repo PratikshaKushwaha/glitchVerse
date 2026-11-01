@@ -5,7 +5,7 @@ import manuscriptGlbUrl from '../assets/separated_objects/glb/object_0001/model_
 import { sound } from '../utils/AudioEngine'
 
 const FULL_MANUSCRIPT_TEXT = `[TRANSMISSION RECOVERED]
-THE GLITCHVERSE CHRONICLE
+THE WAY OUT CHRONICLE
 -------------------------
 DEVELOPER SIGNAL:
 "You made it... The system is collapsing.
