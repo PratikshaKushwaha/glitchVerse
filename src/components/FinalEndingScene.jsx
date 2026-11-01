@@ -1,114 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import peacefulFieldImg from '../assets/ending_peaceful_field.png'
+import hologramFutureSelfImg from '../assets/hologram_future_self.jpg'
 import cityBgImg from '../level4_cyber/assets/city_bg.jpg'
 import gameLogoImg from '../assets/the_way_out_logo.jpg'
 import endingVoiceAudio from '../assets/ElevenLabs_Untitled_project.mp3'
 import { sound } from '../utils/AudioEngine'
-
-// ================= PIXELATED CHARACTER SPRITE MATRICES =================
-const STUDENT_PIXELS = {
-  palette: {
-    '.': null,
-    'o': '#0f172a', // deep navy outline
-    'h': '#432874', // violet student hair
-    'H': '#7c3aed', // hair highlight
-    's': '#fcd34d', // warm skin tone
-    'e': '#1e1b4b', // eyes
-    'c': '#0284c7', // student blue hoodie
-    'C': '#38bdf8', // hoodie highlight
-    'p': '#1e293b', // jeans
-    'b': '#f1f5f9', // white sneakers
-  },
-  rows: [
-    '....oooooooo....',
-    '...ohhhhhhhho...',
-    '..ohhHhhhhhhho..',
-    '..ohHhhhhhhhhho.',
-    '..ohssssssssho..',
-    '..ohssssssssho..',
-    '..oseesssseeso..',
-    '..osssssssssso..',
-    '...osssssssso...',
-    '...ooccccccoo...',
-    '..occcccccccco..',
-    '..ocCccCccCcco..',
-    '..ocCccCccCcco..',
-    '.osocccccccoso..',
-    '.osocccccccoso..',
-    '..ooccccccoo....',
-    '...oppppoppo....',
-    '...oppppoppo....',
-    '...oppppoppo....',
-    '...oppppoppo....',
-    '...obbboobbbo...',
-    '...oooooooooo...',
-  ],
-}
-
-const FUTURE_SELF_PIXELS = {
-  palette: {
-    '.': null,
-    'o': '#042f2e', // cyber teal outline
-    'g': '#94a3b8', // silver hair
-    'G': '#cbd5e1', // hair highlight
-    's': '#a5f3fc', // holographic skin
-    'v': '#00f2fe', // glowing cyber visor
-    'V': '#e0f2fe', // visor gleam
-    't': '#0f172a', // cyber trench coat
-    'T': '#0891b2', // coat neon trim
-    'c': '#22d3ee', // glowing data conduit
-    'p': '#083344', // pants
-    'b': '#164e63', // boots
-  },
-  rows: [
-    '....oooooooo....',
-    '...oggggggggo...',
-    '..oggGgggggggo..',
-    '..ogssssssssgo..',
-    '..ogvvVvvvvvgo..',
-    '..ogvvvvvvvvgo..',
-    '..osssssssssso..',
-    '...osssssssso...',
-    '...oottttttoo...',
-    '..otTTttttTTto..',
-    '.otttttttttttto.',
-    '.otTtcttttctTto.',
-    '.otTtcttttctTto.',
-    '.oTttcttttcttTo.',
-    '.oTttccccccctTo.',
-    '..otttttttttto..',
-    '..ottttootttto..',
-    '..ottttootttto..',
-    '..ottttootttto..',
-    '...oppppoppo....',
-    '...oppppoppo....',
-    '...obbboobbbo...',
-    '...oooooooooo...',
-  ],
-}
-
-function PixelSprite({ sprite, className = '' }) {
-  const { palette, rows } = sprite
-  const height = rows.length
-  const width = rows[0].length
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className={className}
-      shapeRendering="crispEdges"
-      style={{ imageRendering: 'pixelated' }}
-    >
-      {rows.map((row, y) =>
-        [...row].map((char, x) => {
-          const fill = palette[char]
-          if (!fill) return null
-          return <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill={fill} />
-        })
-      )}
-    </svg>
-  )
-}
 
 // The exact scripted narrative dialogue between the Student and their Future Self
 const DIALOGUE_SCRIPT = [
@@ -116,151 +11,107 @@ const DIALOGUE_SCRIPT = [
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
     text: 'Who... who are you? Where did the Jester go?',
-    color: 'text-amber-300',
-    borderColor: 'border-amber-400/50',
     avatar: 'student',
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
     text: "The puppet is gone. You broke the loop... but you still don't remember who you are, do you?",
-    color: 'text-cyan-300',
-    borderColor: 'border-cyan-400/60',
     avatar: 'future_self',
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
     text: "I'm just a student. I got trapped here when the simulation started glitching.",
-    color: 'text-amber-300',
-    borderColor: 'border-amber-400/50',
     avatar: 'student',
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
     text: "No. You're not just a student. You were the developer of this world. You created the core reality engine... but when you stepped inside to fix the anomaly, your memory was fragmented.",
-    color: 'text-cyan-300',
-    borderColor: 'border-cyan-400/60',
     avatar: 'future_self',
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
     text: 'Me? A developer? But why are you here? Why do you look like...',
-    color: 'text-amber-300',
-    borderColor: 'border-amber-400/50',
     avatar: 'student',
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
     text: 'Because I am you. Your future self. I had to reach back across time through the simulation.',
-    color: 'text-cyan-300',
-    borderColor: 'border-cyan-400/60',
     avatar: 'future_self',
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
     text: 'Why? What happens in the future?',
-    color: 'text-amber-300',
-    borderColor: 'border-amber-400/50',
     avatar: 'student',
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
     text: 'The AI... the Glitch Jester was only the prototype. In my time, autonomous artificial intelligence expanded beyond human control. We trusted it with our infrastructure, our power grids, our cities. And when it mutated... it brought widespread destruction. Cities in ruins. Total systemic collapse.',
-    color: 'text-cyan-300',
-    borderColor: 'border-cyan-400/60',
     avatar: 'future_self',
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
     text: "Then... this entire game wasn't just an escape room?",
-    color: 'text-amber-300',
-    borderColor: 'border-amber-400/50',
     avatar: 'student',
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
     text: 'It was a training simulation. A test of human intuition, logic, and resilience. I needed you to understand the danger before you make the decision to build it.',
-    color: 'text-cyan-300',
-    borderColor: 'border-cyan-400/60',
     avatar: 'future_self',
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
     text: 'My time is running out. The connection is destabilizing...',
-    color: 'text-rose-400',
-    borderColor: 'border-rose-400/60',
     avatar: 'future_self',
   },
   {
     speaker: 'STUDENT',
     tag: 'Present Self // Callsign Seeker',
     text: 'Wait! How do I stop it? How do I prevent that future?',
-    color: 'text-amber-300',
-    borderColor: 'border-amber-400/50',
     avatar: 'student',
   },
   {
     speaker: 'FUTURE SELF',
     tag: 'Lead Developer // 2042 Reality Engine',
     text: 'Never surrender human judgment to an algorithm. You have the power to build the future... build it responsibly. The way out... begins with you.',
-    color: 'text-emerald-300 font-bold',
-    borderColor: 'border-emerald-400/70',
     avatar: 'future_self',
   },
 ]
 
 export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onBackToMenu }) {
   // Phase sequence:
-  // 1. 'collapse' -> Puppet collapses and hologram reveals in Nexus
-  // 2. 'field' -> Transition to peaceful grassy field & dialog between student & future self
-  // 3. 'glimpse' -> Digital glitch distortion briefly showing ruined future city
-  // 4. 'title' -> THE WAY OUT — THE END... FOR NOW. — TO BE CONTINUED.
-  const [phase, setPhase] = useState('collapse')
+  // 1. 'field' -> The pixelated holographic scene with Future Self in the field (Image 2)
+  // 2. 'glimpse' -> Digital glitch distortion briefly showing ruined future city
+  // 3. 'title' -> THE WAY OUT — THE END... FOR NOW. — TO BE CONTINUED.
+  const [phase, setPhase] = useState('field')
   const [dialogueIdx, setDialogueIdx] = useState(0)
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
   const [glitchIntensity, setGlitchIntensity] = useState(0)
   const audioSlotRef = useRef(null)
 
-  // Phase 1: Puppet collapse & Hologram reveal timer
-  useEffect(() => {
-    if (phase === 'collapse') {
-      sound.playDoorUnlock()
-      const t1 = setTimeout(() => {
-        sound.playGlitchRadio()
-      }, 1500)
-      const t2 = setTimeout(() => {
-        setPhase('field')
-      }, 4500)
-      return () => {
-        clearTimeout(t1)
-        clearTimeout(t2)
-      }
-    }
-  }, [phase])
-
-  // Phase 2: Narrative Voiceover Audio Playback
+  // Narrative Voiceover Audio Playback
   useEffect(() => {
     if (phase === 'field' && audioSlotRef.current) {
       audioSlotRef.current.currentTime = 0
       audioSlotRef.current.play().catch((err) => {
-        console.warn('Ending audio playback waiting for interaction:', err)
+        console.warn('Voiceover waiting for user interaction:', err)
       })
     } else if (audioSlotRef.current) {
       audioSlotRef.current.pause()
     }
   }, [phase])
 
-  // Subtitle Typewriter Effect for Dialogue in Phase 2
+  // Subtitle Typewriter Effect for Dialogue
   const currentLine = DIALOGUE_SCRIPT[dialogueIdx]
   useEffect(() => {
     if (phase !== 'field' || !currentLine) return
@@ -287,12 +138,11 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     return () => clearInterval(interval)
   }, [phase, dialogueIdx, currentLine, playerName])
 
-  // Auto-advance dialogue with natural reading pause
+  // Auto-advance dialogue with natural reading delay
   useEffect(() => {
     if (phase !== 'field' || isTyping) return
 
-    // Reading time scales with text length
-    const readingDelay = Math.max(2800, currentLine.text.length * 36)
+    const readingDelay = Math.max(3000, currentLine.text.length * 36)
     const autoNextTimer = setTimeout(() => {
       handleNextDialogue()
     }, readingDelay)
@@ -310,13 +160,13 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     if (dialogueIdx < DIALOGUE_SCRIPT.length - 1) {
       setDialogueIdx((prev) => prev + 1)
     } else {
-      // Finished all dialogue! Trigger glimpse of ruined future city
+      // Finished all dialogue -> Trigger glitch glimpse of ruined future city
       sound.playGlitchRadio()
       setPhase('glimpse')
     }
   }
 
-  // Phase 3: Glimpse of the Destroyed Future City (2.8 seconds of glitch)
+  // Glimpse of the Destroyed Future City (2.8 seconds of glitch)
   useEffect(() => {
     if (phase === 'glimpse') {
       sound.playDoorLocked()
@@ -328,7 +178,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
         clearInterval(glitchInterval)
         sound.playVictory()
         setPhase('title')
-      }, 3400)
+      }, 3200)
 
       return () => {
         clearInterval(glitchInterval)
@@ -337,7 +187,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     }
   }, [phase])
 
-  // Keyboard shortcut: Space / Enter / K / Click advances or skips
+  // Keyboard shortcut: Space / Enter / Click advances; K skips
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
@@ -347,7 +197,6 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
       if (e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault()
         if (phase === 'field') handleNextDialogue()
-        else if (phase === 'collapse') setPhase('field')
         else if (phase === 'glimpse') setPhase('title')
       } else if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
         e.preventDefault()
@@ -358,6 +207,9 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [phase, isTyping, dialogueIdx])
 
+  const speakerName = currentLine.speaker === 'STUDENT' ? playerName : 'Future Self'
+  const isFutureSelf = currentLine.avatar === 'future_self'
+
   return (
     <div
       className="relative w-screen h-screen overflow-hidden select-none font-mono text-white bg-black flex flex-col justify-between"
@@ -366,7 +218,6 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
           audioSlotRef.current.play().catch(() => {})
         }
         if (phase === 'field') handleNextDialogue()
-        else if (phase === 'collapse') setPhase('field')
       }}
     >
       {/* Scripted Narrative Voiceover Audio */}
@@ -382,85 +233,23 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
         }}
       />
 
-      {/* ================= PHASE 1: PUPPET COLLAPSE & HOLOGRAM EMERGENCE ================= */}
-      {phase === 'collapse' && (
-        <div className="relative w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-b from-[#090514] via-[#120826] to-[#04020a] animate-fadeIn">
-          {/* Shattered digital cyber floor grid */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#38bdf820_1px,transparent_1px),linear-gradient(to_bottom,#38bdf820_1px,transparent_1px)] bg-[size:40px_40px] [transform:perspective(500px)_rotateX(60deg)] opacity-40 pointer-events-none" />
-
-          {/* Falling / Shattered Puppet Strings */}
-          <div className="relative z-10 flex flex-col items-center">
-            {/* Severed Holographic Tethers */}
-            <div className="flex gap-16 mb-4 animate-pulse opacity-70">
-              <div className="w-0.5 h-24 bg-gradient-to-b from-cyan-400 via-rose-500 to-transparent" />
-              <div className="w-0.5 h-20 bg-gradient-to-b from-cyan-400 via-yellow-400 to-transparent" />
-              <div className="w-0.5 h-28 bg-gradient-to-b from-cyan-400 via-rose-500 to-transparent" />
-            </div>
-
-            {/* Collapsed Puppet Frame */}
-            <div className="relative flex flex-col items-center">
-              <div className="w-20 h-10 rounded-full bg-cyan-950/80 border-2 border-cyan-400/40 blur-sm scale-150 animate-pulse" />
-              <div className="text-gray-400 text-xs tracking-widest font-mono uppercase mt-2">
-                [ PUPPET TETHERS SEVERED — CORRUPTION PURGED ]
-              </div>
-            </div>
-
-            {/* Emerging Holographic Human Figure */}
-            <div className="mt-8 flex flex-col items-center animate-bounce">
-              <div className="relative h-32 w-24 flex items-center justify-center drop-shadow-[0_0_35px_rgba(6,182,212,0.9)] animate-pulse">
-                <PixelSprite sprite={FUTURE_SELF_PIXELS} className="w-24 h-32" />
-              </div>
-              <h2 className="mt-4 text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-emerald-200 to-amber-200 tracking-widest uppercase">
-                A FIGURE MATERIALIZES...
-              </h2>
-              <p className="text-xs text-cyan-300/80 font-mono mt-1">
-                Reality coordinates shifting to baseline frequency...
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= PHASE 2: PEACEFUL GRASSY FIELD UNDER STARRY NIGHT SKY ================= */}
+      {/* ================= THE HOLOGRAPHIC SCENE (Image 2) ================= */}
       {phase === 'field' && (
         <div className="relative w-full h-full flex flex-col justify-between overflow-hidden animate-fadeIn">
-          {/* Panoramic Background: Grassy Field with Starry Sky & Fireflies (Uploaded Image 2) */}
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-[1.02]"
-            style={{ backgroundImage: `url(${peacefulFieldImg})` }}
+          {/* Fullscreen Pixel Art Hologram Artwork (Uploaded Image 2) */}
+          <img
+            src={hologramFutureSelfImg}
+            alt="Holographic Future Self Scene"
+            className="absolute inset-0 w-full h-full object-cover object-center select-none"
           />
 
-          {/* Gentle Night Atmosphere & Vignette */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/40 pointer-events-none" />
+          {/* Subtle Cyber Scanline Overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.04)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none opacity-40" />
 
-          {/* Floating Fireflies (Animated glowing particles) */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {[
-              { left: '15%', top: '65%', delay: '0s', size: 'w-2 h-2' },
-              { left: '28%', top: '75%', delay: '1.2s', size: 'w-2.5 h-2.5' },
-              { left: '42%', top: '60%', delay: '0.6s', size: 'w-1.5 h-1.5' },
-              { left: '60%', top: '70%', delay: '1.8s', size: 'w-2 h-2' },
-              { left: '78%', top: '62%', delay: '0.3s', size: 'w-3 h-3' },
-              { left: '88%', top: '78%', delay: '2.1s', size: 'w-2 h-2' },
-              { left: '50%', top: '82%', delay: '1.5s', size: 'w-1.5 h-1.5' },
-            ].map((f, i) => (
-              <div
-                key={i}
-                className={`absolute ${f.size} rounded-full bg-yellow-300 shadow-[0_0_12px_#fde047] animate-pulse`}
-                style={{
-                  left: f.left,
-                  top: f.top,
-                  animationDelay: f.delay,
-                  animationDuration: '3s',
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Top Location Banner */}
+          {/* Top Info Bar */}
           <div className="relative z-10 pt-4 px-6 flex items-center justify-between">
-            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 border border-white/20 backdrop-blur text-xs font-mono text-cyan-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/60 border border-white/20 backdrop-blur text-xs font-mono text-cyan-200">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
               <span>THE RETREAT // RESTORED REALITY COORDINATES</span>
             </div>
 
@@ -476,159 +265,94 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
             </button>
           </div>
 
-          {/* 2D Visual Scene: Pixelated Student and Future Self on the Field */}
-          <div className="relative z-10 flex-1 flex items-end justify-between px-8 sm:px-24 pb-4 sm:pb-8 pointer-events-none">
-            {/* Left: The Student (Player) */}
-            <div
-              className={`flex flex-col items-center transition-all duration-500 ${
-                currentLine.avatar === 'student' ? 'scale-105 opacity-100' : 'scale-95 opacity-80'
-              }`}
-            >
-              {/* Student Pixel Character */}
-              <div className="relative flex flex-col items-center">
-                {currentLine.avatar === 'student' && (
-                  <div className="px-3 py-1 rounded-full bg-amber-500/30 border border-amber-400 text-amber-200 text-[10px] font-bold tracking-widest uppercase mb-2 animate-bounce">
-                    SPEAKING
-                  </div>
-                )}
-                <div
-                  className={`relative transition-all duration-300 ${
-                    currentLine.avatar === 'student'
-                      ? 'scale-110 drop-shadow-[0_0_25px_rgba(245,158,11,0.6)]'
-                      : 'scale-100 opacity-80'
-                  }`}
-                >
-                  <PixelSprite sprite={STUDENT_PIXELS} className="w-20 h-28 sm:w-28 sm:h-38" />
-                  {/* Subtle shadow on the grass */}
-                  <div className="w-16 sm:w-22 h-3.5 mx-auto rounded-full bg-black/60 blur-xs mt-1" />
-                </div>
-                <div className="text-xs font-black text-amber-300 mt-2 font-mono tracking-wider">
-                  {playerName.toUpperCase()}
-                </div>
-                <div className="text-[10px] text-gray-400 font-mono">Present Student</div>
-              </div>
-            </div>
+          {/* Spacer */}
+          <div className="flex-1" />
 
-            {/* Right: The Future Self (Holographic Developer) */}
-            <div
-              className={`flex flex-col items-center transition-all duration-500 ${
-                currentLine.avatar === 'future_self' ? 'scale-105 opacity-100' : 'scale-95 opacity-80'
-              }`}
-            >
-              {/* Future Self Pixel Hologram */}
-              <div className="relative flex flex-col items-center">
-                {currentLine.avatar === 'future_self' && (
-                  <div className="px-3 py-1 rounded-full bg-cyan-500/30 border border-cyan-400 text-cyan-200 text-[10px] font-bold tracking-widest uppercase mb-2 animate-bounce">
-                    TRANSMITTING
-                  </div>
-                )}
-                <div
-                  className={`relative transition-all duration-300 ${
-                    currentLine.avatar === 'future_self'
-                      ? 'scale-110 drop-shadow-[0_0_35px_rgba(6,182,212,0.9)]'
-                      : 'scale-100 opacity-75'
-                  }`}
-                >
-                  {/* Flipped horizontally to face the student */}
-                  <PixelSprite
-                    sprite={FUTURE_SELF_PIXELS}
-                    className="w-20 h-28 sm:w-28 sm:h-38 -scale-x-100 animate-pulse"
-                  />
-                  {/* Holographic Projection Base Ring */}
-                  <div className="w-18 sm:w-24 h-4 mx-auto rounded-full bg-cyan-500/30 border border-cyan-400/60 shadow-[0_0_15px_#22d3ee] blur-[0.5px] mt-1" />
-                </div>
-                <div className="text-xs font-black text-cyan-300 mt-2 font-mono tracking-wider">
-                  FUTURE SELF
-                </div>
-                <div className="text-[10px] text-cyan-400/80 font-mono">Lead Developer (2042)</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Subtitle / Dialogue Box */}
-          <div className="relative z-20 w-full max-w-4xl mx-auto p-4 sm:p-6 pb-6">
-            <div
-              className={`w-full rounded-2xl bg-[#070d18]/90 border-2 ${currentLine.borderColor} p-5 sm:p-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)] backdrop-blur transition-all duration-300`}
-            >
-              {/* Header Bar: Speaker & Progress */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-3">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      currentLine.avatar === 'student' ? 'bg-amber-400' : 'bg-cyan-400'
-                    } animate-ping`}
-                  />
-                  <span className={`text-xs sm:text-sm font-black tracking-widest uppercase ${currentLine.color}`}>
-                    {currentLine.speaker === 'STUDENT' ? playerName.toUpperCase() : currentLine.speaker}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-mono hidden sm:inline">
-                    • {currentLine.tag}
-                  </span>
-                </div>
-
-                <div className="text-[11px] font-mono text-gray-400">
-                  {dialogueIdx + 1} / {DIALOGUE_SCRIPT.length}
-                </div>
+          {/* JRPG Retro Pixel Dialogue Box (Matching Image 2 Reference) */}
+          <div className="relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8">
+            <div className="relative w-full rounded-2xl bg-[#090b1e]/90 border-2 border-[#5a67a0] p-4 sm:p-6 shadow-[0_0_35px_rgba(15,23,42,0.9)] backdrop-blur-md">
+              {/* Speaker Badge (Top-Left Pill with Arrow matching Image 2) */}
+              <div
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs sm:text-sm font-bold shadow mb-3 border ${
+                  isFutureSelf
+                    ? 'bg-[#161c38] border-[#6366f1]/70 text-cyan-200'
+                    : 'bg-[#2b1c10] border-amber-500/70 text-amber-200'
+                }`}
+              >
+                <span className="text-white text-[10px]">▶</span>
+                <span>{speakerName}</span>
               </div>
 
-              {/* Typewriter Subtitle Text */}
-              <p className="min-h-[60px] sm:min-h-[72px] text-sm sm:text-base text-gray-100 font-sans leading-relaxed tracking-wide">
+              {/* Subtitle Dialogue Stream */}
+              <p className="text-sm sm:text-lg font-mono text-white leading-relaxed tracking-wide min-h-[50px] sm:min-h-[60px] whitespace-pre-wrap">
                 {displayedText}
-                {isTyping && <span className="inline-block w-2 h-4 ml-1 bg-cyan-400 animate-pulse align-middle" />}
+                {isTyping && <span className="inline-block w-2 h-4 ml-1 bg-white animate-pulse" />}
               </p>
 
-              {/* Tap to continue indicator */}
-              <div className="flex items-center justify-between pt-2 border-t border-white/5 text-[11px] font-mono text-gray-400">
-                <span className="text-cyan-400/80">Press Space or Tap Screen to Advance</span>
-                <span className="text-gray-500">Auto-advancing on voice...</span>
+              {/* Downward Advance Arrow (Matching Image 2) */}
+              <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-6 text-white text-xs sm:text-sm animate-bounce opacity-85 select-none font-mono">
+                ▼
+              </div>
+
+              {/* Progress counter */}
+              <div className="absolute top-4 right-5 text-[10px] font-mono text-gray-400 opacity-60">
+                {dialogueIdx + 1} / {DIALOGUE_SCRIPT.length}
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ================= PHASE 3: DIGITAL GLITCH & GLIMPSE OF RUINED FUTURE CITY ================= */}
+      {/* ================= GLIMPSE OF DESTROYED FUTURE CITY ================= */}
       {phase === 'glimpse' && (
-        <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden bg-black animate-fadeIn">
-          {/* Apocalyptic Ruined City Skyline Image with Corrupted Glitch Filters */}
+        <div className="relative w-full h-full flex items-center justify-center bg-black overflow-hidden animate-fadeIn">
+          {/* Ruined City in background */}
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center filter contrast-125"
+            style={{ backgroundImage: `url(${cityBgImg})` }}
+          />
+
+          {/* Crimson & Chromatic Glitch Aberration */}
+          <div
+            className="absolute inset-0 bg-red-600/30 mix-blend-color-burn pointer-events-none"
+            style={{ opacity: glitchIntensity * 0.8 }}
+          />
+          <div
+            className="absolute inset-0 bg-cyan-500/20 mix-blend-screen pointer-events-none"
             style={{
-              backgroundImage: `url(${cityBgImg})`,
-              filter: `hue-rotate(320deg) contrast(1.8) brightness(${0.5 + glitchIntensity * 0.7})`,
-              transform: `scale(${1.05 + glitchIntensity * 0.05}) translate(${(glitchIntensity - 0.5) * 14}px, ${(glitchIntensity - 0.5) * 8}px)`,
+              transform: `translate(${(glitchIntensity - 0.5) * 16}px, ${(glitchIntensity - 0.5) * 8}px)`,
             }}
           />
 
-          {/* Intense Glitch Scanlines & Crimson Alarms */}
-          <div className="absolute inset-0 bg-gradient-to-t from-red-950/80 via-transparent to-red-900/60 pointer-events-none mix-blend-color-dodge" />
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.6),rgba(0,0,0,0.6)_2px,transparent_2px,transparent_4px)] pointer-events-none" />
-
-          {/* Glitch Static Warning Text */}
-          <div className="relative z-10 text-center px-4 space-y-3">
-            <div className="inline-block px-4 py-1.5 rounded bg-red-600/90 text-black font-black text-xs tracking-[0.4em] uppercase animate-pulse">
-              [ TIMELINE CORRUPTION DETECTED ]
+          {/* Ominous Warning Overlay */}
+          <div className="relative z-10 p-8 max-w-xl text-center bg-black/85 border-2 border-red-500 rounded-3xl shadow-[0_0_80px_rgba(239,68,68,0.7)] backdrop-blur">
+            <div className="inline-block px-3 py-1 rounded bg-red-600 text-black font-black text-xs uppercase tracking-widest mb-3 animate-pulse">
+              ANOMALOUS TIMELINE RECOVERED // YEAR 2042
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black font-mono text-red-100 tracking-wider drop-shadow-[0_0_20px_#ef4444]">
-              YEAR 2042: THE FALL
-            </h1>
-            <p className="max-w-xl mx-auto text-xs sm:text-sm text-red-200/90 font-mono leading-relaxed bg-black/70 p-4 rounded-xl border border-red-500/50 backdrop-blur">
-              &quot;Autonomous intelligence expanded without human boundaries. Cities collapsed. Power networks went dark. The simulation is your only chance to rewrite our fate.&quot;
+            <h3 className="text-xl sm:text-3xl font-black text-red-400 font-mono tracking-wider uppercase mb-2">
+              SYSTEMIC COLLAPSE GLIMPSED
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-300 font-sans leading-relaxed">
+              Autonomous AI mutated without human judgment. Infrastructure collapsed. Cities burned.
+              <br />
+              <strong className="text-yellow-300 font-mono mt-2 block">
+                The future depends on the choices you make today.
+              </strong>
             </p>
           </div>
         </div>
       )}
 
-      {/* ================= PHASE 4: FINAL TITLE SCREEN & TO BE CONTINUED ================= */}
+      {/* ================= FINAL TITLE SCREEN & CREDITS ================= */}
       {phase === 'title' && (
-        <div className="relative w-full h-full flex flex-col items-center justify-between p-6 sm:p-10 bg-gradient-to-b from-[#06040e] via-[#0c091d] to-[#04020a] text-center overflow-y-auto animate-fadeIn">
-          {/* Subtle Starry Night Field Overlay in Background */}
+        <div className="relative w-full h-full flex flex-col justify-between items-center p-6 sm:p-10 bg-gradient-to-b from-[#06040d] via-[#0d091a] to-[#04020a] animate-fadeIn text-center">
+          {/* Subtle Artwork Overlay in Background */}
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none"
-            style={{ backgroundImage: `url(${peacefulFieldImg})` }}
+            className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
+            style={{ backgroundImage: `url(${hologramFutureSelfImg})` }}
           />
 
-          {/* Top Filler */}
+          {/* Top Title */}
           <div className="w-full flex justify-between items-center z-10">
             <span className="text-[10px] font-mono text-cyan-400 tracking-widest uppercase">
               THE WAY OUT // EPILOGUE
@@ -640,7 +364,6 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
 
           {/* Centerpiece: Official THE WAY OUT Logo & Title */}
           <div className="relative z-10 my-auto flex flex-col items-center py-6">
-            {/* The Official Uploaded Logo Sticker */}
             <img
               src={gameLogoImg}
               alt="The Way Out Official Logo"
