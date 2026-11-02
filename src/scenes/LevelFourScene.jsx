@@ -100,6 +100,21 @@ export default function LevelFourScene({
     }
   }
 
+  // Universal K key to skip to Robot Boss Cutscene / Paradox Chamber
+  useEffect(() => {
+    if (stage !== 'boss') return
+    const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return
+      if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
+        e.preventDefault()
+        Audio.stopMusic()
+        setStage('cutscene')
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [stage])
+
   return (
     <div className="relative w-screen h-screen bg-[#070514] text-white flex flex-col justify-between overflow-hidden select-none font-mono">
       
@@ -147,11 +162,14 @@ export default function LevelFourScene({
 
               {/* Proceed to Robot Boss Perspective & Paradox Chamber */}
               <button
-                onClick={() => setStage('cutscene')}
-                className="px-3 py-1 rounded-full bg-gradient-to-r from-rose-500 via-rose-400 to-rose-300 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider cursor-pointer transition shadow"
-                title="Proceed to Robot Boss Cutscene & Paradox Chamber"
+                onClick={() => {
+                  Audio.stopMusic()
+                  setStage('cutscene')
+                }}
+                className="px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 hover:brightness-110 active:scale-95 text-black font-mono font-black text-xs uppercase tracking-wider cursor-pointer transition shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-200 flex items-center gap-1.5"
+                title="Skip to Robot Boss Cutscene & Paradox Chamber (Press K or Click)"
               >
-                Final Boss ➔
+                <span>Skip [K] ➔</span>
               </button>
             </div>
           </header>
@@ -176,13 +194,16 @@ export default function LevelFourScene({
                 <strong className="text-cyan-300 font-mono">W / Space</strong>: Jump
               </span>
               <span>
-                <strong className="text-cyan-300 font-mono">Shift / K</strong>: Dash
+                <strong className="text-cyan-300 font-mono">Shift</strong>: Dash
               </span>
               <span>
                 <strong className="text-rose-400 font-mono">F / E / Click</strong>: Shoot Blaster
               </span>
               <span>
                 <strong className="text-purple-300 font-mono">G</strong>: Gravity Flip
+              </span>
+              <span>
+                <strong className="text-amber-300 font-mono">K</strong>: Skip
               </span>
             </div>
             <div className="text-yellow-400/90 font-bold hidden md:block">

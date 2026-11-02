@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import ambientVideo from './assets/enchanted_cottage_ambient.mp4'
-import gameLogoImg from './assets/the_way_out_logo.jpg'
 import IntroVideo from './components/IntroVideo'
 import HubScene from './scenes/HubScene'
 import RoomScene from './scenes/RoomScene'
 import LevelTwoScene from './scenes/LevelTwoScene'
 import LevelThreeScene from './scenes/LevelThreeScene'
 import LevelFourScene from './scenes/LevelFourScene'
+import ParadoxChamberScene from './scenes/ParadoxChamberScene'
 import FinalBossScene from './scenes/FinalBossScene'
 import FinalEndingScene from './components/FinalEndingScene'
 
@@ -107,19 +107,31 @@ const App = () => {
     )
   }
 
-  // 6. Level 4 Scene: The 2D Boss Battle (Moving Platforms, Joker Puppeteer, Trapped Developer, FPS Blaster Combat)
+  // 6. Level 4 Scene: The 2D Boss Battle (Moving Platforms, Cyber Pawns, Robot Boss Perspective Cutscene)
   if (currentScene === 'level4') {
     return (
       <LevelFourScene
         playerName={playerName || 'Seeker'}
         onBackToMenu={() => setCurrentScene('menu')}
         onBackToLevelThree={() => setCurrentScene('level3')}
-        onGoToFinalBoss={() => setCurrentScene('finalboss')}
+        onGoToFinalBoss={() => setCurrentScene('paradox')}
       />
     )
   }
 
-  // 7. Final Boss: PENNYWISE — The Puppet Master (Author entangled in strings, MC shoots strings with gun)
+  // 7. Paradox Chamber: The Entropy Engine (Reality Collapse 2D Puzzle Chamber)
+  if (currentScene === 'paradox') {
+    return (
+      <ParadoxChamberScene
+        playerName={playerName || 'Seeker'}
+        onBackToLevelFour={() => setCurrentScene('level4')}
+        onGoToFinalBoss={() => setCurrentScene('finalboss')}
+        onBackToMenu={() => setCurrentScene('menu')}
+      />
+    )
+  }
+
+  // 8. Final Boss: The Puppet Master (Author entangled in strings, MC shoots strings with gun)
   if (currentScene === 'finalboss') {
     return (
       <FinalBossScene
@@ -129,7 +141,7 @@ const App = () => {
     )
   }
 
-  // 8. The Afterlife Holographic Epilogue: Student & Future Self meeting in restored reality
+  // 9. The Afterlife Holographic Epilogue: Student & Future Self meeting in restored reality
   if (currentScene === 'afterlife' || currentScene === 'ending') {
     return (
       <FinalEndingScene
@@ -167,13 +179,6 @@ const App = () => {
         aria-label="Main menu"
       >
         <div>
-          <div className="mb-4">
-            <img
-              src={gameLogoImg}
-              alt="The Way Out Official Emblem"
-              className="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-2xl shadow-2xl drop-shadow-[0_8px_24px_rgba(245,158,11,0.35)] border border-amber-400/40 hover:scale-105 transition-transform duration-300"
-            />
-          </div>
           <h1 className="font-serif text-[clamp(4rem,9vw,7.5rem)] font-medium leading-[.87] tracking-[-.06em] text-[#f7f4eb] drop-shadow-[0_3px_30px_rgba(0,0,0,.22)]">
             <span className="mb-2 block pl-1 text-[.34em] leading-none tracking-[.03em] text-[#c8d4bd]">
               The

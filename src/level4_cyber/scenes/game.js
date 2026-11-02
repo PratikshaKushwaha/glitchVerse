@@ -599,6 +599,17 @@ export class GameScene {
 
         if (!this.won && Input.rawPressed('KeyR')) { this.respawn(); return; }
 
+        // Universal Skip shortcut [K]
+        if (Input.rawPressed('KeyK')) {
+            if (this.onPawnsCleared) {
+                this.onPawnsCleared();
+                return;
+            } else if (this.onSavedAuthor) {
+                this.onSavedAuthor();
+                return;
+            }
+        }
+
         // Shooting input (Touch button, KeyF, KeyJ, KeyX, KeyC, or screen tap)
         if (Input.pressed('shoot') || Input.held('shoot')) {
             this.tryShoot();

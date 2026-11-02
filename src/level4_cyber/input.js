@@ -175,12 +175,12 @@ export const Input = {
     isTouch: () => Boolean(settings.touchControls !== false && isTouch),
     held: a => down.has(settings.keys[a])
         || (a === 'jump' && (down.has('ArrowUp') || down.has('KeyW')))
-        || (a === 'dash' && (down.has('KeyK') || down.has('ShiftLeft') || down.has('ShiftRight')))
+        || (a === 'dash' && (down.has('ShiftLeft') || down.has('ShiftRight')))
         || (a === 'shoot' && (down.has('KeyF') || down.has('KeyJ') || down.has('KeyX') || down.has('KeyC') || down.has('KeyE')))
         || touchHeld.has(a),
     pressed: a => hit.has(settings.keys[a])
         || (a === 'jump' && (hit.has('ArrowUp') || hit.has('KeyW')))
-        || (a === 'dash' && (hit.has('KeyK') || hit.has('ShiftLeft') || hit.has('ShiftRight')))
+        || (a === 'dash' && (hit.has('ShiftLeft') || hit.has('ShiftRight')))
         || (a === 'shoot' && (hit.has('KeyF') || hit.has('KeyJ') || hit.has('KeyX') || hit.has('KeyC') || hit.has('KeyE')))
         || touchHit.has(a),
     rawPressed: c => hit.has(c)
