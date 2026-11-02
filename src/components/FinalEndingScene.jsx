@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import hologramFutureSelfImg from '../assets/hologram_future_self.jpg'
+import peacefulFieldImg from '../assets/ending_peaceful_field.png'
 import cityBgImg from '../level4_cyber/assets/city_bg.jpg'
 import gameLogoImg from '../assets/the_way_out_logo.jpg'
 import endingVoiceAudio from '../assets/finalscene-audio.mp3'
@@ -269,30 +270,32 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
         }}
       />
 
-      {/* ================= THE HOLOGRAPHIC SCENE (Image 2) ================= */}
+      {/* ================= THE HOLOGRAPHIC SCENE ================= */}
       {phase === 'field' && (
         <div className="relative w-full h-full flex flex-col justify-between overflow-hidden">
-          {/* Fullscreen Pixel Art Hologram Artwork (Loaded slowly into view) */}
-          <img
-            src={hologramFutureSelfImg}
-            alt="Holographic Future Self Scene"
-            className={`absolute inset-0 w-full h-full object-cover object-center select-none transition-all duration-[3600ms] ease-out ${
-              materialized
-                ? 'scale-100 blur-0 opacity-100'
-                : 'scale-105 blur-md opacity-75'
-            }`}
-          />
-
-          {/* Subtle Cyber Scanline Overlay */}
-          <div
-            className={`absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.04)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none transition-opacity duration-[3000ms] ${
-              materialized ? 'opacity-40' : 'opacity-0'
-            }`}
-          />
+          {/* Layer 1: Living Grassy Meadow Under Starry Night Sky */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <img
+              src={peacefulFieldImg}
+              alt="Peaceful Meadow under Starry Night Sky"
+              className={`w-full h-full object-cover object-bottom select-none transition-all duration-[3200ms] ease-out ${
+                materialized ? 'scale-100 filter-none opacity-100' : 'scale-105 blur-sm opacity-60'
+              }`}
+            />
+            {/* Ambient vignette */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(3,7,18,0.85)_100%)] pointer-events-none" />
+            
+            {/* Subtle atmospheric scanlines */}
+            <div
+              className={`absolute inset-0 bg-[linear-gradient(rgba(14,165,233,0.03)_1px,transparent_1px)] bg-[size:100%_4px] pointer-events-none transition-opacity duration-[3000ms] ${
+                materialized ? 'opacity-40' : 'opacity-0'
+              }`}
+            />
+          </div>
 
           {/* Top Info Bar */}
           <div
-            className={`relative z-10 pt-4 px-6 flex items-center justify-between transition-all duration-1000 delay-1000 ${
+            className={`relative z-20 pt-4 px-6 flex items-center justify-between transition-all duration-1000 delay-1000 ${
               materialized ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
             }`}
           >
@@ -306,29 +309,94 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
                 e.stopPropagation()
                 setPhase('title')
               }}
-              className="px-3 py-1 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 text-[11px] font-mono text-gray-300 hover:text-white transition cursor-pointer"
+              className="px-3.5 py-1 rounded-full bg-black/60 hover:bg-black/80 border border-white/20 text-xs font-mono text-gray-300 hover:text-white transition cursor-pointer flex items-center gap-1.5"
               title="Skip to Final Credits"
             >
-              Skip [K] -&gt;
+              <span>Skip [K]</span>
+              <span>➔</span>
             </button>
           </div>
 
-          {/* Spacer */}
-          <div className="flex-1" />
+          {/* Layer 2: Centerstage Holographic Future Self Character */}
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-end pb-2 pointer-events-none select-none max-h-[64vh]">
+            {/* Floating telemetry headers */}
+            <div
+              className={`w-full max-w-2xl flex justify-between px-6 mb-2 text-[10px] font-mono tracking-widest text-cyan-300/80 transition-opacity duration-1000 delay-[1400ms] ${
+                materialized ? 'opacity-90' : 'opacity-0'
+              }`}
+            >
+              <span className="flex items-center gap-1.5 bg-black/50 px-2.5 py-0.5 rounded border border-cyan-500/30 backdrop-blur">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                SIGNAL: 2042-PRIME // HOLO_LINK
+              </span>
+              <span className="hidden sm:inline-block bg-black/50 px-2.5 py-0.5 rounded border border-cyan-500/30 backdrop-blur text-cyan-400/80">
+                IDENTITY: LEAD DEVELOPER
+              </span>
+            </div>
 
-          {/* JRPG Retro Pixel Dialogue Box (Matching Image 2 Reference) */}
+            {/* Hologram Avatar Container */}
+            <div className="relative flex items-center justify-center max-w-xl w-full">
+              {/* Glowing Hologram Projection Rings on the Grass */}
+              <div className="absolute -bottom-2 w-80 h-16 rounded-full bg-cyan-500/20 blur-md border border-cyan-400/50 shadow-[0_0_50px_rgba(34,211,238,0.7)] pointer-events-none" />
+              <div className="absolute -bottom-1 w-52 h-9 rounded-full border border-cyan-300/60 shadow-[0_0_25px_rgba(34,211,238,0.9)] animate-pulse pointer-events-none" />
+
+              {/* Upward Hologram Emitter Light Beams */}
+              <div
+                className="absolute inset-x-12 bottom-0 top-8 pointer-events-none opacity-30"
+                style={{
+                  background: 'linear-gradient(to top, rgba(6,182,212,0.35) 0%, rgba(56,189,248,0.08) 60%, transparent 100%)',
+                  clipPath: 'polygon(18% 100%, 82% 100%, 100% 0%, 0% 0%)',
+                }}
+              />
+
+              {/* The Future Self Pixel Art Hologram (with Outstretched Hand) */}
+              <div className="relative z-10 max-h-[48vh] sm:max-h-[54vh] flex items-center justify-center overflow-hidden">
+                <img
+                  src={hologramFutureSelfImg}
+                  alt="Holographic Future Self"
+                  className={`max-h-[46vh] sm:max-h-[52vh] w-auto object-contain select-none transition-all duration-[2400ms] ${
+                    materialized ? 'opacity-95 scale-100' : 'opacity-0 scale-95'
+                  }`}
+                  style={{
+                    filter:
+                      'drop-shadow(0 0 25px rgba(34,211,238,0.75)) drop-shadow(0 0 50px rgba(6,182,212,0.45)) drop-shadow(-2px 0 0 rgba(239,68,68,0.3)) drop-shadow(2px 0 0 rgba(59,130,246,0.3))',
+                    maskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                  }}
+                />
+
+                {/* Animated Cyber Scanlines Layer over character */}
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-40 mix-blend-screen"
+                  style={{
+                    background:
+                      'repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(34,211,238,0.25) 3px, rgba(34,211,238,0.25) 5px)',
+                  }}
+                />
+
+                {/* Digital glitch slice bars shifting across the hologram */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <div className="w-full h-1 bg-cyan-300/40 blur-[1px] absolute top-1/4 animate-pulse" />
+                  <div className="w-2/3 h-1.5 bg-sky-400/35 blur-[1px] absolute top-1/2 left-4 animate-pulse" />
+                  <div className="w-3/4 h-1 bg-cyan-200/50 blur-[1px] absolute top-3/4 right-2 animate-ping" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Layer 3: JRPG Retro Pixel Dialogue Box (Matching Image Reference) */}
           <div
-            className={`relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8 transition-all duration-1000 delay-[1800ms] ${
+            className={`relative z-20 w-full max-w-4xl mx-auto px-4 sm:px-6 pb-5 sm:pb-7 transition-all duration-1000 delay-[1800ms] ${
               firstDialogueReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'
             }`}
           >
-            <div className="relative w-full rounded-2xl bg-[#090b1e]/90 border-2 border-[#5a67a0] p-4 sm:p-6 shadow-[0_0_35px_rgba(15,23,42,0.9)] backdrop-blur-md">
-              {/* Speaker Badge (Top-Left Pill with Arrow matching Image 2) */}
+            <div className="relative w-full rounded-2xl bg-[#090b1e]/95 border-2 border-[#5a67a0] p-4 sm:p-6 shadow-[0_0_40px_rgba(10,15,35,0.95)] backdrop-blur-md">
+              {/* Speaker Badge (Top-Left Pill with Arrow matching reference) */}
               <div
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs sm:text-sm font-bold shadow mb-3 border ${
                   isFutureSelf
-                    ? 'bg-[#161c38] border-[#6366f1]/70 text-cyan-200'
-                    : 'bg-[#2b1c10] border-amber-500/70 text-amber-200'
+                    ? 'bg-[#161c38] border-[#6366f1]/80 text-cyan-200 shadow-[0_0_12px_rgba(99,102,241,0.4)]'
+                    : 'bg-[#2b1c10] border-amber-500/80 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
                 }`}
               >
                 <span className="text-white text-[10px]">▶</span>
@@ -341,7 +409,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
                 {isTyping && <span className="inline-block w-2 h-4 ml-1 bg-white animate-pulse" />}
               </p>
 
-              {/* Downward Advance Arrow (Matching Image 2) */}
+              {/* Downward Advance Arrow (Matching Reference) */}
               <div className="absolute bottom-3 right-4 sm:bottom-4 sm:right-6 text-white text-xs sm:text-sm animate-bounce opacity-85 select-none font-mono">
                 ▼
               </div>
