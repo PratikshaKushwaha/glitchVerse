@@ -28,6 +28,11 @@ export class EntropyGame {
       isPushing: false
     };
 
+    // Responsive Jump Feel: Coyote Time & Jump Buffering
+    this.coyoteTimer = 0;
+    this.jumpBufferTimer = 0;
+    this.animTime = 0;
+
     // Camera
     this.camX = 0;
     this.camY = 0;
@@ -109,6 +114,11 @@ export class EntropyGame {
         e.preventDefault();
       }
       this.keys[e.code] = true;
+
+      // Jump buffer registration
+      if (e.code === 'Space' || e.code === 'KeyW' || e.code === 'ArrowUp') {
+        this.jumpBufferTimer = 0.14;
+      }
 
       // Audio resume on first gesture
       entropyAudio.resume();
@@ -358,7 +368,7 @@ export class EntropyGame {
     this.notifyState();
   }
 
-  // --- DAMAGE & RESPAWN ---
+  // --- DAMAGE & RESPAWN (Always Restart from Start Point) ---
   damagePlayer(reason = 'HAZARD CONTACT') {
     if (this.p.invulnTimer > 0) return;
 
@@ -374,14 +384,55 @@ export class EntropyGame {
       return;
     }
 
-    // Respawn at latest unlocked checkpoint
-    const cp = this.data.checkpoints[this.currentCheckpoint] || this.data.checkpoints[0];
-    this.p.x = cp.x;
-    this.p.y = cp.y;
+    // Always restart/respawn at the START POINT (Airlock 01) per requirement
+    const startPt = this.data.checkpoints[0];
+    this.p.x = startPt.x;
+    this.p.y = startPt.y;
     this.p.vx = 0;
     this.p.vy = 0;
     this.p.gd = 1;
+    this.camX = 0;
     this.energy = GAME_CONSTANTS.MAX_ENERGY; // Energy restored on respawn to prevent softlock
+    this.notifyState();
+  }
+
+  // --- RESTART FROM START POINT (Full Reset) ---
+  restartFromStart() {
+    this.data = createChamberData();
+    this.state = 'playing';
+    const startPt = this.data.checkpoints[0];
+    this.p.x = startPt.x;
+    this.p.y = startPt.y;
+    this.p.vx = 0;
+    this.p.vy = 0;
+    this.p.gd = 1;
+    this.p.invulnTimer = 0;
+    this.p.isPushing = false;
+    this.camX = 0;
+    this.camY = 0;
+    this.shake = 0;
+    this.currentDim = 'A';
+    this.energy = GAME_CONSTANTS.STARTING_ENERGY;
+    this.freezeActive = false;
+    this.freezeTimer = 0;
+    this.freezeCooldown = 0;
+    this.overloadTriggered = false;
+    this.overloadBannerTimer = 0;
+    this.syncSequence = [];
+    this.reactorStabilized = false;
+    this.timeRemaining = GAME_CONSTANTS.TOTAL_TIME_SEC;
+    this.attempts = GAME_CONSTANTS.INITIAL_ATTEMPTS;
+    this.currentCheckpoint = 0;
+    this.stats = {
+      gravityFlips: 0,
+      timeFreezes: 0,
+      dimensionSwitches: 0,
+      nodesActivated: 0
+    };
+    this.finalScore = 0;
+    this.finalRank = 'B';
+    this.particles = [];
+    this.glitchOverlay = 0;
     this.notifyState();
   }
 
@@ -409,6 +460,8 @@ export class EntropyGame {
   // --- CORE UPDATE LOOP (60 FPS) ---
   update(dt = 1 / 60) {
     if (this.state !== 'playing') return;
+
+    this.animTime += dt;
 
     // Timer countdown
     this.timeRemaining -= dt;
@@ -465,15 +518,28 @@ export class EntropyGame {
     p.vy += gravityForce * dt;
     p.vy = Math.max(-420, Math.min(420, p.vy));
 
-    // Jump Impulse (Gravity-aware)
-    if (jump && p.onGround) {
-      p.vy = -290 * p.gd; // Pushes toward ceiling when gd = 1, pushes toward floor when gd = -1
+    // Coyote time & Jump buffer timers
+    if (p.onGround) {
+      this.coyoteTimer = 0.12;
+    } else {
+      this.coyoteTimer = Math.max(0, this.coyoteTimer - dt);
+    }
+    if (this.jumpBufferTimer > 0) {
+      this.jumpBufferTimer = Math.max(0, this.jumpBufferTimer - dt);
+    }
+
+    // Jump Impulse (Gravity-aware with coyote time & jump buffering)
+    const wantsJump = jump || this.jumpBufferTimer > 0;
+    if (wantsJump && (p.onGround || this.coyoteTimer > 0)) {
+      p.vy = -300 * p.gd; // Pushes toward ceiling when gd = 1, pushes toward floor when gd = -1
       p.onGround = false;
+      this.coyoteTimer = 0;
+      this.jumpBufferTimer = 0;
       entropyAudio.playJump();
       this.spawnSparks(p.x + 8, p.y + (p.gd > 0 ? 24 : 0), PALETTE.cyan, 6);
     }
 
-    // Variable jump height cut if released
+    // Variable jump height cut if released early
     if (!jump && ((p.gd > 0 && p.vy < -100) || (p.gd < 0 && p.vy > 100))) {
       p.vy *= 0.55;
     }
@@ -869,6 +935,9 @@ export class EntropyGame {
     ctx.fillStyle = reactorGrad;
     ctx.fillRect(2130, 0, 640, 500);
 
+    // Multi-Room Architectural Sector Dividers (Cross-Section Facility Look)
+    this.drawSectorArchitecture(ctx);
+
     // 3. Render Platforms
     this.data.platforms.forEach(pl => {
       const isSolid = pl.dim === 'neutral' || pl.dim === this.currentDim;
@@ -919,9 +988,9 @@ export class EntropyGame {
       ctx.strokeRect(cp.x, cp.y, cp.w, cp.h);
     });
 
-    // 6. Security Blast Doors
+    // 6. Security Blast Doors (Generic intermediate gates)
     this.data.doors.forEach(d => {
-      if (d.open) return;
+      if (d.open || d.id === 'door_exit') return;
       ctx.fillStyle = '#dc2626';
       ctx.fillRect(d.x, d.y, d.w, d.h);
       ctx.strokeStyle = '#f87171';
@@ -933,15 +1002,9 @@ export class EntropyGame {
       }
     });
 
-    // 7. Exit Portal (Central Reactor)
-    const exit = this.data.doors.find(d => d.id === 'door_exit');
-    if (exit) {
-      ctx.fillStyle = this.reactorStabilized ? PALETTE.green : 'rgba(100, 100, 100, 0.4)';
-      ctx.fillRect(exit.x, exit.y, exit.w, exit.h);
-      ctx.strokeStyle = this.reactorStabilized ? '#6ee7b7' : '#555';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(exit.x, exit.y, exit.w, exit.h);
-    }
+    // 7. Dedicated Proper Start Airlock & Exit Reality Breach Gate
+    this.drawStartAirlock(ctx);
+    this.drawExitPortal(ctx);
 
     // 8. Movable Crates
     this.data.crates.forEach(c => {
@@ -1082,5 +1145,216 @@ export class EntropyGame {
     }
 
     ctx.restore();
+  }
+
+  // --- MULTI-ROOM SECTOR ARCHITECTURE (Inspired by multi-tier facility design) ---
+  drawSectorArchitecture(ctx) {
+    const dividers = [
+      { x: 500, label: 'SEC-02 // TEMPORAL BAY', color: '#38bdf8' },
+      { x: 1090, label: 'SEC-03 // QUANTUM RIFT', color: '#ec4899' },
+      { x: 1714, label: 'SEC-04 // ENTROPY GAUNTLET', color: '#f59e0b' },
+      { x: 2200, label: 'SEC-05 // REACTOR CORE', color: '#10b981' }
+    ];
+
+    dividers.forEach(div => {
+      // Background structural vertical girder
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+      ctx.fillRect(div.x - 4, 28, 8, 380);
+
+      // Warning vertical girder lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(div.x - 4, 28);
+      ctx.lineTo(div.x - 4, 408);
+      ctx.moveTo(div.x + 4, 28);
+      ctx.lineTo(div.x + 4, 408);
+      ctx.stroke();
+
+      // Overhead Sector Placard
+      ctx.fillStyle = '#0b1120';
+      ctx.fillRect(div.x - 60, 34, 120, 16);
+      ctx.strokeStyle = div.color;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(div.x - 60, 34, 120, 16);
+
+      ctx.fillStyle = div.color;
+      ctx.font = 'bold 7.5px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(div.label, div.x, 45);
+    });
+  }
+
+  // --- PROPER START AIRLOCK GATEWAY ---
+  drawStartAirlock(ctx) {
+    const sa = this.data.startAirlock;
+    if (!sa) return;
+
+    // Heavy reinforced airlock frame
+    ctx.fillStyle = '#0b1329';
+    ctx.fillRect(sa.x - 8, sa.y - 14, sa.w + 16, sa.h + 14);
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(sa.x - 8, sa.y - 14, sa.w + 16, sa.h + 14);
+
+    // Inner Doorway Tunnel Depth
+    const grad = ctx.createLinearGradient(sa.x, sa.y, sa.x + sa.w, sa.y);
+    grad.addColorStop(0, '#022c22');
+    grad.addColorStop(0.5, '#064e3b');
+    grad.addColorStop(1, '#0b1329');
+    ctx.fillStyle = grad;
+    ctx.fillRect(sa.x, sa.y, sa.w, sa.h);
+
+    // Cyan / Green Energy Barrier Slats
+    ctx.strokeStyle = 'rgba(52, 211, 153, 0.5)';
+    ctx.lineWidth = 1.5;
+    for (let ey = sa.y + 12; ey < sa.y + sa.h - 6; ey += 16) {
+      ctx.beginPath();
+      ctx.moveTo(sa.x + 4, ey);
+      ctx.lineTo(sa.x + sa.w - 4, ey);
+      ctx.stroke();
+    }
+
+    // Top Mounted Flashing Beacon Lamp
+    const beaconPulse = Math.sin(this.animTime * 6) * 0.35 + 0.65;
+    ctx.fillStyle = `rgba(34, 197, 94, ${beaconPulse})`;
+    ctx.beginPath();
+    ctx.arc(sa.x + sa.w / 2, sa.y - 7, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Signboard Above Airlock
+    ctx.fillStyle = '#022c22';
+    ctx.fillRect(sa.x - 14, sa.y - 30, sa.w + 28, 16);
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(sa.x - 14, sa.y - 30, sa.w + 28, 16);
+
+    ctx.fillStyle = '#86efac';
+    ctx.font = 'bold 8px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ENTRY // AIRLOCK 01', sa.x + sa.w / 2, sa.y - 19);
+
+    // Directional Start Arrow
+    ctx.fillStyle = '#34d399';
+    ctx.font = 'bold 9px monospace';
+    ctx.fillText('START ➔', sa.x + sa.w / 2, sa.y + sa.h - 10);
+
+    // Hazard Stripes Threshold at Base
+    for (let hx = sa.x; hx < sa.x + sa.w; hx += 8) {
+      ctx.fillStyle = (Math.floor(hx / 8) % 2 === 0) ? '#eab308' : '#000000';
+      ctx.fillRect(hx, sa.y + sa.h - 4, 8, 4);
+    }
+  }
+
+  // --- PROPER EXIT REALITY BREACH GATE ---
+  drawExitPortal(ctx) {
+    const ep = this.data.exitPortal;
+    if (!ep) return;
+
+    // Outer Massive Titanium Arch
+    ctx.fillStyle = '#090d16';
+    ctx.fillRect(ep.x - 10, ep.y - 16, ep.w + 20, ep.h + 16);
+    ctx.strokeStyle = this.reactorStabilized ? '#00e5ff' : '#dc2626';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(ep.x - 10, ep.y - 16, ep.w + 20, ep.h + 16);
+
+    if (!this.reactorStabilized) {
+      // --- LOCKED STATE ---
+      // Heavy Sealed Red Blast Shutters
+      ctx.fillStyle = '#18070b';
+      ctx.fillRect(ep.x, ep.y, ep.w, ep.h);
+
+      // Security Laser Grid & Cross Braces
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+      ctx.lineWidth = 2;
+      for (let ly = ep.y + 12; ly < ep.y + ep.h - 8; ly += 16) {
+        ctx.beginPath();
+        ctx.moveTo(ep.x + 4, ly);
+        ctx.lineTo(ep.x + ep.w - 4, ly);
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.moveTo(ep.x, ep.y);
+      ctx.lineTo(ep.x + ep.w, ep.y + ep.h);
+      ctx.moveTo(ep.x + ep.w, ep.y);
+      ctx.lineTo(ep.x + ep.w, ep.y + ep.h);
+      ctx.stroke();
+
+      // Flashing Red Alarm Beacon on Top
+      const redGlow = Math.sin(this.animTime * 8) * 0.4 + 0.6;
+      ctx.fillStyle = `rgba(239, 68, 68, ${redGlow})`;
+      ctx.beginPath();
+      ctx.arc(ep.x + ep.w / 2, ep.y - 8, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Signboard: LOCKED
+      ctx.fillStyle = '#1e0508';
+      ctx.fillRect(ep.x - 18, ep.y - 32, ep.w + 36, 16);
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(ep.x - 18, ep.y - 32, ep.w + 36, 16);
+
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('EXIT // CONTAINMENT LOCKED', ep.x + ep.w / 2, ep.y - 21);
+
+      // Center Status Prompt
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText('STABILIZE CORES', ep.x + ep.w / 2, ep.y + ep.h / 2);
+    } else {
+      // --- OPEN / UNLOCKED STATE (Reality Singularity Vortex) ---
+      // Inner Deep Cosmic Void
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(ep.x, ep.y, ep.w, ep.h);
+
+      // Animated Swirling Vortex Rings
+      const cx = ep.x + ep.w / 2;
+      const cy = ep.y + ep.h / 2;
+      const vortexAngle = this.animTime * 4;
+
+      for (let r = 42; r > 10; r -= 10) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(vortexAngle * (r % 20 === 0 ? 1 : -1) + r);
+        ctx.strokeStyle = r > 22 ? 'rgba(0, 229, 255, 0.9)' : 'rgba(255, 0, 212, 0.9)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r, r * 0.55, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Central Radiant White Singularity
+      const corePulse = Math.sin(this.animTime * 10) * 3 + 12;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, corePulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Top Flashing Emerald Beacon
+      ctx.fillStyle = '#34d399';
+      ctx.beginPath();
+      ctx.arc(cx, ep.y - 8, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Signboard: REALITY BREACH OPEN
+      ctx.fillStyle = '#042f2e';
+      ctx.fillRect(ep.x - 22, ep.y - 32, ep.w + 44, 16);
+      ctx.strokeStyle = '#2dd4bf';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(ep.x - 22, ep.y - 32, ep.w + 44, 16);
+
+      ctx.fillStyle = '#5eead4';
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('EXIT // BREACH OPEN ➔', cx, ep.y - 21);
+
+      // Pulsing Directional Indicator
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 10px monospace';
+      ctx.fillText('ENTER ➔', cx, ep.y + ep.h - 12);
+    }
   }
 }

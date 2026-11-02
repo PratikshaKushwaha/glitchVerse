@@ -5,7 +5,6 @@ import { Audio } from '../level4_cyber/audio.js'
 import { attachCanvas, resize, present } from '../level4_cyber/render.js'
 import { GameScene } from '../level4_cyber/scenes/game.js'
 import { sound } from '../utils/AudioEngine'
-import RobotBossCutscene from '../components/RobotBossCutscene'
 
 export default function LevelFourScene({
   playerName = 'Seeker',
@@ -15,11 +14,9 @@ export default function LevelFourScene({
 }) {
   const canvasRef = useRef(null)
   const reqIdRef = useRef(null)
-  const [stage, setStage] = useState('boss') // 'boss' | 'cutscene'
   const [soundEnabled, setSoundEnabled] = useState(true)
 
   useEffect(() => {
-    if (stage !== 'boss') return
     if (!canvasRef.current) return
 
     // 1. Attach Canvas & Input Listeners
@@ -34,23 +31,25 @@ export default function LevelFourScene({
     window.addEventListener('keydown', handleGesture, { once: true })
     window.addEventListener('pointerdown', handleGesture, { once: true })
 
-    // 3. Callback when Author is Saved — proceed to cutscene or final boss
+    // 3. Callback when Author is Saved — proceed directly to Paradox Chamber
     const handleSavedAuthor = () => {
       sound.playVictory()
-      setStage('cutscene')
+      Audio.stopMusic()
+      onGoToFinalBoss()
     }
 
-    // 4. Callback when 6 smaller enemy pawns are cleared -> trigger Robot Boss perspective cutscene!
+    // 4. Callback when 6 smaller enemy pawns are cleared -> directly enter Paradox Chamber
     const handlePawnsCleared = () => {
       sound.playGlitchRadio()
-      setStage('cutscene')
+      Audio.stopMusic()
+      onGoToFinalBoss()
     }
 
     // 5. Initialize Level 4 Boss GameScene with pawns cleared callback
     const gameScene = new GameScene(2, handleSavedAuthor, handlePawnsCleared)
     Scenes.set(gameScene)
 
-    // 5. 60 FPS Engine Frame Loop
+    // 6. 60 FPS Engine Frame Loop
     let last = performance.now()
     let acc = 0
 
@@ -88,7 +87,7 @@ export default function LevelFourScene({
       Audio.stopMusic()
       attachCanvas(null)
     }
-  }, [stage])
+  }, [onGoToFinalBoss])
 
   const toggleSound = () => {
     const next = !soundEnabled
@@ -100,129 +99,109 @@ export default function LevelFourScene({
     }
   }
 
-  // Universal K key to skip to Robot Boss Cutscene / Paradox Chamber
+  // Universal K key to skip to Paradox Chamber
   useEffect(() => {
-    if (stage !== 'boss') return
     const handleKeyDown = (e) => {
       if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return
       if (e.code === 'KeyK' || e.key === 'k' || e.key === 'K') {
         e.preventDefault()
         Audio.stopMusic()
-        setStage('cutscene')
+        onGoToFinalBoss()
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [stage])
+  }, [onGoToFinalBoss])
 
   return (
     <div className="relative w-screen h-screen bg-[#070514] text-white flex flex-col justify-between overflow-hidden select-none font-mono">
-      
-      {/* ================= STAGE 1: ACTIVE LEVEL 4 RETRO-CYBER COMBAT ================= */}
-      {stage === 'boss' && (
-        <>
-          {/* TOP HUD BAR */}
-          <header className="relative z-20 flex items-center justify-between px-3 sm:px-6 py-2 bg-[#0d0922]/90 border-b border-[#2d1b4e] shadow-2xl backdrop-blur select-none">
-            
-            {/* Left: Sector & Callsign Indicator */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onBackToMenu}
-                className="px-3 py-1 rounded bg-[#1e1338] hover:bg-[#2e1f54] text-xs font-bold text-gray-300 hover:text-white transition cursor-pointer border border-[#3b2766]"
-              >
-                ← Exit
-              </button>
+      {/* TOP HUD BAR */}
+      <header className="relative z-20 flex items-center justify-between px-3 sm:px-6 py-2 bg-[#0d0922]/90 border-b border-[#2d1b4e] shadow-2xl backdrop-blur select-none">
+        
+        {/* Left: Sector & Callsign Indicator */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBackToMenu}
+            className="px-3 py-1 rounded bg-[#1e1338] hover:bg-[#2e1f54] text-xs font-bold text-gray-300 hover:text-white transition cursor-pointer border border-[#3b2766]"
+          >
+            ← Exit
+          </button>
 
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
-                <span className="font-bold text-xs tracking-wider text-rose-300">
-                  SECTOR 4: FINAL SHOWDOWN
-                </span>
-              </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-rose-500 animate-ping" />
+            <span className="font-bold text-xs tracking-wider text-rose-300">
+              SECTOR 4: FINAL SHOWDOWN
+            </span>
+          </div>
+        </div>
 
-            {/* Right: Callsign, Sound, and Testing Skip Button */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-xs font-bold text-cyan-300 shadow">
-                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-                <span>{playerName}</span>
-              </div>
+        {/* Right: Callsign, Sound, and Testing Skip Button */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-xs font-bold text-cyan-300 shadow">
+            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span>{playerName}</span>
+          </div>
 
-              <button
-                onClick={toggleSound}
-                className="px-2.5 py-1 rounded bg-[#1e1338] hover:bg-[#2e1f54] text-xs font-bold text-yellow-300 transition cursor-pointer border border-[#3b2766]"
-                title="Toggle Sound"
-              >
-                {soundEnabled ? 'VOL: ON' : 'VOL: OFF'}
-              </button>
+          <button
+            onClick={toggleSound}
+            className="px-2.5 py-1 rounded bg-[#1e1338] hover:bg-[#2e1f54] text-xs font-bold text-yellow-300 transition cursor-pointer border border-[#3b2766]"
+            title="Toggle Sound"
+          >
+            {soundEnabled ? 'VOL: ON' : 'VOL: OFF'}
+          </button>
 
+          {/* Proceed directly to Paradox Chamber without AI bot cutscene */}
+          <button
+            onClick={() => {
+              Audio.stopMusic()
+              onGoToFinalBoss()
+            }}
+            className="px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 hover:brightness-110 active:scale-95 text-black font-mono font-black text-xs uppercase tracking-wider cursor-pointer transition shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-200 flex items-center gap-1.5"
+            title="Proceed directly to Paradox Chamber (Press K or Click)"
+          >
+            <span>Paradox Chamber [K] ➔</span>
+          </button>
+        </div>
+      </header>
 
-
-              {/* Proceed to Robot Boss Perspective & Paradox Chamber */}
-              <button
-                onClick={() => {
-                  Audio.stopMusic()
-                  setStage('cutscene')
-                }}
-                className="px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 hover:brightness-110 active:scale-95 text-black font-mono font-black text-xs uppercase tracking-wider cursor-pointer transition shadow-[0_0_15px_rgba(245,158,11,0.6)] border border-amber-200 flex items-center gap-1.5"
-                title="Skip to Robot Boss Cutscene & Paradox Chamber (Press K or Click)"
-              >
-                <span>Skip [K] ➔</span>
-              </button>
-            </div>
-          </header>
-
-          {/* MAIN CANVAS CONTAINER FOR LEVEL 4 ENGINE */}
-          <main className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-black">
-            <canvas
-              id="game"
-              ref={canvasRef}
-              className="w-full h-full block touch-none"
-              style={{ imageRendering: 'pixelated' }}
-            />
-          </main>
-
-          {/* BOTTOM CONTROLS FOOTER */}
-          <footer className="relative z-20 flex items-center justify-between px-3 sm:px-6 py-1.5 bg-[#0d0922]/90 border-t border-[#2d1b4e] text-[10px] sm:text-xs text-gray-400 select-none">
-            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-              <span>
-                <strong className="text-cyan-300 font-mono">A / D / ← / →</strong>: Move
-              </span>
-              <span>
-                <strong className="text-cyan-300 font-mono">W / Space</strong>: Jump
-              </span>
-              <span>
-                <strong className="text-cyan-300 font-mono">Shift</strong>: Dash
-              </span>
-              <span>
-                <strong className="text-rose-400 font-mono">F / E / Click</strong>: Shoot Blaster
-              </span>
-              <span>
-                <strong className="text-purple-300 font-mono">G</strong>: Gravity Flip
-              </span>
-              <span>
-                <strong className="text-amber-300 font-mono">K</strong>: Skip
-              </span>
-            </div>
-            <div className="text-yellow-400/90 font-bold hidden md:block">
-              OBJECTIVE: DESTROY 6 PAWNS ➔ BREACH PARADOX CHAMBER
-            </div>
-          </footer>
-        </>
-      )}
-
-      {/* ================= STAGE 2: ROBOT BOSS PERSPECTIVE & PARADOX TELEPORTATION ================= */}
-      {stage === 'cutscene' && (
-        <RobotBossCutscene
-          playerName={playerName}
-          onComplete={onGoToFinalBoss}
+      {/* MAIN CANVAS CONTAINER FOR LEVEL 4 ENGINE */}
+      <main className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden bg-black">
+        <canvas
+          id="game"
+          ref={canvasRef}
+          className="w-full h-full block touch-none"
+          style={{ imageRendering: 'pixelated' }}
         />
-      )}
+      </main>
 
-
-
+      {/* BOTTOM CONTROLS FOOTER */}
+      <footer className="relative z-20 flex items-center justify-between px-3 sm:px-6 py-1.5 bg-[#0d0922]/90 border-t border-[#2d1b4e] text-[10px] sm:text-xs text-gray-400 select-none">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+          <span>
+            <strong className="text-cyan-300 font-mono">A / D / ← / →</strong>: Move
+          </span>
+          <span>
+            <strong className="text-cyan-300 font-mono">W / Space</strong>: Jump
+          </span>
+          <span>
+            <strong className="text-cyan-300 font-mono">Shift</strong>: Dash
+          </span>
+          <span>
+            <strong className="text-rose-400 font-mono">F / E / Click</strong>: Shoot Blaster
+          </span>
+          <span>
+            <strong className="text-purple-300 font-mono">G</strong>: Gravity Flip
+          </span>
+          <span>
+            <strong className="text-amber-300 font-mono">K</strong>: Skip
+          </span>
+        </div>
+        <div className="text-yellow-400/90 font-bold hidden md:block">
+          OBJECTIVE: DESTROY 6 PAWNS ➔ ENTER PARADOX CHAMBER
+        </div>
+      </footer>
     </div>
   )
 }

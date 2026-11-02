@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import * as THREE from 'three'
-import futureSelfSceneImg from '../assets/future_self_scene.png'
-import studentSheetImg from '../assets/student_character_sheet.jpg'
-import hologramFutureSelfImg from '../assets/hologram_future_self.jpg'
-import peacefulFieldImg from '../assets/ending_peaceful_field.png'
+import StudentSprite from './characters/StudentSprite'
+import FutureSelfSprite from './characters/FutureSelfSprite'
+import endingForestBg from '../assets/ending_forest_bg.png'
 import cityBgImg from '../level4_cyber/assets/city_bg.jpg'
 import gameLogoImg from '../assets/the_way_out_logo.jpg'
 import endingVoiceAudio from '../assets/finalscene-audio.mp3'
@@ -114,7 +112,6 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
   const [glitchFlicker, setGlitchFlicker] = useState(false)
   const [audioTime, setAudioTime] = useState(0)
 
-  const threeCanvasRef = useRef(null)
   const audioSlotRef = useRef(null)
   const typewriterTimerRef = useRef(null)
 
@@ -127,6 +124,43 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     return currentLine.text.replace(/Seeker/g, playerName || 'Student')
   }, [currentLine, playerName])
 
+  // Dynamic Character Expressions mapped to the narrative script
+  const studentExpression = useMemo(() => {
+    switch (dialogueIdx) {
+      case 0: return 'curious'
+      case 1:
+      case 2: return 'confused'
+      case 3:
+      case 4: return 'shocked'
+      case 5:
+      case 6: return 'worried'
+      case 7:
+      case 8: return 'worried'
+      case 9:
+      case 10:
+      case 11: return 'concerned'
+      default: return 'neutral'
+    }
+  }, [dialogueIdx])
+
+  const futureSelfExpression = useMemo(() => {
+    switch (dialogueIdx) {
+      case 0: return 'serious'
+      case 1: return 'knowing'
+      case 2: return 'serious'
+      case 3: return 'determined'
+      case 4: return 'grave'
+      case 5: return 'determined'
+      case 6:
+      case 7: return 'grave'
+      case 8:
+      case 9: return 'urgent'
+      case 10:
+      case 11: return 'hopeful'
+      default: return 'serious'
+    }
+  }, [dialogueIdx])
+
   // 1. Natural emergence from whiteout / blue boss radiance into peaceful grassy field
   useEffect(() => {
     const t = setTimeout(() => {
@@ -135,296 +169,7 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
     return () => clearTimeout(t)
   }, [])
 
-  // 2. Three.js 3D Stylised Environment (Starry Night, Crescent Moon, Rolling Meadow, Fireflies, Hologram Emitter)
-  useEffect(() => {
-    if (!threeCanvasRef.current) return
-    const canvas = threeCanvasRef.current
-
-    let renderer, scene, camera, reqId
-    try {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight)
-    } catch {
-      return
-    }
-
-    scene = new THREE.Scene()
-    scene.fog = new THREE.FogExp2(0x060c18, 0.016)
-
-    camera = new THREE.PerspectiveCamera(52, canvas.clientWidth / canvas.clientHeight, 0.1, 1000)
-    camera.position.set(0, 1.8, 6.2)
-
-    // Lighting: Moonlight & ambient night glow
-    const moonlight = new THREE.DirectionalLight(0xa5c4ff, 1.6)
-    moonlight.position.set(-8, 12, 6)
-    scene.add(moonlight)
-
-    const ambientLight = new THREE.HemisphereLight(0x1e293b, 0x06110a, 0.85)
-    scene.add(ambientLight)
-
-    // Hologram Emitter Spot & Point Light (positioned where Future Self stands on the right)
-    const holoLight = new THREE.PointLight(0x38bdf8, 3.5, 12)
-    holoLight.position.set(2.4, 0.8, -0.5)
-    scene.add(holoLight)
-
-    // --- STARFIELD (900 Twinkling Stars) ---
-    const starCount = 900
-    const starGeo = new THREE.BufferGeometry()
-    const starPositions = new Float32Array(starCount * 3)
-    const starColors = new Float32Array(starCount * 3)
-    const starPhases = new Float32Array(starCount)
-
-    const palette = [
-      new THREE.Color(0xffffff),
-      new THREE.Color(0x93c5fd),
-      new THREE.Color(0x38bdf8),
-      new THREE.Color(0xfef08a),
-    ]
-
-    for (let i = 0; i < starCount; i++) {
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.acos(Math.random() * 0.95 + 0.05)
-      const r = 180 + Math.random() * 40
-
-      starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-      starPositions[i * 3 + 1] = r * Math.cos(phi) + 10
-      starPositions[i * 3 + 2] = -Math.abs(r * Math.sin(phi) * Math.sin(theta)) - 10
-
-      const c = palette[Math.floor(Math.random() * palette.length)]
-      starColors[i * 3] = c.r
-      starColors[i * 3 + 1] = c.g
-      starColors[i * 3 + 2] = c.b
-
-      starPhases[i] = Math.random() * Math.PI * 2
-    }
-
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3))
-    starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3))
-
-    const starMat = new THREE.PointsMaterial({
-      size: 1.8,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.85,
-    })
-    const starField = new THREE.Points(starGeo, starMat)
-    scene.add(starField)
-
-    // --- CRESCENT MOON (Stylised Luminous Crescent in Upper-Left Sky) ---
-    const moonGroup = new THREE.Group()
-    moonGroup.position.set(-18, 14, -80)
-
-    const moonSphereGeo = new THREE.SphereGeometry(3.6, 32, 32)
-    const moonMat = new THREE.MeshBasicMaterial({ color: 0xfffae0 })
-    const moonMesh = new THREE.Mesh(moonSphereGeo, moonMat)
-    moonGroup.add(moonMesh)
-
-    // Shadow sphere carving crescent profile
-    const shadowSphereGeo = new THREE.SphereGeometry(3.4, 32, 32)
-    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x060c18 })
-    const shadowMesh = new THREE.Mesh(shadowSphereGeo, shadowMat)
-    shadowMesh.position.set(1.4, 0.4, 0.6)
-    moonGroup.add(shadowMesh)
-
-    // Soft moon corona glow ring
-    const moonHaloGeo = new THREE.RingGeometry(3.6, 7.5, 32)
-    const moonHaloMat = new THREE.MeshBasicMaterial({
-      color: 0x93c5fd,
-      transparent: true,
-      opacity: 0.22,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-    })
-    const moonHalo = new THREE.Mesh(moonHaloGeo, moonHaloMat)
-    moonHalo.position.z = -0.1
-    moonGroup.add(moonHalo)
-
-    scene.add(moonGroup)
-
-    // --- PROCEDURAL ROLLING MEADOW TERRAIN ---
-    const groundGeo = new THREE.PlaneGeometry(60, 45, 48, 48)
-    const pos = groundGeo.attributes.position
-    for (let i = 0; i < pos.count; i++) {
-      const vx = pos.getX(i)
-      const vy = pos.getY(i)
-      const elevation = Math.sin(vx * 0.18) * 0.45 + Math.cos(vy * 0.14) * 0.35 + Math.sin((vx + vy) * 0.25) * 0.2
-      pos.setZ(i, elevation)
-    }
-    groundGeo.computeVertexNormals()
-
-    const groundMat = new THREE.MeshStandardMaterial({
-      color: 0x07150c,
-      roughness: 0.9,
-      metalness: 0.1,
-    })
-    const ground = new THREE.Mesh(groundGeo, groundMat)
-    ground.rotation.x = -Math.PI / 2
-    ground.position.set(0, -0.6, -10)
-    scene.add(ground)
-
-    // --- FIREFLIES / BIOLUMINESCENT NIGHT PARTICLES (45 motes) ---
-    const fireflyCount = 45
-    const fireflyGeo = new THREE.BufferGeometry()
-    const fireflyPos = new Float32Array(fireflyCount * 3)
-    const fireflySpeed = new Float32Array(fireflyCount * 3)
-
-    for (let i = 0; i < fireflyCount; i++) {
-      fireflyPos[i * 3] = (Math.random() - 0.5) * 26
-      fireflyPos[i * 3 + 1] = 0.2 + Math.random() * 2.8
-      fireflyPos[i * 3 + 2] = (Math.random() - 0.5) * 16 - 2
-
-      fireflySpeed[i * 3] = (Math.random() - 0.5) * 0.4
-      fireflySpeed[i * 3 + 1] = 0.2 + Math.random() * 0.4
-      fireflySpeed[i * 3 + 2] = (Math.random() - 0.5) * 0.4
-    }
-    fireflyGeo.setAttribute('position', new THREE.BufferAttribute(fireflyPos, 3))
-
-    const fireflyMat = new THREE.PointsMaterial({
-      color: 0x86efac,
-      size: 3.2,
-      transparent: true,
-      opacity: 0.75,
-      blending: THREE.AdditiveBlending,
-    })
-    const fireflies = new THREE.Points(fireflyGeo, fireflyMat)
-    scene.add(fireflies)
-
-    // --- 3D HOLOGRAM PROJECTOR BASE (Concentric Glowing Rings Beneath Future Self) ---
-    const holoBaseGroup = new THREE.Group()
-    holoBaseGroup.position.set(2.4, -0.48, -0.6)
-
-    const ringMat1 = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
-      transparent: true,
-      opacity: 0.85,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-    })
-    const ring1 = new THREE.Mesh(new THREE.RingGeometry(0.2, 1.4, 32), ringMat1)
-    ring1.rotation.x = -Math.PI / 2
-    holoBaseGroup.add(ring1)
-
-    const ringMat2 = new THREE.MeshBasicMaterial({
-      color: 0x22d3ee,
-      transparent: true,
-      opacity: 0.55,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-    })
-    const ring2 = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.3, 32), ringMat2)
-    ring2.rotation.x = -Math.PI / 2
-    holoBaseGroup.add(ring2)
-
-    // Upward Hologram Projection Cone
-    const coneGeo = new THREE.CylinderGeometry(1.9, 0.4, 4.5, 32, 1, true)
-    const coneMat = new THREE.MeshBasicMaterial({
-      color: 0x0284c7,
-      transparent: true,
-      opacity: 0.16,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-    })
-    const cone = new THREE.Mesh(coneGeo, coneMat)
-    cone.position.y = 2.25
-    holoBaseGroup.add(cone)
-
-    scene.add(holoBaseGroup)
-
-    // --- RISING 3D VOXEL / DIGITAL CUBE PARTICLES ---
-    const voxelCount = 28
-    const voxelGeo = new THREE.BoxGeometry(0.06, 0.06, 0.06)
-    const voxelMat = new THREE.MeshBasicMaterial({
-      color: 0x67e8f9,
-      transparent: true,
-      opacity: 0.75,
-      blending: THREE.AdditiveBlending,
-    })
-    const voxels = new THREE.InstancedMesh(voxelGeo, voxelMat, voxelCount)
-    const voxelData = []
-    const dummy = new THREE.Object3D()
-
-    for (let i = 0; i < voxelCount; i++) {
-      const vx = 2.4 + (Math.random() - 0.5) * 1.8
-      const vy = 0.2 + Math.random() * 3.5
-      const vz = -0.6 + (Math.random() - 0.5) * 1.2
-      voxelData.push({
-        x: vx,
-        y: vy,
-        z: vz,
-        speed: 0.6 + Math.random() * 0.8,
-        rotSpeed: (Math.random() - 0.5) * 3,
-        scale: 0.6 + Math.random() * 0.8,
-      })
-    }
-    scene.add(voxels)
-
-    // --- ANIMATION LOOP ---
-    let clock = new THREE.Clock()
-
-    const animate = () => {
-      const elapsed = clock.getElapsedTime()
-
-      // Camera breathing motion
-      camera.position.y = 1.8 + Math.sin(elapsed * 0.6) * 0.04
-      camera.position.x = Math.sin(elapsed * 0.4) * 0.06
-
-      // Star twinkling
-      starMat.opacity = 0.75 + Math.sin(elapsed * 2.2) * 0.18
-
-      // Rotate hologram base rings
-      ring1.rotation.z = elapsed * 0.8
-      ring2.rotation.z = -elapsed * 0.5
-
-      // Floating bio-luminescent fireflies
-      const ffPos = fireflies.geometry.attributes.position
-      for (let i = 0; i < fireflyCount; i++) {
-        let y = ffPos.getY(i) + Math.sin(elapsed * 1.5 + i) * 0.008
-        if (y > 3.6) y = 0.3
-        ffPos.setY(i, y)
-        ffPos.setX(i, ffPos.getX(i) + Math.sin(elapsed * 0.8 + i * 2) * 0.006)
-      }
-      ffPos.needsUpdate = true
-
-      // Floating ascending voxels
-      for (let i = 0; i < voxelCount; i++) {
-        const v = voxelData[i]
-        v.y += v.speed * 0.016
-        if (v.y > 4.2) {
-          v.y = 0.1
-          v.x = 2.4 + (Math.random() - 0.5) * 1.6
-          v.z = -0.6 + (Math.random() - 0.5) * 1.0
-        }
-        dummy.position.set(v.x, v.y, v.z)
-        dummy.rotation.x = elapsed * v.rotSpeed
-        dummy.rotation.y = elapsed * v.rotSpeed * 0.8
-        dummy.scale.setScalar(v.scale * Math.sin((v.y / 4.2) * Math.PI))
-        dummy.updateMatrix()
-        voxels.setMatrixAt(i, dummy.matrix)
-      }
-      voxels.instanceMatrix.needsUpdate = true
-
-      renderer.render(scene, camera)
-      reqId = requestAnimationFrame(animate)
-    }
-    animate()
-
-    const handleResize = () => {
-      if (!canvas) return
-      camera.aspect = canvas.clientWidth / canvas.clientHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight)
-    }
-    window.addEventListener('resize', handleResize)
-
-    return () => {
-      cancelAnimationFrame(reqId)
-      window.removeEventListener('resize', handleResize)
-      renderer.dispose()
-    }
-  }, [])
-
-  // 3. Audio Voiceover Playback & Synchronisation
+  // 2. Audio Voiceover Playback & Synchronisation
   useEffect(() => {
     if (phase !== 'field' && phase !== 'emergence') {
       if (audioSlotRef.current) audioSlotRef.current.pause()
@@ -601,19 +346,18 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
       {(phase === 'emergence' || phase === 'field' || phase === 'hologram_fade') && (
         <div className="relative w-full h-full flex flex-col justify-between overflow-hidden">
           
-          {/* Layer 1: Dedicated 3D Three.js Canvas (Starfield, Moon, Terrain, Motes) */}
-          <canvas
-            ref={threeCanvasRef}
-            className="absolute inset-0 w-full h-full block pointer-events-none z-0"
-          />
-
-          {/* Layer 2: Atmosphere & Silhouette Horizon */}
+          {/* Layer 1: Painted Atmospheric Night Forest Background */}
           <div
-            className="absolute inset-0 bg-cover bg-bottom opacity-30 filter blur-[2px] pointer-events-none mix-blend-screen"
-            style={{ backgroundImage: `url(${peacefulFieldImg})` }}
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat select-none pointer-events-none z-0"
+            style={{
+              backgroundImage: `url(${endingForestBg})`,
+              backgroundPosition: 'center 45%',
+            }}
           />
+          {/* Soft Atmospheric Vignette for Cinematic Contrast & UI Legibility */}
+          <div className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-t from-black/80 via-black/20 to-black/35" />
 
-          {/* Layer 3: Top Navigation Header (Matching Reference Image) */}
+          {/* Layer 2: Top Navigation Header (Matching Reference Image) */}
           <header className="relative z-30 pt-4 sm:pt-6 px-4 sm:px-8 flex items-center justify-between pointer-events-auto">
             {/* Top-Left: SKIP >> Button (Matching reference) */}
             <button
@@ -658,142 +402,72 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
             </div>
           </header>
 
-          {/* Layer 4: Interactive Character Staging Area (Student on Left, Hologram Future Self on Right) */}
-          <div className="relative z-10 flex-1 w-full max-w-6xl mx-auto flex items-end justify-between px-4 sm:px-12 pb-3 pointer-events-none select-none max-h-[64vh]">
+          {/* Layer 4: Interactive Character Staging Area (Homescapes Active Speaker Presentation) */}
+          <div className="relative z-10 flex-1 w-full max-w-6xl mx-auto flex items-end justify-between px-4 sm:px-12 pb-2 pointer-events-none select-none max-h-[66vh]">
             
-            {/* --- LEFT: The Student (Young Protagonist / Callsign Seeker) --- */}
+            {/* --- LEFT: The Student (Present Self / Callsign Seeker) --- */}
             <div
-              className={`relative flex flex-col items-center justify-end transition-all duration-700 max-w-[42%] sm:max-w-[40%] ${
-                !isFutureSelf ? 'scale-105 filter drop-shadow-[0_0_25px_rgba(56,189,248,0.35)]' : 'opacity-85 scale-100'
+              className={`relative flex flex-col items-center justify-end transition-all duration-700 ease-out max-w-[46%] sm:max-w-[42%] ${
+                !isFutureSelf
+                  ? 'scale-105 sm:scale-110 translate-y-0 opacity-100 z-20 filter drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] brightness-100'
+                  : 'scale-90 sm:scale-95 translate-y-3 sm:translate-y-4 opacity-40 z-10 filter brightness-[0.08] contrast-125 drop-shadow-[0_0_12px_rgba(0,0,0,0.9)]'
               }`}
             >
-              {/* Character Illustration */}
-              <div className="relative overflow-hidden flex items-end justify-center">
-                <img
-                  src={futureSelfSceneImg}
-                  alt="Student Present Self"
-                  className="w-auto h-[44vh] sm:h-[50vh] object-cover pointer-events-none"
-                  style={{
-                    objectPosition: '22% 48%',
-                    transform: 'scale(2.2)',
-                    transformOrigin: '22% 48%',
-                    maskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
-                  }}
-                />
-              </div>
-
-              {/* Speaker Indicator Glow Under Student */}
-              {!isFutureSelf && (
-                <div className="absolute -bottom-2 w-32 sm:w-44 h-4 rounded-full bg-cyan-400/30 blur-md animate-pulse" />
-              )}
+              {/* Pixel Art Character Sprite */}
+              <StudentSprite
+                expression={studentExpression}
+                isSpeaking={!isFutureSelf}
+                className="w-full h-auto max-h-[46vh] sm:max-h-[52vh]"
+              />
             </div>
 
-            {/* --- RIGHT: The Future Self (Glowing Hologram with Tactical Armor & Scanlines) --- */}
+            {/* --- RIGHT: The Future Self (Holographic Lead Developer with Blue Glow) --- */}
             <div
-              className={`relative flex flex-col items-center justify-end transition-all duration-700 max-w-[50%] sm:max-w-[46%] ${
+              className={`relative flex flex-col items-center justify-end transition-all duration-700 ease-out max-w-[50%] sm:max-w-[45%] ${
                 phase === 'hologram_fade'
-                  ? 'opacity-0 scale-95 blur-sm transition-opacity duration-[2200ms]'
+                  ? 'opacity-0 scale-95 blur-sm transition-all duration-[2400ms]'
                   : isFutureSelf
-                  ? 'scale-105'
-                  : 'opacity-90 scale-100'
+                  ? 'scale-105 sm:scale-110 translate-y-0 opacity-100 z-20 filter brightness-110 drop-shadow-[0_0_35px_rgba(56,189,248,0.95)] drop-shadow-[0_0_65px_rgba(14,165,233,0.7)]'
+                  : 'scale-90 sm:scale-95 translate-y-3 sm:translate-y-4 opacity-40 z-10 filter brightness-[0.08] contrast-125 drop-shadow-[0_0_15px_rgba(2,132,199,0.35)]'
               }`}
             >
-              {/* Holographic Projection Emitter Base on Grass */}
-              <div className="absolute -bottom-3 w-48 sm:w-64 h-8 rounded-full bg-cyan-400/25 blur-lg border border-cyan-400/60 shadow-[0_0_50px_rgba(56,189,248,0.85)] animate-pulse" />
-              <div className="absolute -bottom-1.5 w-32 sm:w-44 h-5 rounded-full border border-cyan-300/80 shadow-[0_0_20px_rgba(56,189,248,0.9)] animate-ping" />
-
-              {/* Upward Holographic Light Projection Cone */}
+              {/* Pixel Art Holographic Future Self Sprite */}
               <div
-                className="absolute inset-x-4 bottom-0 top-0 pointer-events-none opacity-30"
-                style={{
-                  background: 'linear-gradient(to top, rgba(56,189,248,0.4) 0%, rgba(34,211,238,0.12) 65%, transparent 100%)',
-                  clipPath: 'polygon(15% 100%, 85% 100%, 100% 0%, 0% 0%)',
-                }}
-              />
-
-              {/* Holographic Future Self Character Image */}
-              <div
-                className={`relative overflow-hidden flex items-end justify-center transition-transform ${
+                className={`relative w-full flex items-end justify-center transition-transform ${
                   glitchFlicker ? 'translate-x-1.5 filter hue-rotate-90' : 'translate-x-0'
                 }`}
               >
-                <img
-                  src={futureSelfSceneImg}
-                  alt="Holographic Future Self"
-                  className="w-auto h-[46vh] sm:h-[52vh] object-cover pointer-events-none"
-                  style={{
-                    objectPosition: '78% 46%',
-                    transform: 'scale(2.2)',
-                    transformOrigin: '78% 46%',
-                    filter: isFutureSelf
-                      ? 'drop-shadow(0 0 25px rgba(56,189,248,0.9)) drop-shadow(0 0 50px rgba(14,165,233,0.6)) contrast(1.15) brightness(1.15)'
-                      : 'drop-shadow(0 0 15px rgba(56,189,248,0.6)) contrast(1.05)',
-                    maskImage: 'linear-gradient(to bottom, black 84%, transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 84%, transparent 100%)',
-                  }}
+                <FutureSelfSprite
+                  expression={futureSelfExpression}
+                  isSpeaking={isFutureSelf}
+                  isDissolving={phase === 'hologram_fade'}
+                  className="w-full h-auto max-h-[46vh] sm:max-h-[52vh]"
                 />
-
-                {/* Real-time Dynamic Holographic Scanlines Layer */}
-                <div
-                  className="absolute inset-0 pointer-events-none opacity-45 mix-blend-screen"
-                  style={{
-                    background:
-                      'repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(56,189,248,0.3) 3px, rgba(56,189,248,0.3) 5px)',
-                  }}
-                />
-
-                {/* Glitch Static Bars */}
-                {glitchFlicker && (
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="w-full h-1 bg-cyan-300 blur-[1px] absolute top-1/3 animate-pulse" />
-                    <div className="w-3/4 h-1.5 bg-sky-200 blur-[1px] absolute top-2/3 right-0" />
-                  </div>
-                )}
               </div>
             </div>
           </div>
 
-          {/* Layer 5: INTERACTIVE DIALOGUE INTERFACE (Matching Reference Image) */}
+          {/* Layer 5: INTERACTIVE HOMESCAPES-STYLE DIALOGUE INTERFACE */}
           <div className="relative z-30 w-full max-w-4xl mx-auto px-4 sm:px-6 pb-4 sm:pb-6 pointer-events-auto">
             <div className="relative w-full flex items-end gap-3 sm:gap-4">
               
               {/* Speaker Character Portrait (Left Box with Glossy Cyan Frame) */}
-              <div className="relative flex-shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-2xl border-4 border-[#38bdf8] bg-gradient-to-b from-[#1b3152] via-[#0d1e38] to-[#081120] shadow-[0_0_30px_rgba(56,189,248,0.65)] overflow-hidden transition-all duration-300">
+              <div className="relative flex-shrink-0 w-20 h-20 sm:w-26 sm:h-26 rounded-2xl border-4 border-[#38bdf8] bg-gradient-to-b from-[#1b3152] via-[#0d1e38] to-[#081120] shadow-[0_0_25px_rgba(56,189,248,0.65)] overflow-hidden transition-all duration-300 flex items-center justify-center">
                 {isFutureSelf ? (
-                  // Future Self Avatar (from reference frame)
-                  <img
-                    src={futureSelfSceneImg}
-                    alt="Future Self Portrait"
-                    className="w-full h-full object-cover"
-                    style={{
-                      objectPosition: '13.5% 80.5%',
-                      transform: 'scale(4.8)',
-                      transformOrigin: '13.5% 80.5%',
-                    }}
+                  <FutureSelfSprite
+                    isAvatar={true}
+                    expression={futureSelfExpression}
+                    isSpeaking={true}
+                    className="w-full h-full"
                   />
                 ) : (
-                  // Student Avatar (from character design sheet)
-                  <img
-                    src={studentSheetImg}
-                    alt="Student Portrait"
-                    className="w-full h-full object-cover"
-                    style={{
-                      objectPosition: '20% 16%',
-                      transform: 'scale(2.2)',
-                      transformOrigin: '20% 16%',
-                    }}
+                  <StudentSprite
+                    isAvatar={true}
+                    expression={studentExpression}
+                    isSpeaking={true}
+                    className="w-full h-full"
                   />
                 )}
-
-                {/* Subtle Inner Scanlines on Avatar */}
-                <div
-                  className="absolute inset-0 pointer-events-none opacity-25"
-                  style={{
-                    background:
-                      'repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(56,189,248,0.4) 2px, rgba(56,189,248,0.4) 3px)',
-                  }}
-                />
               </div>
 
               {/* Large Rounded Speech Bubble (Warm Cream Tone with Speech Tail) */}
@@ -802,22 +476,23 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
                   e.stopPropagation()
                   handleDialogueAdvance()
                 }}
-                className="relative flex-1 bg-[#fef8ea] text-[#3d2410] border-2 border-[#ecd8b0] rounded-3xl p-4 sm:p-6 shadow-[0_12px_45px_rgba(0,0,0,0.55)] cursor-pointer transition active:scale-[0.99] min-h-[96px] sm:min-h-[115px] flex flex-col justify-between"
+                className="relative flex-1 bg-[#fffbf2] text-[#2c1d11] border-2 border-[#eedbb9] rounded-3xl p-4 sm:p-5 shadow-[0_14px_45px_rgba(0,0,0,0.6)] cursor-pointer transition active:scale-[0.99] min-h-[96px] sm:min-h-[112px] flex flex-col justify-between"
               >
                 {/* Speech Bubble Tail Pointing towards Left Avatar */}
                 <div
-                  className="absolute -left-3 bottom-6 w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-r-[13px] border-r-[#fef8ea]"
+                  className="absolute -left-3 bottom-6 w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-r-[13px] border-r-[#fffbf2]"
                 />
 
-                {/* Speaker Name Pill (Top-Left Blue Badge) */}
-                <div className="absolute -top-3.5 left-5 inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-[#38bdf8] text-white font-sans font-black text-xs sm:text-sm tracking-wide shadow-[0_3px_10px_rgba(56,189,248,0.6)]">
+                {/* Speaker Name Pill (Cyan Capsule Badge with Decorative Tape Accent) */}
+                <div className="absolute -top-3.5 left-6 inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-[#38bdf8] text-white font-sans font-black text-xs sm:text-sm tracking-wide shadow-[0_3px_12px_rgba(56,189,248,0.6)] border border-white/70">
+                  <span className="absolute -left-2 -top-1 w-5 h-2.5 bg-amber-100/75 border border-amber-300/60 rotate-[-12deg] rounded-xs pointer-events-none shadow-xs" />
                   <span className="text-[10px]">▶</span>
                   <span>{speakerName}</span>
                 </div>
 
                 {/* Dialogue Subtitle Text (Smooth Typewriter Effect) */}
                 <div className="pt-2 sm:pt-1">
-                  <p className="text-sm sm:text-base md:text-lg font-sans font-bold text-[#3d2410] leading-relaxed tracking-normal select-none">
+                  <p className="text-sm sm:text-base md:text-lg font-sans font-bold text-[#2d1a0c] leading-relaxed tracking-normal select-none">
                     {displayedText}
                     {isTyping && <span className="inline-block w-2 h-4 ml-1 bg-[#38bdf8] animate-pulse align-middle" />}
                   </p>
@@ -959,12 +634,6 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
       {/* ========================================================================= */}
       {phase === 'title' && (
         <div className="relative w-full h-full flex flex-col justify-between items-center p-4 sm:p-8 bg-gradient-to-b from-[#06040d] via-[#0d091a] to-[#04020a] animate-fadeIn text-center overflow-hidden">
-          {/* Peaceful Meadow Silhouette Background with Ambient Blur */}
-          <div
-            className="absolute inset-0 bg-cover bg-bottom opacity-20 filter blur-sm pointer-events-none"
-            style={{ backgroundImage: `url(${peacefulFieldImg})` }}
-          />
-
           {/* Top Title Bar */}
           <div className="w-full flex justify-end items-center z-10">
             <span className="text-[10px] font-mono text-amber-400 tracking-widest uppercase">

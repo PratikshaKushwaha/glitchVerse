@@ -77,13 +77,14 @@ export default function ParadoxChamberScene({
   };
 
   const restartChamber = () => {
-    if (!canvasRef.current) return;
-    if (gameRef.current) gameRef.current.destroy();
-
-    const game = new EntropyGame(canvasRef.current, (updatedState) => {
-      setGameState(prev => ({ ...prev, ...updatedState }));
-    });
-    gameRef.current = game;
+    if (gameRef.current) {
+      gameRef.current.restartFromStart();
+    } else if (canvasRef.current) {
+      const game = new EntropyGame(canvasRef.current, (updatedState) => {
+        setGameState(prev => ({ ...prev, ...updatedState }));
+      });
+      gameRef.current = game;
+    }
   };
 
   // Keyboard shortcut listener for Tab / H / K
@@ -109,13 +110,28 @@ export default function ParadoxChamberScene({
       {/* ================= TOP HUD BAR ================= */}
       <header className="relative z-20 flex items-center justify-between px-3 sm:px-6 py-2 bg-[#0b0f1a]/95 border-b border-[#242f40] shadow-2xl backdrop-blur">
         
-        {/* Left: Sector & Energy Bar */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        {/* Left: Sector, Retry & Energy Bar */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={onBackToLevelFour}
             className="px-2.5 py-1 rounded bg-[#1e293b] hover:bg-[#334155] text-xs font-bold text-gray-300 hover:text-white transition cursor-pointer border border-[#475569]"
           >
             ← Sector 4
+          </button>
+
+          {/* Dedicated Retry Option */}
+          <button
+            onClick={restartChamber}
+            className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-xs font-bold text-amber-300 hover:text-amber-200 transition cursor-pointer border border-amber-400/50 shadow flex items-center gap-1.5"
+            title="Restart Paradox Chamber"
+          >
+            <svg className="w-3.5 h-3.5 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+              <path d="M21 21v-5h-5" />
+            </svg>
+            <span>Retry</span>
           </button>
 
           {/* Energy Bar (0 - 100) */}

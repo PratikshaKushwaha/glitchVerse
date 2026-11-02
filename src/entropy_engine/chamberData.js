@@ -15,14 +15,31 @@ export function createChamberData() {
       { id: 5, name: 'CENTRAL REACTOR: THE LAST EQUILIBRIUM', startX: 2200, endX: 2600, targetNode: 'core' }
     ],
 
-    // Checkpoint locations
+    // Checkpoint locations (Spawn at Start Point)
     checkpoints: [
-      { id: 0, x: 60, y: 380, label: 'SPAWN POINT' },
+      { id: 0, x: 60, y: 376, label: 'START POINT // AIRLOCK 01' },
       { id: 1, x: 500, y: 380, label: 'SECTOR 1 CLEAR' },
       { id: 2, x: 1080, y: 380, label: 'SECTOR 2 CLEAR // OVERLOAD ACTIVE' },
       { id: 3, x: 1700, y: 380, label: 'SECTOR 3 CLEAR' },
       { id: 4, x: 2180, y: 380, label: 'CENTRAL REACTOR GATE' }
     ],
+
+    // Designated Entrance Airlock & Exit Reality Breach Gate
+    startAirlock: {
+      x: 30,
+      y: 300,
+      w: 52,
+      h: 100,
+      label: 'CHAMBER ENTRY // AIRLOCK 01'
+    },
+    exitPortal: {
+      x: 2500,
+      y: 288,
+      w: 64,
+      h: 112,
+      open: false,
+      label: 'REALITY BREACH // TO FINAL BOSS'
+    },
 
     // Platforms:
     // dim: 'neutral' (solid in both dimensions), 'A' (solid in Dim A), 'B' (solid in Dim B)
@@ -181,7 +198,7 @@ export function createChamberData() {
       { id: 'door1', x: 500, y: 308, w: 24, h: 92, open: false, requiredNode: 1 },
       { id: 'door2', x: 1090, y: 318, w: 24, h: 82, open: false, requiredNode: 2 },
       { id: 'door3', x: 1714, y: 318, w: 24, h: 82, open: false, requiredNode: 3 },
-      { id: 'door_exit', x: 2570, y: 320, w: 10, h: 80, open: false, label: 'EXIT PORTAL' }
+      { id: 'door_exit', x: 2500, y: 288, w: 64, h: 112, open: false, label: 'REALITY BREACH EXIT' }
     ],
 
     // 4 Reactor Energy Nodes (Recharges +25 Energy, activates sector gates)
