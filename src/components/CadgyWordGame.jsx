@@ -137,29 +137,34 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
     return goldIds
   }, [currentBoard, foundBasicWords, foundBonusWords, foundExtraWords])
 
-  // Completion status: At least 3 basic words or all basic words solved
-  const isBasicComplete =
+  // Hardened Difficulty: Must crack all 3 Basic Words AND at least 1 Bonus Word
+  const isAllBasicFound =
     currentBoard.basicWords.length > 0 &&
     foundBasicWords.length === currentBoard.basicWords.length
+  const hasBonusWord = foundBonusWords.length >= 1
+  const isCadgyComplete = isAllBasicFound && hasBonusWord
 
-  // Auto-advance once all basic words solved
+  // Auto-advance once all basic words + 1 bonus word solved
   useEffect(() => {
-    if (isBasicComplete && !autoAdvanceTriggered.current) {
+    if (isCadgyComplete && !autoAdvanceTriggered.current) {
       autoAdvanceTriggered.current = true
       setIsTimerRunning(false)
       sound.playVictory()
-      setCommentary('ALL BASIC WORDS CRACKED! PROCEEDING TO RIDDLE SANCTUARY...')
+      setCommentary('CIPHER BREACHED! BASIC & BONUS CODES SOLVED!')
       setCommentaryColor('text-emerald-300 font-extrabold')
       const timeout = setTimeout(() => {
         onComplete && onComplete()
-      }, 900)
+      }, 950)
       return () => clearTimeout(timeout)
+    } else if (isAllBasicFound && !hasBonusWord) {
+      setCommentary('BASIC WORDS SOLVED! NOW CRACK AT LEAST 1 BONUS WORD TO BREACH!')
+      setCommentaryColor('text-amber-300 font-bold animate-pulse')
     }
-  }, [isBasicComplete, onComplete])
+  }, [isCadgyComplete, isAllBasicFound, hasBonusWord, onComplete])
 
   // Tile Selection Handler
   const handleTileClick = (tile, colIndex) => {
-    if (isVerifying || isBasicComplete) return
+    if (isVerifying || isCadgyComplete) return
     sound.playTypewriter()
 
     // 1. If clicking already selected tile in this column, deselect it
@@ -689,7 +694,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
         </div>
 
         {/* Auto-Advance Notification Button */}
-        {isBasicComplete && (
+        {isCadgyComplete && (
           <button
             onClick={() => onComplete && onComplete()}
             className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(16,185,129,0.7)] flex items-center justify-center gap-2 cursor-pointer transition animate-bounce"
@@ -697,7 +702,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
             <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
             </svg>
-            <span>ALL BASIC WORDS CRACKED! ADVANCE TO RIDDLE BOARD -&gt;</span>
+            <span>CIPHER BREACHED! ADVANCE TO RIDDLE BOARD -&gt;</span>
           </button>
         )}
       </div>

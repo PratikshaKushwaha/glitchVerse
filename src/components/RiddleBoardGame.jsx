@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import woodBoardImg from '../assets/level2/wood_board.jpg'
 import { sound } from '../utils/AudioEngine'
-import { RIDDLES_DATASET, fetchRiddlesDataset } from '../data/riddlesDataset'
+import { RIDDLES_DATASET, fetchRiddlesDataset, enrichRiddleWithDecoys } from '../data/riddlesDataset'
 
 export default function RiddleBoardGame({ onComplete, onExit, environment = 'wood' }) {
-  // 3 Dynamic Riddles selected from dataset
+  // 4 Dynamic Riddles with Decoy Letters (Hardened Difficulty)
   const [activeRiddles, setActiveRiddles] = useState(() => {
     const shuffled = [...RIDDLES_DATASET].sort(() => Math.random() - 0.5)
-    return shuffled.slice(0, 3)
+    return shuffled.slice(0, 4).map(enrichRiddleWithDecoys)
   })
   const [currentRiddleIndex, setCurrentRiddleIndex] = useState(0)
   const currentRiddle = activeRiddles[currentRiddleIndex] || activeRiddles[0]
@@ -26,7 +26,7 @@ export default function RiddleBoardGame({ onComplete, onExit, environment = 'woo
     sound.playKeyClick()
     setIsLoadingApi(true)
     try {
-      const fresh = await fetchRiddlesDataset(3)
+      const fresh = await fetchRiddlesDataset(4)
       setActiveRiddles(fresh)
       setCurrentRiddleIndex(0)
       setSelectedWheelIndices([])
@@ -178,7 +178,7 @@ export default function RiddleBoardGame({ onComplete, onExit, environment = 'woo
             />
           ))}
           <span className="font-mono font-black text-amber-300 text-[11px] sm:text-xs ml-1.5 sm:ml-2">
-            RIDDLE {currentRiddleIndex + 1} / 3
+            RIDDLE {currentRiddleIndex + 1} / {activeRiddles.length}
           </span>
         </div>
 

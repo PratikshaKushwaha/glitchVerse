@@ -184,10 +184,26 @@ export const RIDDLES_DATASET = [
   },
 ]
 
-// Mock API function that fetches random diverse tech riddles
-export async function fetchRiddlesDataset(count = 3) {
+const DECOY_POOL = ['X', 'Z', 'Q', 'J', 'K', 'V', 'B', 'M', 'P', 'R', 'S', 'T', 'W', 'F']
+
+// Hardened Riddle Generator: Adds decoy letters to the wheel so it is not a direct anagram
+export function enrichRiddleWithDecoys(riddle) {
+  const answerLetters = riddle.answer.split('')
+  // Select 2 decoy letters not contained in the answer
+  const availableDecoys = DECOY_POOL.filter((ch) => !answerLetters.includes(ch))
+  const shuffledDecoys = [...availableDecoys].sort(() => Math.random() - 0.5)
+  const decoys = shuffledDecoys.slice(0, 2)
+  const combined = [...answerLetters, ...decoys].sort(() => Math.random() - 0.5)
+  return {
+    ...riddle,
+    wheelLetters: combined,
+  }
+}
+
+// Mock API function that fetches random diverse tech riddles with decoy letters
+export async function fetchRiddlesDataset(count = 4) {
   // Simulate network micro-latency if needed
   await new Promise((resolve) => setTimeout(resolve, 50))
   const shuffled = [...RIDDLES_DATASET].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, count)
+  return shuffled.slice(0, count).map(enrichRiddleWithDecoys)
 }

@@ -125,7 +125,7 @@ export const WORD_THEMES = [
   },
 ]
 
-export const GRID_SIZE = 12
+export const GRID_SIZE = 14
 
 // Proper Crossword & Word Search Generator with letter intersection & 8 directional constraints
 export function generateThemedWordSearch(themeId = null) {
@@ -137,9 +137,9 @@ export function generateThemedWordSearch(themeId = null) {
     themeObj = WORD_THEMES[Math.floor(Math.random() * WORD_THEMES.length)]
   }
 
-  // Shuffle word pool and take 8 to 10 words
+  // Shuffle word pool and take 12 challenging words (Hardened difficulty)
   const wordsPool = [...themeObj.words].sort(() => Math.random() - 0.5)
-  const candidateWords = wordsPool.slice(0, 10)
+  const candidateWords = wordsPool.slice(0, 12)
 
   const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(''))
   const placedWords = []

@@ -305,7 +305,7 @@ export default function WordSearchGame({ onComplete, onExit, environment = 'wood
                         onMouseDown={() => handleCellMouseDown(x, y)}
                         onMouseEnter={() => handleCellMouseEnter(x, y)}
                         onTouchStart={(e) => handleTouchStart(e, x, y)}
-                        className={`h-[clamp(1.5rem,3.8vw,2.5rem)] w-[clamp(1.5rem,3.8vw,2.5rem)] rounded-md sm:rounded-lg flex items-center justify-center font-bold text-[clamp(0.75rem,1.8vw,1.125rem)] select-none cursor-pointer transition-all ${
+                        className={`h-[clamp(1.2rem,2.5vw,2.1rem)] w-[clamp(1.2rem,2.5vw,2.1rem)] rounded-md flex items-center justify-center font-bold text-[clamp(0.65rem,1.3vw,1rem)] select-none cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-amber-400 text-black scale-105 shadow-md ring-2 ring-amber-500 font-black'
                             : isFound

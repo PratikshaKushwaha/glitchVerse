@@ -480,54 +480,51 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
 
       {/* ================= FINAL TITLE SCREEN & CREDITS ================= */}
       {phase === 'title' && (
-        <div className="relative w-full h-full flex flex-col justify-between items-center p-6 sm:p-10 bg-gradient-to-b from-[#06040d] via-[#0d091a] to-[#04020a] animate-fadeIn text-center">
-          {/* Subtle Artwork Overlay in Background */}
+        <div className="relative w-full h-full flex flex-col justify-between items-center p-4 sm:p-8 bg-gradient-to-b from-[#06040d] via-[#0d091a] to-[#04020a] animate-fadeIn text-center overflow-hidden">
+          {/* Peaceful Meadow Silhouette Background with Ambient Blur (No ghosted dialogue box) */}
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
-            style={{ backgroundImage: `url(${hologramFutureSelfImg})` }}
+            className="absolute inset-0 bg-cover bg-bottom opacity-20 filter blur-sm pointer-events-none"
+            style={{ backgroundImage: `url(${peacefulFieldImg})` }}
           />
 
-          {/* Top Title */}
-          <div className="w-full flex justify-between items-center z-10">
-            <span className="text-[10px] font-mono text-cyan-400 tracking-widest uppercase">
-              THE WAY OUT // EPILOGUE
-            </span>
+          {/* Top Title Bar (Removed "THE WAY OUT // EPILOGUE" as requested) */}
+          <div className="w-full flex justify-end items-center z-10">
             <span className="text-[10px] font-mono text-amber-400 tracking-widest uppercase">
               STORY BY TEAM STRAWHATS
             </span>
           </div>
 
           {/* Centerpiece: Official THE WAY OUT Logo & Title */}
-          <div className="relative z-10 my-auto flex flex-col items-center py-6">
+          <div className="relative z-10 my-auto flex flex-col items-center py-2 sm:py-3 max-w-xl">
             <img
               src={gameLogoImg}
               alt="The Way Out Official Logo"
-              className="w-48 sm:w-64 h-auto object-contain drop-shadow-[0_0_50px_rgba(249,115,22,0.4)] rounded-2xl mb-6 hover:scale-105 transition-transform"
+              className="w-32 sm:w-44 h-auto object-contain drop-shadow-[0_0_40px_rgba(249,115,22,0.45)] rounded-2xl mb-3 sm:mb-4 hover:scale-105 transition-transform"
             />
 
-            <h1 className="text-3xl sm:text-5xl font-serif font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-300 to-amber-100 uppercase drop-shadow-[0_2px_15px_rgba(245,158,11,0.5)]">
+            <h1 className="text-2xl sm:text-4xl font-serif font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-orange-300 to-amber-100 uppercase drop-shadow-[0_2px_15px_rgba(245,158,11,0.5)]">
               THE WAY OUT
             </h1>
 
-            <div className="my-4 h-0.5 w-32 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+            <div className="my-2 sm:my-3 h-0.5 w-24 sm:w-32 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
-            <h2 className="text-lg sm:text-2xl font-mono font-bold tracking-[0.25em] text-cyan-200 uppercase">
+            <h2 className="text-base sm:text-xl font-mono font-bold tracking-[0.2em] text-cyan-200 uppercase">
               THE END... FOR NOW.
             </h2>
 
-            <div className="mt-3 px-6 py-2 rounded-full bg-gradient-to-r from-amber-500/20 via-orange-500/30 to-amber-500/20 border border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-              <span className="text-xs sm:text-sm font-black font-mono tracking-[0.35em] text-amber-300 uppercase animate-pulse">
+            <div className="mt-2 px-5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-orange-500/30 to-amber-500/20 border border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+              <span className="text-xs sm:text-sm font-black font-mono tracking-[0.3em] text-amber-300 uppercase animate-pulse">
                 TO BE CONTINUED.
               </span>
             </div>
 
-            <p className="max-w-lg mx-auto text-xs sm:text-sm text-gray-300 font-sans leading-relaxed mt-6 italic [text-wrap:pretty]">
+            <p className="max-w-md mx-auto text-xs sm:text-sm text-gray-300 font-sans leading-relaxed mt-4 italic [text-wrap:pretty]">
               &quot;The person you sought to save was who you will become. The battle for ethical AI has only just begun.&quot;
             </p>
           </div>
 
-          {/* Bottom Actions & Credits */}
-          <div className="relative z-10 w-full max-w-md flex flex-col gap-3 pt-4">
+          {/* Bottom Actions & Credits (With prominent Retry button) */}
+          <div className="relative z-10 w-full max-w-md flex flex-col gap-2.5 pb-2">
             <div className="text-[11px] font-mono text-gray-400">
               Made with pride by <strong>team StrawHats</strong>
             </div>
@@ -535,15 +532,19 @@ export default function FinalEndingScene({ playerName = 'Seeker', onRestart, onB
             <div className="flex gap-3 w-full">
               <button
                 onClick={onRestart}
-                className="flex-1 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs uppercase tracking-wider cursor-pointer border border-white/20 transition active:scale-95"
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 hover:brightness-110 active:scale-95 text-black font-mono font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.6)] border border-amber-200 cursor-pointer transition flex items-center justify-center gap-2"
+                title="Retry the Journey from Level 1"
               >
-                Replay Journey
+                <span className="text-sm">🔄</span>
+                <span>Retry</span>
               </button>
               <button
                 onClick={onBackToMenu}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-400 to-amber-300 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.5)] hover:brightness-110 active:scale-95 cursor-pointer transition"
+                className="flex-1 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono font-bold text-xs uppercase tracking-wider border border-white/25 cursor-pointer transition active:scale-95 flex items-center justify-center gap-2"
+                title="Return to Main Menu"
               >
-                Main Menu -&gt;
+                <span>Main Menu</span>
+                <span>➔</span>
               </button>
             </div>
           </div>

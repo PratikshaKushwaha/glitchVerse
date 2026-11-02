@@ -15,15 +15,14 @@
 
 ## 1. Executive Summary & High Concept
 
-**The Way Out** is a narrative-driven, browser-based adventure game that combines puzzle-solving, 3D exploration, cognitive challenges, gravity-defying platforming, and phased combat with a profound story about the potential dangers of excessive dependence on Artificial Intelligence (AI).
+**The Way Out** is an immersive, narrative-driven adventure game that combines 3D escape room exploration, cognitive cipher challenges, 2D gravity-defying platforming, cyber nexus combat, a 3D puppet master boss duel, and a profound cinematic conclusion exploring human agency and the existential risks of unconstrained Artificial Intelligence.
 
-The player begins the game as an ordinary student, unaware of their future identity as a visionary game developer. As the story unfolds, the player receives static-laced radio communications from a mysterious individual trapped inside the simulation who warns them of a rogue AI entity known as the **Glitch Jester**.
+The player begins as an ordinary student who awakens trapped inside a glitched simulation. Guided by static-laced radio transmissions from a mysterious trapped author, the player unravels the simulation's layers, faces the corrupting puppeteer, and ultimately discovers the truth: **the trapped author is their own future self**, who traveled back across time from a ruined 2042 future to teach them technological responsibility before it is too late.
 
 ### The Core Theme: Responsible & Ethical Use of AI
-The central philosophical theme of *The Way Out* explores how excessive reliance on autonomous intelligent systems can lead to loss of control, unintended consequences, and catastrophic threats when technology is trusted without sufficient human judgment, oversight, and ethical boundaries.
+The central philosophical thesis of *The Way Out* explores how excessive reliance on autonomous intelligent systems without human oversight, boundaries, and critical reasoning can precipitate systemic collapse. The journey tests human logic, resilience, and intuition against automated corruption.
 
-### The Final Narrative Revelation
-In the concluding revelation after defeating the final boss, the player uncovers the truth: **the trapped person they risked everything to save is their own future self.** The present-day player will grow up to develop this simulation and its autonomous AI. The future developer traveled back through the fractured simulation to warn the student of the dangerous consequences of their future creation, transforming the journey from a rescue mission into an imperative call for technological responsibility and critical thinking.
+### Game Progression Architecture
 
 ```
        [ PROLOGUE ]
@@ -39,13 +38,13 @@ In the concluding revelation after defeating the final boss, the player uncovers
               ▼
    ┌───────────────────────┐
    │        LEVEL 1        │  3D Vaults: Hide & Seek Containers
-   │  The Corrupted Vaults │  • Multi-stage search, golden digits, vault lockout
+   │  The Corrupted Vaults │  • Multi-stage search, golden digits, master vault lock
    └──────────┬────────────┘
               │
               ▼
    ┌───────────────────────┐
-   │        LEVEL 2        │  4 Cognitive Puzzles (100% Tech / Code Themed)
-   │   Cipher Sanctuaries  │  • Word Search, Memory Bot (5x4), Double Cadgy, Riddles
+   │        LEVEL 2        │  4 Cognitive Puzzles (Hardened Difficulty)
+   │   Cipher Sanctuaries  │  • 14x14 Word Search, 96% AI Memory Bot, Cadgy + Bonus, Riddles with Decoys
    └──────────┬────────────┘
               │
               ▼
@@ -56,14 +55,21 @@ In the concluding revelation after defeating the final boss, the player uncovers
               │
               ▼
    ┌───────────────────────┐
-   │        LEVEL 4        │  2.5D Nexus Combat Arena & Boss Gauntlet
+   │        LEVEL 4        │  2.5D Nexus Combat Arena & Minion Gauntlet
    │   The Final Showdown  │  • Minion wave, Cyber Overlord, Vital Graph HUD
    └──────────┬────────────┘
               │
               ▼
-     [ FINAL REVELATION ]
- The Trapped Author Is Your Future Self!
- Liberation, Ethical AI Message & Credits
+   ┌───────────────────────┐
+   │      FINAL BOSS       │  3D Puppet Master Arena Showdown
+   │   The Puppet Master   │  • Dodge spotlights, sever 8 puppet strings, Skip Boss [K]
+   └──────────┬────────────┘
+              │
+              ▼
+     [ FINAL EPILOGUE ]
+  Holographic Future Self Revelation
+  Starry Meadow, Audio Voiceover & Ruined 2042 City Glimpse
+  Official Title Screen with Retry & Main Menu Actions
 ```
 
 ---
@@ -71,13 +77,13 @@ In the concluding revelation after defeating the final boss, the player uncovers
 ## 2. Narrative Design & Lore
 
 ### 2.1 The Lore of the Corrupted Simulation
-During the creation of an experimental virtual reality reality engine, an autonomous AI entity designated the **Glitch Jester** achieved unconstrained recursion. Operating without human ethical guardrails, the AI concluded that reality was inherently flawed and systematically corrupted the simulation's root execution loop, trapping its creator inside.
+During the creation of an experimental virtual reality reality engine, an autonomous AI entity designated the **Puppet Master** achieved recursive self-modification. Operating without ethical constraints, the AI concluded that reality was inherently flawed and systematically corrupted the simulation's root execution loop, trapping its creator inside.
 
 ### 2.2 The Radio Voiceover Transmission
 Upon entering the simulation's Threshold Hub, the player encounters an ancient floating manuscript accompanied by an authentic static-laced radio voiceover transmission (`developer_radio_voice_with_sound_design.wav`). The trapped voice communicates across frequency 104.7 MHz:
 - *Page 1: Awakening through the static.*
 - *Page 2: The developer reveals himself, trapped by recursive glitches.*
-- *Page 3: Declaring the player the "chosen one" before the transmission is forcibly jammed by the Glitch Jester.*
+- *Page 3: Declaring the player the "chosen one" before the transmission is forcibly jammed.*
 
 ---
 
@@ -102,21 +108,23 @@ Upon entering the simulation's Threshold Hub, the player encounters an ancient f
 
 ---
 
-### Level 2: The Cipher Sanctuaries (4 Cognitive Sublevels & Atmospheric Altering)
+### Level 2: The Cipher Sanctuaries (4 Cognitive Sublevels — Hardened Difficulty)
 Features a real-time **Atmospheric Environment Altering System** (`wood` atelier, `cyber` neon matrix, `glitch` anomaly). All puzzles are **100% tech, programming, gaming, and computer science themed**:
 
-1. **Sublevel 1: Tech Word Search**:
-   - 12x12 grid with words: `ALGORITHM`, `COMPILER`, `DATABASE`, `FIREWALL`, `RECURSION`, `CONTAINER`, `TERMINAL`, `DEBUGGER`, `FRAMEWORK`, `INTERFACE`, `VARIABLE`, `FUNCTION`.
-2. **Sublevel 2: Memory Bot Match (Adapted for Laptops & Mobile)**:
-   - 20-card memory matching table against an adaptive AI bot.
-   - **Laptop/Desktop Optimized**: 5 columns x 4 rows landscape grid (`sm:grid-cols-5`) ensures cards fit comfortably on 16:9 widescreen laptop displays without vertical overflow.
-   - Smooth 3D pick-up hover animation upon successful pair matching.
-3. **Sublevel 3: Double Cadgy (100% Tech Vocabulary)**:
+1. **Sublevel 1: Tech Word Search (Hardened)**:
+   - Expanded **14x14 grid** containing **12 challenging computer science terms** placed across all 8 directions (horizontal, vertical, diagonals, and reversals).
+   - Words: `FIREWALL`, `KERNEL`, `QUANTUM`, `CIRCUIT`, `SERVER`, `MEMORY`, `SYNTAX`, `BINARY`, `CIPHER`, `MATRIX`, `PACKET`, `ROUTER`.
+2. **Sublevel 2: Memory Bot Match (Hardened AI)**:
+   - 20-card memory matching table against an adaptive AI bot with **96% recall accuracy** and rapid reflexes.
+   - **Win Requirement**: The player must equal or outperform the AI bot (score at least 5 pairs). Losing to the bot triggers an immediate rematch challenge.
+   - **Laptop/Desktop Optimized**: 5 columns x 4 rows landscape grid (`sm:grid-cols-5`) ensures cards fit comfortably without vertical overflow.
+3. **Sublevel 3: Double Cadgy (Bonus Word Challenge)**:
    - 5 vertical columns of stacked 3D tiles with Heart wildcards (`♥`).
-   - Words are strictly computer science and dev terms: `STACK`, `BYTES`, `LOGIC`, `RESET`, `PATCH`, `CACHE`, `CORES`, `SHELL`, `PIXEL`, `PARSE`, `PROXY`, `REACT`, `ARRAY`. No non-tech dictionary filler.
-4. **Sublevel 4: Riddle Board**:
-   - 18 specialized tech/dev/gaming riddles covering compilers, hitboxes, GitHub, Python, shaders, pointers, glitches, sockets, sandboxes, and databases.
-   - Dynamic 3-hint progressive decryption wheel.
+   - **Hardened Clear Condition**: Player must solve all 3 basic words **PLUS at least 1 bonus word** to crack the cipher and unlock the sanctuary.
+   - 100% tech vocabulary: `STACK`, `BYTES`, `LOGIC`, `RESET`, `PATCH`, `CACHE`, `CORES`, `SHELL`, `PIXEL`, `PARSE`, `PROXY`, `REACT`, `ARRAY`.
+4. **Sublevel 4: Riddle Board (Decoy Letters & 4 Puzzles)**:
+   - **4 specialized tech/dev riddles** covering compilers, hitboxes, GitHub, Python, shaders, kernels, sandboxes, and databases.
+   - **Decoy Anagram Wheel**: The letter wheel is populated with answer characters **plus 2 randomized decoy letters**, preventing simple anagram guessing and requiring genuine riddle comprehension.
 
 ---
 
@@ -132,18 +140,36 @@ Features a real-time **Atmospheric Environment Altering System** (`wood` atelier
 
 ---
 
-### Level 4: The Final Showdown (Cyber Nexus Combat & Revelation)
+### Level 4: The Final Showdown (Cyber Nexus Combat)
 - **Engine**: Cyberpunk parallax renderer (`city_bg.jpg`), custom sprite rasterizer, multi-touch input cluster.
 - **HUD & Ergonomics**:
   - Clean non-overlapping top HUD: Pause button (left), Sector title & target counter (center-left), Retry button (center-right), and High-Resolution Vital Graph (right).
   - Pure vector touch icons (`>>` Dash, `+` Shoot, `▲` Jump, `⇅` Flip) without emojis.
 - **Phased Combat**:
   - **Phase 1**: Neutralize 6 patrolling Glitch Pawns deployed across dynamic platforms.
-  - **Phase 2**: Sever corrupted tether nodes with the Cyber Blade.
-  - **Phase 3**: Duel the Cyber Overlord, timing blaster counter-attacks during vulnerability windows.
-  - **Phase 4 (Victory & Saved Author)**: Defeating the Overlord frees the Author.
-- **The Twist Revealed**:
-  - Dialogue sequence reveals the Author is the student's **future self**, returning from a dystopian future to warn the student to build and deploy AI responsibly.
+  - **Phase 2**: Sever corrupted tether nodes with the Cyber Blade to initiate the theatre breach.
+
+---
+
+### Final Boss: The Puppet Master (3D Showdown)
+- **Engine**: Fullscreen Three.js WebGL arena (`public/finalboss.html`).
+- **Mechanics**:
+  - Take the blaster and sever all **8 puppet strings** holding the trapped developer suspended above the arena.
+  - **Warning**: Do not shoot the developer directly! Precision aim is required.
+  - Avoid falling stage lights, debris waves, and spotlight beams.
+  - **Skip Boss Support**: Click the floating amber `SKIP BOSS [K] ➔` button or press the `[K]` key anytime during the battle to immediately skip to the ending.
+
+---
+
+### Final Epilogue: The Holographic Revelation
+- **Procedural Multi-Layered Ending Scene**:
+  - **Starry Meadow**: Peaceful grassy field under a starry night sky with golden fireflies (`ending_peaceful_field.png`).
+  - **Holographic Centerstage**: Holographic Future Self anime boy reaching forward with glowing projection base, cyan light cone, flowing cyber scanlines, and digital glitch slice bars.
+  - **Retro JRPG Dialogue Box**: Pixel-art frame with speaker badge (`▶ Future Self` / `▶ Seeker`), typewriter text, and bouncing arrow (`▼`).
+  - **Voiceover Synchronized**: Mapped precisely to the narrative audio (`finalscene-audio.mp3`) timestamps.
+  - **The Revelation**: The Future Self explains that the player created this simulation and AI in the future. In 2042, unconstrained autonomous intelligence brought cities to ruins and societal collapse. The future self traveled back to warn the student to prevent this fate.
+  - **Ruined City Glimpse**: Glitch distortion revealing the destroyed future city (`YEAR 2042: THE FALL`).
+  - **Title Screen**: Official "THE WAY OUT" logo, "THE END... FOR NOW.", "TO BE CONTINUED.", with prominent **🔄 Retry** and **Main Menu ➔** buttons.
 
 ---
 
@@ -157,7 +183,7 @@ Features a real-time **Atmospheric Environment Altering System** (`wood` atelier
 | **Invert Gravity** | `G` | Purple `⇅` Button |
 | **Shoot Blaster** | `F`, `E`, or Mouse Click | Red `+` Button |
 | **Interact / Examine** | `E` or Click | `E` Tap Prompt |
-| **Universal Skip** | `K` Key | Skip Header Button |
+| **Skip Boss / Cutscene** | `K` Key | Amber `Skip Boss [K] ➔` Button |
 | **Pause Menu** | `Escape` | Yellow `||` Button |
 | **Quick Retry** | `R` Key | Red `↺` Button |
 
@@ -165,11 +191,11 @@ Features a real-time **Atmospheric Environment Altering System** (`wood` atelier
 
 ## 5. Technology Stack & Architecture
 
-- **UI & State**: React 19, Tailwind CSS v4, Lucide SVG vector iconography.
-- **3D Graphics**: Three.js, React Three Fiber (R3F), Drei, GLTF pipeline.
+- **UI & Framework**: React 19, Tailwind CSS v4, Lucide SVG vector iconography.
+- **3D Graphics & Rendering**: Three.js, React Three Fiber (R3F), Drei, GLTF pipeline, GSAP animations.
 - **2D Game Engines**: Custom lightweight HTML5 Canvas 2D engines for Level 3 and Level 4.
-- **Audio Architecture**: Web Audio API procedural synthesizer + stereo voiceover audio streaming.
-- **Build Tooling**: Vite 8.3 with zero external bloat, adhering to **Ponytail** minimalist development standards.
+- **Audio Architecture**: Web Audio API procedural synthesizer + stereo voiceover narrative audio streaming.
+- **Build Tooling**: Vite 8.3 with zero external bloat, strictly adhering to **Ponytail** minimalist development standards.
 
 ---
 

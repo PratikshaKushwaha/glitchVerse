@@ -99,19 +99,34 @@ function createShuffledDeck() {
 }
 
 export default function MemoryCardGame({ playerName = 'You', onComplete, onExit, environment = 'wood' }) {
-  const [cards] = useState(() => createShuffledDeck())
+  const [cards, setCards] = useState(() => createShuffledDeck())
   const [flippedIndices, setFlippedIndices] = useState([])
   const [matchedIds, setMatchedIds] = useState([])
   const [isBotTurn, setIsBotTurn] = useState(false)
   const [playerScore, setPlayerScore] = useState(0)
   const [botScore, setBotScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
+  const [botWon, setBotWon] = useState(false)
 
   // Floating picked-up match animation state (Image 2 Style)
   const [liftingMatchCards, setLiftingMatchCards] = useState(null) // [card1, card2]
 
   const botMemory = useRef({})
   const isProcessing = useRef(false)
+
+  const handleRestartMatch = () => {
+    sound.playKeyClick()
+    setMatchedIds([])
+    setFlippedIndices([])
+    setPlayerScore(0)
+    setBotScore(0)
+    setGameOver(false)
+    setBotWon(false)
+    botMemory.current = {}
+    isProcessing.current = false
+    setIsBotTurn(false)
+    setCards(createShuffledDeck())
+  }
 
   // Match check logic
   useEffect(() => {
@@ -201,7 +216,7 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit,
         (i) => botMemory.current[i] === card1.id
       )
 
-      if (matchingFromMem !== undefined && Math.random() < 0.85) {
+      if (matchingFromMem !== undefined && Math.random() < 0.96) {
         pick2 = matchingFromMem
       } else {
         const rndIndex2 = Math.floor(Math.random() * remainingAvailable.length)
@@ -217,8 +232,8 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit,
       setTimeout(() => {
         sound.playCardFlip()
         setFlippedIndices([pick1, pick2])
-      }, 700)
-    }, 600)
+      }, 500)
+    }, 450)
   }
 
   // Trigger bot when turn switches
@@ -226,23 +241,28 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit,
     if (isBotTurn && !gameOver && flippedIndices.length === 0 && !isProcessing.current) {
       const timer = setTimeout(() => {
         triggerBotTurn()
-      }, 750)
+      }, 650)
       return () => clearTimeout(timer)
     }
   }, [isBotTurn, gameOver, flippedIndices])
 
-  // Check Game Over
+  // Check Game Over (Hardened: Player must equal or beat the AI bot to pass)
   useEffect(() => {
     const uniqueCount = new Set(matchedIds).size
     if (uniqueCount >= 10 && !gameOver) {
       setGameOver(true)
-      sound.playVictory()
-      const timer = setTimeout(() => {
-        onComplete && onComplete()
-      }, 900)
-      return () => clearTimeout(timer)
+      if (playerScore >= botScore) {
+        sound.playVictory()
+        const timer = setTimeout(() => {
+          onComplete && onComplete()
+        }, 1100)
+        return () => clearTimeout(timer)
+      } else {
+        sound.playGlitchRadio()
+        setBotWon(true)
+      }
     }
-  }, [matchedIds, gameOver, onComplete])
+  }, [matchedIds, gameOver, onComplete, playerScore, botScore])
 
   const handleCardClick = (index) => {
     if (isBotTurn || isProcessing.current || flippedIndices.length >= 2) return
@@ -353,6 +373,28 @@ export default function MemoryCardGame({ playerName = 'You', onComplete, onExit,
                   {renderCardIcon(card.id, 'w-14 h-14 sm:w-16 sm:h-16 text-white fill-current drop-shadow-2xl')}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* AI Bot Defeat Overlay */}
+        {botWon && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fadeIn">
+            <div className="max-w-md w-full bg-[#180a0a] border-2 border-rose-500 rounded-2xl p-6 text-center shadow-[0_0_40px_rgba(244,63,94,0.5)]">
+              <h3 className="text-xl sm:text-2xl font-mono font-black text-rose-400 mb-2 uppercase tracking-wider">
+                AI BOT OVERCLOCK DEFEAT
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-300 font-mono mb-4 leading-relaxed">
+                The AI Bot matched <strong className="text-rose-400">{botScore}</strong> pairs vs your <strong className="text-cyan-400">{playerScore}</strong> pairs.<br/>
+                You must equal or beat the AI Bot to breach the memory vault!
+              </p>
+              <button
+                onClick={handleRestartMatch}
+                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 hover:brightness-110 active:scale-95 text-white font-black text-xs uppercase tracking-wider shadow cursor-pointer transition flex items-center justify-center gap-2 mx-auto"
+              >
+                <span>🔄</span>
+                <span>Rematch / Try Again</span>
+              </button>
             </div>
           </div>
         )}
