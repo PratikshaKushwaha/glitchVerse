@@ -56,13 +56,19 @@ The central philosophical thesis of *The Way Out* explores how excessive relianc
               ▼
    ┌───────────────────────┐
    │        LEVEL 4        │  2.5D Nexus Combat Arena & Minion Gauntlet
-   │   The Final Showdown  │  • Minion wave, Cyber Overlord, Vital Graph HUD
+   │   The Final Showdown  │  • Destroy 6 Cyber Pawns, breach security perimeter
    └──────────┬────────────┘
               │
               ▼
    ┌───────────────────────┐
-   │      FINAL BOSS       │  3D Puppet Master Arena Showdown
-   │   The Puppet Master   │  • Dodge spotlights, sever 8 puppet strings, Skip Boss [K]
+   │  ROBOT BOSS CUTSCENE  │  Suspenseful POV Transition & Disorientation
+   │  The Paradox Protocol │  • Robot Boss ocular POV, spinning vortex, teleport
+   └──────────┬────────────┘
+              │
+              ▼
+   ┌───────────────────────┐
+   │  THE PARADOX CHAMBER  │  3D Puppet Master Arena Showdown
+   │   The Puppet Master   │  • Sever 8 puppet strings, free the author, Skip [K]
    └──────────┬────────────┘
               │
               ▼
@@ -147,11 +153,26 @@ Features a real-time **Atmospheric Environment Altering System** (`wood` atelier
   - Pure vector touch icons (`>>` Dash, `+` Shoot, `▲` Jump, `⇅` Flip) without emojis.
 - **Phased Combat**:
   - **Phase 1**: Neutralize 6 patrolling Glitch Pawns deployed across dynamic platforms.
-  - **Phase 2**: Sever corrupted tether nodes with the Cyber Blade to initiate the theatre breach.
+  - **Phase 2**: Sever corrupted tether nodes with the Cyber Blade to trigger the security breach.
 
 ---
 
-### Final Boss: The Puppet Master (3D Showdown)
+### Robot Boss Perspective & Paradox Teleportation Cutscene
+- **Heads-Up Display POV**: Once the player destroys the 6 defense pawns, the sequence switches to the **Robot Boss's ocular perspective**:
+  - Crimson optic grid and tracking reticle locked onto the player (`[ TARGET: SEEKER ]`).
+  - Threat assessment diagnostics report `PERIMETER BREACHED // 6/6 PAWNS ELIMINATED`.
+  - The Boss realizes the player is within striking distance of the Author and will free the Creator.
+- **The Evil Plan**: To prevent the loop from breaking, the Boss executes emergency protocol `PARADOX CONDUIT`, tearing the Author's coordinates away into the **Paradox Chamber**.
+- **Suspenseful Audio**: Built using a low-frequency oscillating sub-bass tension drone and escalating alert pulses.
+- **Violent Disorienting Spinning Effect**:
+  - The entire environment rapidly rotates through an accelerating 1440-degree spin.
+  - Tunnel perspective and chromatic aberration (red/cyan channel shift) disorient the player.
+  - Sudden blinding whiteout implosion drops the player directly into the **Paradox Chamber**.
+- **Universal Skip**: Top-right `Skip Transition [K] ➔` button or pressing `[K]` / `Space` immediately jumps to the next level.
+
+---
+
+### Final Boss: The Puppet Master in the Paradox Chamber (3D Showdown)
 - **Engine**: Fullscreen Three.js WebGL arena (`public/finalboss.html`).
 - **Mechanics**:
   - Take the blaster and sever all **8 puppet strings** holding the trapped developer suspended above the arena.

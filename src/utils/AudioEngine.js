@@ -483,6 +483,98 @@ class AudioEngine {
       osc.stop(now + idx * 0.08 + 0.08)
     })
   }
+
+  // Suspenseful Danger Music (Drone + Sub-bass tension for Robot Boss perspective)
+  startSuspenseMusic() {
+    if (this.isMuted) return
+    this.init()
+    if (!this.ctx) return
+    this.stopSuspenseMusic()
+
+    try {
+      const now = this.ctx.currentTime
+      const droneMaster = this.ctx.createGain()
+      droneMaster.gain.setValueAtTime(0.01, now)
+      droneMaster.gain.linearRampToValueAtTime(0.22, now + 1.2)
+
+      // Dual detuned low-bass oscillators for acoustic tension beat
+      const osc1 = this.ctx.createOscillator()
+      const osc2 = this.ctx.createOscillator()
+      osc1.type = 'sawtooth'
+      osc2.type = 'triangle'
+      osc1.frequency.setValueAtTime(48, now)
+      osc2.frequency.setValueAtTime(49.4, now)
+
+      const filter = this.ctx.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.setValueAtTime(160, now)
+      filter.frequency.exponentialRampToValueAtTime(420, now + 4.5)
+
+      osc1.connect(filter)
+      osc2.connect(filter)
+      filter.connect(droneMaster)
+      droneMaster.connect(this.ctx.destination)
+
+      osc1.start(now)
+      osc2.start(now)
+
+      this.suspenseNodes = { osc1, osc2, droneMaster }
+    } catch (e) {
+      console.warn('Suspense music error:', e)
+    }
+  }
+
+  stopSuspenseMusic() {
+    if (this.suspenseNodes) {
+      try {
+        const now = this.ctx ? this.ctx.currentTime : 0
+        if (this.suspenseNodes.droneMaster && this.ctx) {
+          this.suspenseNodes.droneMaster.gain.linearRampToValueAtTime(0.001, now + 0.25)
+        }
+        setTimeout(() => {
+          if (this.suspenseNodes) {
+            this.suspenseNodes.osc1?.stop()
+            this.suspenseNodes.osc2?.stop()
+            this.suspenseNodes = null
+          }
+        }, 300)
+      } catch (e) {
+        this.suspenseNodes = null
+      }
+    }
+  }
+
+  // Disorienting Teleportation Spinning Sonic Pulse
+  playTeleportSpin() {
+    if (this.isMuted) return
+    this.init()
+    if (!this.ctx) return
+
+    const now = this.ctx.currentTime
+    const osc = this.ctx.createOscillator()
+    const gain = this.ctx.createGain()
+    const filter = this.ctx.createBiquadFilter()
+
+    osc.type = 'sawtooth'
+    osc.frequency.setValueAtTime(65, now)
+    osc.frequency.exponentialRampToValueAtTime(920, now + 2.8)
+
+    filter.type = 'bandpass'
+    filter.frequency.setValueAtTime(180, now)
+    filter.frequency.exponentialRampToValueAtTime(2600, now + 2.8)
+    filter.Q.setValueAtTime(7, now)
+
+    gain.gain.setValueAtTime(0.05, now)
+    gain.gain.linearRampToValueAtTime(0.3, now + 2.0)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 3.0)
+
+    osc.connect(filter)
+    filter.connect(gain)
+    gain.connect(this.ctx.destination)
+
+    osc.start(now)
+    osc.stop(now + 3.1)
+  }
 }
 
 export const sound = new AudioEngine()

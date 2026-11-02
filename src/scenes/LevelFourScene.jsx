@@ -5,6 +5,7 @@ import { Audio } from '../level4_cyber/audio.js'
 import { attachCanvas, resize, present } from '../level4_cyber/render.js'
 import { GameScene } from '../level4_cyber/scenes/game.js'
 import { sound } from '../utils/AudioEngine'
+import RobotBossCutscene from '../components/RobotBossCutscene'
 
 export default function LevelFourScene({
   playerName = 'Seeker',
@@ -14,7 +15,7 @@ export default function LevelFourScene({
 }) {
   const canvasRef = useRef(null)
   const reqIdRef = useRef(null)
-  const [stage, setStage] = useState('boss') // 'boss' | 'saved_author'
+  const [stage, setStage] = useState('boss') // 'boss' | 'cutscene'
   const [soundEnabled, setSoundEnabled] = useState(true)
 
   useEffect(() => {
@@ -33,14 +34,20 @@ export default function LevelFourScene({
     window.addEventListener('keydown', handleGesture, { once: true })
     window.addEventListener('pointerdown', handleGesture, { once: true })
 
-    // 3. Callback when Author is Saved — go straight to Final Boss
+    // 3. Callback when Author is Saved — proceed to cutscene or final boss
     const handleSavedAuthor = () => {
       sound.playVictory()
-      onGoToFinalBoss()
+      setStage('cutscene')
     }
 
-    // 4. Initialize Level 4 Boss GameScene
-    const gameScene = new GameScene(2, handleSavedAuthor)
+    // 4. Callback when 6 smaller enemy pawns are cleared -> trigger Robot Boss perspective cutscene!
+    const handlePawnsCleared = () => {
+      sound.playGlitchRadio()
+      setStage('cutscene')
+    }
+
+    // 5. Initialize Level 4 Boss GameScene with pawns cleared callback
+    const gameScene = new GameScene(2, handleSavedAuthor, handlePawnsCleared)
     Scenes.set(gameScene)
 
     // 5. 60 FPS Engine Frame Loop
@@ -138,11 +145,11 @@ export default function LevelFourScene({
 
 
 
-              {/* Proceed to Final Boss: Pennywise (Author entangled in strings) */}
+              {/* Proceed to Robot Boss Perspective & Paradox Chamber */}
               <button
-                onClick={onGoToFinalBoss}
+                onClick={() => setStage('cutscene')}
                 className="px-3 py-1 rounded-full bg-gradient-to-r from-rose-500 via-rose-400 to-rose-300 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wider cursor-pointer transition shadow"
-                title="Proceed to Final Boss — Pennywise Puppet Master"
+                title="Proceed to Robot Boss Cutscene & Paradox Chamber"
               >
                 Final Boss ➔
               </button>
@@ -179,10 +186,18 @@ export default function LevelFourScene({
               </span>
             </div>
             <div className="text-yellow-400/90 font-bold hidden md:block">
-              OBJECTIVE: DESTROY 6 PAWNS ➔ DEFEAT OVERLORD ➔ SAVE AUTHOR
+              OBJECTIVE: DESTROY 6 PAWNS ➔ BREACH PARADOX CHAMBER
             </div>
           </footer>
         </>
+      )}
+
+      {/* ================= STAGE 2: ROBOT BOSS PERSPECTIVE & PARADOX TELEPORTATION ================= */}
+      {stage === 'cutscene' && (
+        <RobotBossCutscene
+          playerName={playerName}
+          onComplete={onGoToFinalBoss}
+        />
       )}
 
 

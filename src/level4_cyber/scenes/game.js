@@ -17,9 +17,10 @@ const TUNES = [[110, [0, 3, 5, 7, 10]], [98, [0, 2, 3, 7, 8]], [87, [0, 1, 5, 7,
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 export class GameScene {
-    constructor(li = 2, onSavedAuthor = null) { // Defaults to Level 3: UPSIDE DOWN from reference image!
+    constructor(li = 2, onSavedAuthor = null, onPawnsCleared = null) { // Defaults to Level 3: UPSIDE DOWN from reference image!
         this.li = li;
         this.onSavedAuthor = onSavedAuthor;
+        this.onPawnsCleared = onPawnsCleared;
         this.lv = loadLevel(li);
         this.bg = makeParallax(li * 97 + 13);
         this.p = {
@@ -875,8 +876,14 @@ export class GameScene {
                     this.pawns.splice(j, 1);
                     this.pawnsKilled++;
 
-                    if (this.pawnsKilled >= this.pawnsTarget && this.bossState === 'inactive') {
-                        this.triggerBossWarning();
+                    if (this.pawnsKilled >= this.pawnsTarget) {
+                        if (this.onPawnsCleared) {
+                            setTimeout(() => {
+                                if (this.onPawnsCleared) this.onPawnsCleared();
+                            }, 500);
+                        } else if (this.bossState === 'inactive') {
+                            this.triggerBossWarning();
+                        }
                     } else if (this.bossState === 'inactive') {
                         this.banner = `PAWN ELIMINATED! (${this.pawnsKilled}/${this.pawnsTarget})`;
                         this.bannerT = 1.4;
