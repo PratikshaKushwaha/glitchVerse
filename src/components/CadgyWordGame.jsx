@@ -22,9 +22,10 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
   const [foundBonusWords, setFoundBonusWords] = useState([])
   const [foundExtraWords, setFoundExtraWords] = useState([])
 
-  // Score & Timer
-  const [score, setScore] = useState(30)
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  // Score, Countdown Timer & Shields
+  const [score, setScore] = useState(50)
+  const [countdownSeconds, setCountdownSeconds] = useState(120)
+  const [shields, setShields] = useState(4)
   const [isTimerRunning, setIsTimerRunning] = useState(true)
 
   // Feedback commentary
@@ -46,15 +47,31 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
     setFoundBasicWords([])
     setFoundBonusWords([])
     setFoundExtraWords([])
+    setCountdownSeconds(120)
+    setShields(4)
     setCommentary('')
     autoAdvanceTriggered.current = false
   }, [boardIndex, currentBoard])
 
-  // Stopwatch timer
+  // Countdown timer with matrix scramble on expiration
   useEffect(() => {
     if (!isTimerRunning) return
     const interval = setInterval(() => {
-      setElapsedSeconds((s) => s + 1)
+      setCountdownSeconds((sec) => {
+        if (sec <= 1) {
+          sound.playGlitchRadio()
+          setBoardColumns((prevColumns) =>
+            prevColumns.map((col) => {
+              const shuffled = [...col].sort(() => Math.random() - 0.5)
+              return shuffled.map((tile, idx) => ({ ...tile, row: idx }))
+            })
+          )
+          setCommentary('FIREWALL OVERLOAD! COLUMNS SCRAMBLED!')
+          setCommentaryColor('text-rose-400 font-extrabold animate-pulse')
+          return 75
+        }
+        return sec - 1
+      })
     }, 1000)
     return () => clearInterval(interval)
   }, [isTimerRunning])
@@ -137,30 +154,33 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
     return goldIds
   }, [currentBoard, foundBasicWords, foundBonusWords, foundExtraWords])
 
-  // Hardened Difficulty: Must crack all 3 Basic Words AND at least 1 Bonus Word
+  // Hardened Difficulty: Must crack ALL 5 Basic Words AND at least 2 Bonus Words
   const isAllBasicFound =
     currentBoard.basicWords.length > 0 &&
     foundBasicWords.length === currentBoard.basicWords.length
-  const hasBonusWord = foundBonusWords.length >= 1
+  const hasBonusWord = foundBonusWords.length >= 2
   const isCadgyComplete = isAllBasicFound && hasBonusWord
 
-  // Auto-advance once all basic words + 1 bonus word solved
+  // Auto-advance once all basic words + 2 bonus words solved
   useEffect(() => {
     if (isCadgyComplete && !autoAdvanceTriggered.current) {
       autoAdvanceTriggered.current = true
       setIsTimerRunning(false)
       sound.playVictory()
-      setCommentary('CIPHER BREACHED! BASIC & BONUS CODES SOLVED!')
+      setCommentary('CIPHER BREACHED! ALL 5 BASIC & 2 BONUS WORDS SOLVED!')
       setCommentaryColor('text-emerald-300 font-extrabold')
       const timeout = setTimeout(() => {
         onComplete && onComplete()
       }, 950)
       return () => clearTimeout(timeout)
     } else if (isAllBasicFound && !hasBonusWord) {
-      setCommentary('BASIC WORDS SOLVED! NOW CRACK AT LEAST 1 BONUS WORD TO BREACH!')
+      const remainingBonus = 2 - foundBonusWords.length
+      setCommentary(
+        `BASIC WORDS SOLVED! CRACK ${remainingBonus} MORE BONUS WORD${remainingBonus > 1 ? 'S' : ''} TO BREACH!`
+      )
       setCommentaryColor('text-amber-300 font-bold animate-pulse')
     }
-  }, [isCadgyComplete, isAllBasicFound, hasBonusWord, onComplete])
+  }, [isCadgyComplete, isAllBasicFound, hasBonusWord, foundBonusWords.length, onComplete])
 
   // Tile Selection Handler
   const handleTileClick = (tile, colIndex) => {
@@ -307,18 +327,22 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           sound.playWordFound()
           setFoundBasicWords((prev) => [...prev, resolvedWord])
           setScore((s) => s + 100)
+          setCountdownSeconds((sec) => Math.min(180, sec + 25))
+          setShields((s) => Math.min(4, s + 1))
           const clueObj = currentBoard.basicWords.find((b) => b.word === resolvedWord)
           setCommentary(
-            `BASIC WORD SOLVED: "${resolvedWord}" - ${clueObj?.clue || 'Target Solved'} (+100)`
+            `BASIC ADDR SOLVED: "${resolvedWord}" (+100 pts, +25s, +1 Shield)`
           )
           setCommentaryColor('text-emerald-400 font-extrabold')
         } else if (wordCategory === 'bonus') {
           sound.playVictory()
           setFoundBonusWords((prev) => [...prev, resolvedWord])
           setScore((s) => s + 150)
+          setCountdownSeconds((sec) => Math.min(180, sec + 35))
+          setShields((s) => Math.min(4, s + 1))
           const bonusObj = currentBoard.bonusWords.find((b) => b.word === resolvedWord)
           setCommentary(
-            `BONUS DISCOVERED: "${resolvedWord}" - ${bonusObj?.clue || 'Difficult Clue Cracked'} (+150)`
+            `BONUS CIPHER CRACKED: "${resolvedWord}" (+150 pts, +35s, +1 Shield)`
           )
           setCommentaryColor('text-sky-300 font-extrabold')
         } else {
@@ -326,7 +350,8 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           sound.playWordFound()
           setFoundExtraWords((prev) => [...prev, resolvedWord])
           setScore((s) => s + 50)
-          setCommentary(`DICTIONARY BONUS: "${resolvedWord}" discovered! (+50)`)
+          setCountdownSeconds((sec) => Math.min(180, sec + 15))
+          setCommentary(`EXTRA DICTIONARY CIPHER: "${resolvedWord}" (+50 pts, +15s)`)
           setCommentaryColor('text-purple-300 font-bold')
         }
 
@@ -335,11 +360,22 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           setIsVerifying(false)
         }, 500)
       } else {
-        // Invalid word
+        // Invalid word attempt: deplete 1 shield core
         sound.playDoorLocked()
-        const attempt = sortedTiles.map((t) => (t.isHeart ? '♥' : t.char)).join('')
-        setCommentary(`"${attempt}" is not a recognized word in today's puzzle.`)
-        setCommentaryColor('text-rose-400 font-bold')
+        const attempt = sortedTiles.map((t) => t.char).join('')
+        setShields((prev) => {
+          const nextShields = prev - 1
+          if (nextShields <= 0) {
+            sound.playGlitchRadio()
+            handleShuffleColumns()
+            setCommentary(`SHIELDS COMPROMISED! "${attempt}" REJECTED. MATRIX SCRAMBLED!`)
+            setCommentaryColor('text-rose-500 font-black animate-pulse')
+            return 4
+          }
+          setCommentary(`INVALID CIPHER: "${attempt}" (-1 Shield)`)
+          setCommentaryColor('text-rose-400 font-bold')
+          return nextShields
+        })
 
         setTimeout(() => {
           setSelectedTiles([])
@@ -356,9 +392,10 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
     foundExtraWords,
   ])
 
-  // Provide an interactive Hint
+  // Provide an interactive Hint (costs 10 score)
   const handleTriggerHint = () => {
     sound.playKeyClick()
+    setScore((s) => Math.max(0, s - 10))
     const unsolvedBonus = currentBoard.bonusWords.find(
       (b) => !foundBonusWords.includes(b.word)
     )
@@ -366,13 +403,13 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
       (b) => !foundBasicWords.includes(b.word)
     )
 
-    if (unsolvedBonus) {
+    if (unsolvedBasic) {
       setActiveHintText(
-        `BONUS HINT: Starts with "${unsolvedBonus.word[0]}..." • Definition: ${unsolvedBonus.clue}`
+        `BASIC CLUE: ${unsolvedBasic.clue} (Starts with "${unsolvedBasic.word[0]}...") [-10 pts]`
       )
-    } else if (unsolvedBasic) {
+    } else if (unsolvedBonus) {
       setActiveHintText(
-        `BASIC HINT: Starts with "${unsolvedBasic.word[0]}..." • Meaning: ${unsolvedBasic.clue}`
+        `BONUS CLUE: ${unsolvedBonus.clue} (Starts with "${unsolvedBonus.word[0]}...") [-10 pts]`
       )
     } else {
       setActiveHintText('You have solved all target puzzle words! Remarkable vocabulary!')
@@ -434,7 +471,7 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
           </svg>
         </div>
 
-        {/* CONTROLS TOOLBAR (Score, Timer, Shuffle, 3D, Help) */}
+        {/* CONTROLS TOOLBAR (Score, Shields, Countdown Timer, Shuffle, 3D, Help) */}
         <div className="flex items-center flex-wrap justify-center gap-1.5 sm:gap-2 mt-1 px-3 sm:px-4 py-1 rounded-2xl bg-black/70 border border-white/15 backdrop-blur shadow-xl text-[10px] sm:text-xs">
           
           {/* Score Pill */}
@@ -442,12 +479,22 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
             Score: <span className="text-white text-xs sm:text-sm font-black">{score}</span>
           </div>
 
-          {/* Stopwatch Timer */}
-          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-white/5 border border-white/10 font-mono text-cyan-300">
+          {/* Shields Integrity Pill */}
+          <div className="flex items-center gap-1 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-rose-950/60 border border-rose-500/50 font-mono font-bold text-rose-300 shadow" title="Security Shields (Depletes on invalid cipher entries)">
+            <span>SHIELDS:</span>
+            <span className="text-xs">{'🛡️'.repeat(shields)}</span>
+          </div>
+
+          {/* Countdown Decryption Timer */}
+          <div className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-white/5 border font-mono font-bold transition-colors ${
+            countdownSeconds <= 30
+              ? 'text-rose-400 border-rose-500/50 animate-pulse'
+              : 'text-cyan-300 border-white/10'
+          }`} title="Firewall Decryption Countdown Window">
             <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
               <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
             </svg>
-            <span>{formatTimer(elapsedSeconds)}</span>
+            <span>{formatTimer(countdownSeconds)}</span>
           </div>
 
           {/* Shuffle Button (Image 3) */}
@@ -734,16 +781,16 @@ export default function CadgyWordGame({ onComplete, onExit, environment = 'wood'
                 <strong className="text-purple-300">1. Form Words Left-to-Right:</strong> Select exactly one tile from each of the 5 columns (Col 0 through Col 4).
               </p>
               <p>
-                <strong className="text-rose-400">2. Wildcard Hearts:</strong> Glowing Heart tiles (<svg className="w-3.5 h-3.5 fill-rose-500 inline-block align-middle" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>) are wildcards that can represent any letter needed to complete a valid word.
+                <strong className="text-rose-400">2. Rare Wildcard Heart:</strong> Exactly ONE glowing Heart tile (<svg className="w-3.5 h-3.5 fill-rose-500 inline-block align-middle" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>) exists on the board as a strategic wildcard.
               </p>
               <p>
-                <strong className="text-cyan-300">3. Multi-Letter Tiles:</strong> Tiles with two letters (e.g., CI, EN, TH) insert both letters into the word.
+                <strong className="text-cyan-300">3. Distractor Tiles:</strong> Stacks include decoy letters that don't match target words, requiring careful column tracing.
               </p>
               <p>
                 <strong className="text-amber-300">4. Gold Tiles:</strong> When you successfully find every hidden word that uses a specific tile, that tile permanently turns <strong className="text-amber-400">GOLD</strong>.
               </p>
               <p>
-                <strong className="text-emerald-300">5. Automatic Verification:</strong> Once 5 columns are picked, the system validates the word instantly without pressing submit!
+                <strong className="text-emerald-300">5. Hardened Breach Condition:</strong> You must crack <strong className="text-white">ALL 5 Basic Words</strong> and at least <strong className="text-white">2 Bonus Words</strong> to breach the sanctuary!
               </p>
             </div>
 

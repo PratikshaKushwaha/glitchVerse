@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import ambientVideo from './assets/enchanted_cottage_ambient.mp4'
-import IntroVideo from './components/IntroVideo'
-import HubScene from './scenes/HubScene'
-import RoomScene from './scenes/RoomScene'
-import LevelTwoScene from './scenes/LevelTwoScene'
-import LevelThreeScene from './scenes/LevelThreeScene'
-import LevelFourScene from './scenes/LevelFourScene'
-import ParadoxChamberScene from './scenes/ParadoxChamberScene'
-import FinalBossScene from './scenes/FinalBossScene'
-import FinalEndingScene from './components/FinalEndingScene'
+
+const IntroVideo = lazy(() => import('./components/IntroVideo'))
+const HubScene = lazy(() => import('./scenes/HubScene'))
+const RoomScene = lazy(() => import('./scenes/RoomScene'))
+const LevelTwoScene = lazy(() => import('./scenes/LevelTwoScene'))
+const LevelThreeScene = lazy(() => import('./scenes/LevelThreeScene'))
+const LevelFourScene = lazy(() => import('./scenes/LevelFourScene'))
+const ParadoxChamberScene = lazy(() => import('./scenes/ParadoxChamberScene'))
+const FinalBossScene = lazy(() => import('./scenes/FinalBossScene'))
+const FinalEndingScene = lazy(() => import('./components/FinalEndingScene'))
 
 const App = () => {
   // Pure narrative game progression:
@@ -63,92 +64,82 @@ const App = () => {
     setMessage('You can close this window to leave the game.')
   }
 
-  // 1. Intro Video Scene (opening.mp4 with skip button bottom-right covering watermark)
-  if (currentScene === 'video') {
-    return <IntroVideo onFinish={() => setCurrentScene('hub')} />
+  // Scene Routing with Lazy-Loaded Suspense Boundaries
+  const renderCurrentScene = () => {
+    switch (currentScene) {
+      case 'video':
+        return <IntroVideo onFinish={() => setCurrentScene('hub')} />
+      case 'hub':
+        return <HubScene onEnterLevelOne={() => setCurrentScene('room')} />
+      case 'room':
+        return (
+          <RoomScene
+            playerName={playerName || 'Seeker'}
+            onGoToLevel2={() => setCurrentScene('level2')}
+          />
+        )
+      case 'level2':
+        return (
+          <LevelTwoScene
+            playerName={playerName || 'Seeker'}
+            onBackToMenu={() => setCurrentScene('menu')}
+            onBackToLevelOne={() => setCurrentScene('room')}
+            onGoToLevel3={() => setCurrentScene('level3')}
+          />
+        )
+      case 'level3':
+        return (
+          <LevelThreeScene
+            playerName={playerName || 'Seeker'}
+            onBackToMenu={() => setCurrentScene('menu')}
+            onBackToLevelTwo={() => setCurrentScene('level2')}
+            onGoToLevel4={() => setCurrentScene('level4')}
+          />
+        )
+      case 'level4':
+        return (
+          <LevelFourScene
+            playerName={playerName || 'Seeker'}
+            onBackToMenu={() => setCurrentScene('menu')}
+            onBackToLevelThree={() => setCurrentScene('level3')}
+            onGoToFinalBoss={() => setCurrentScene('paradox')}
+          />
+        )
+      case 'paradox':
+        return (
+          <ParadoxChamberScene
+            playerName={playerName || 'Seeker'}
+            onBackToLevelFour={() => setCurrentScene('level4')}
+            onGoToFinalBoss={() => setCurrentScene('finalboss')}
+            onBackToMenu={() => setCurrentScene('menu')}
+          />
+        )
+      case 'finalboss':
+        return (
+          <FinalBossScene
+            onBossDefeated={() => setCurrentScene('afterlife')}
+            onExitToHub={() => setCurrentScene('hub')}
+          />
+        )
+      case 'afterlife':
+      case 'ending':
+        return (
+          <FinalEndingScene
+            playerName={playerName || 'Seeker'}
+            onRestart={() => setCurrentScene('menu')}
+            onBackToMenu={() => setCurrentScene('menu')}
+          />
+        )
+      default:
+        return null
+    }
   }
 
-  // 2. Hub Door Scene (environment_collider.glb, floating manuscript, locked/unlocked door)
-  if (currentScene === 'hub') {
-    return <HubScene onEnterLevelOne={() => setCurrentScene('room')} />
-  }
-
-  // 3. Level 1: 5 Rooms Scene (with 2-min timer, 3 lives, golden digits permutation, deactivated opened keypads)
-  if (currentScene === 'room') {
+  if (currentScene !== 'menu') {
     return (
-      <RoomScene
-        playerName={playerName || 'Seeker'}
-        onGoToLevel2={() => setCurrentScene('level2')}
-      />
-    )
-  }
-
-  // 4. Level 2: 4 Sublevels (Word Search -> Memory Bot -> Double Cadgy -> Pinned Riddle Board)
-  if (currentScene === 'level2') {
-    return (
-      <LevelTwoScene
-        playerName={playerName || 'Seeker'}
-        onBackToMenu={() => setCurrentScene('menu')}
-        onBackToLevelOne={() => setCurrentScene('room')}
-        onGoToLevel3={() => setCurrentScene('level3')}
-      />
-    )
-  }
-
-  // 5. Level 3 Scene: 2D Gravity Platformer (From dev2 branch with bitmask tiles, spikes, parallax, 4 stages)
-  if (currentScene === 'level3') {
-    return (
-      <LevelThreeScene
-        playerName={playerName || 'Seeker'}
-        onBackToMenu={() => setCurrentScene('menu')}
-        onBackToLevelTwo={() => setCurrentScene('level2')}
-        onGoToLevel4={() => setCurrentScene('level4')}
-      />
-    )
-  }
-
-  // 6. Level 4 Scene: The 2D Boss Battle (Moving Platforms, Cyber Pawns, Robot Boss Perspective Cutscene)
-  if (currentScene === 'level4') {
-    return (
-      <LevelFourScene
-        playerName={playerName || 'Seeker'}
-        onBackToMenu={() => setCurrentScene('menu')}
-        onBackToLevelThree={() => setCurrentScene('level3')}
-        onGoToFinalBoss={() => setCurrentScene('paradox')}
-      />
-    )
-  }
-
-  // 7. Paradox Chamber: The Entropy Engine (Reality Collapse 2D Puzzle Chamber)
-  if (currentScene === 'paradox') {
-    return (
-      <ParadoxChamberScene
-        playerName={playerName || 'Seeker'}
-        onBackToLevelFour={() => setCurrentScene('level4')}
-        onGoToFinalBoss={() => setCurrentScene('finalboss')}
-        onBackToMenu={() => setCurrentScene('menu')}
-      />
-    )
-  }
-
-  // 8. Final Boss: The Puppet Master (Author entangled in strings, MC shoots strings with gun)
-  if (currentScene === 'finalboss') {
-    return (
-      <FinalBossScene
-        onBossDefeated={() => setCurrentScene('afterlife')}
-        onExitToHub={() => setCurrentScene('hub')}
-      />
-    )
-  }
-
-  // 9. The Afterlife Holographic Epilogue: Student & Future Self meeting in restored reality
-  if (currentScene === 'afterlife' || currentScene === 'ending') {
-    return (
-      <FinalEndingScene
-        playerName={playerName || 'Seeker'}
-        onRestart={() => setCurrentScene('menu')}
-        onBackToMenu={() => setCurrentScene('menu')}
-      />
+      <Suspense fallback={<div className="w-screen h-screen bg-[#050811]" />}>
+        {renderCurrentScene()}
+      </Suspense>
     )
   }
 
