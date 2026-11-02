@@ -75,7 +75,7 @@ export const DEFS = {
     { id: 'las3', col: 51, row: 4,  axis: 'v', length: 5, dimOnly: 'B' },
   ],
   energyNodes: [
-    { id: 'en1', col: 18, row: 2  },
+    { id: 'en1', col: 18, row: 1  },
     { id: 'en2', col: 56, row: 10 },
     { id: 'en3', col: 17, row: 15 },
     { id: 'en4', col: 11, row: 21 },

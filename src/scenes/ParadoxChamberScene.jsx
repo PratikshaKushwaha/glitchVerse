@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Game } from '../engine/Game.js';
 import { Audio } from '../engine/Audio.js';
 import { Input } from '../engine/Input.js';
+import studentAvatarImg from '../assets/student_pixel_avatar.png';
 
 export default function ParadoxChamberScene({
   playerName = 'Seeker',
@@ -174,6 +175,17 @@ export default function ParadoxChamberScene({
         
         {/* Left: Sector 4 return, Retry & Energy Gauge */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Student Avatar + Callsign Badge */}
+          <div className="hidden xl:flex items-center gap-2 bg-[#080d1a] px-2.5 py-1 rounded-md border border-cyan-500/40 shadow-inner">
+            <div className="w-6 h-6 rounded-full border border-cyan-400 overflow-hidden bg-cyan-950 flex-shrink-0">
+              <img src={studentAvatarImg} alt={playerName || 'Seeker'} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-[10px] font-bold text-white leading-tight">{playerName || 'Seeker'}</span>
+              <span className="text-[8px] text-cyan-300 font-mono leading-tight">STUDENT // PRESENT</span>
+            </div>
+          </div>
+
           <button
             onClick={onBackToLevelFour}
             className="px-2.5 py-1 rounded bg-[#101b33] hover:bg-[#1a2d54] text-xs font-bold text-gray-300 hover:text-white transition cursor-pointer border border-cyan-500/30 shadow-sm"

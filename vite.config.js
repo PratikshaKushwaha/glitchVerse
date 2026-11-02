@@ -6,4 +6,10 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   assetsInclude: ['**/*.glb', '**/*.gltf', '**/*.mp4'],
+  server: {
+    allowedHosts: true, // Allows all hosts, including your Render domain
+  },
+  preview: {
+    allowedHosts: true, // Allows all hosts, including your Render domain
+  },
 })
